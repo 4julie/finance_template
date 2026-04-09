@@ -77,7 +77,6 @@ jobs:
         run: |
           ./gradlew :packages:core:jsNodeTest :packages:sync:jsNodeTest \
             --parallel --build-cache --stacktrace
-        continue-on-error: true
 
       - name: Generate coverage report
         run: ./gradlew :packages:core:koverXmlReport :packages:sync:koverXmlReport --parallel --build-cache
