@@ -7,6 +7,7 @@ on:
   pull_request:
     branches: [main]
     paths: ['apps/web/**', 'packages/design-tokens/**']
+  workflow_dispatch:
 
 concurrency:
   group: web-${{ github.ref }}
@@ -142,3 +143,29 @@ jobs:
         if: always() && (steps.lighthouse-audit.conclusion == 'success' || steps.lighthouse-audit.conclusion == 'failure')
         run: npx @lhci/cli assert --config=apps/web/lighthouserc-budget.json
         continue-on-error: false
+
+  # ── Gate job ─────────────────────────────────────────────────────
+  # Single required status check for branch protection.
+  # Fails if any upstream job (unit tests, E2E shards, Lighthouse) fails.
+  results:
+    name: Web CI Results
+    if: always()
+    needs: [unit-tests, e2e-tests, lighthouse]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check upstream job results
+        run: |
+          if [[ "${{ needs.unit-tests.result }}" != "success" ]]; then
+            echo "::error::Unit tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.e2e-tests.result }}" != "success" ]]; then
+            echo "::error::E2E tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.lighthouse.result }}" != "success" ]]; then
+            echo "::error::Lighthouse audit failed"
+            exit 1
+          fi
+          echo "✅ All web CI checks passed"
