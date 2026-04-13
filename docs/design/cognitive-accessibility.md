@@ -69,18 +69,19 @@ This mode corresponds to **Persona 4: Casey** (see [personas.md](personas.md)), 
 Cognitive mode is a toggle in **Settings → Accessibility → Cognitive Mode**.
 
 When enabled:
+
 - The app sets `data-a11y-cognitive="true"` on the root element
 - The preference is persisted to local storage / user settings
 - The setting syncs across devices via the user's profile
 
 ### Platform Implementation
 
-| Platform | Root Attribute / Mechanism | Persistence |
-| -------- | -------------------------- | ----------- |
-| Web | `<html data-a11y-cognitive="true">` | `localStorage` + user profile sync |
-| iOS | `UserDefaults.cognitiveAccessibilityEnabled` | App-level setting |
-| Android | `SharedPreferences.cognitiveAccessibility` | App-level setting |
-| Windows | `ApplicationData.cognitiveAccessibility` | App-level setting |
+| Platform | Root Attribute / Mechanism                   | Persistence                        |
+| -------- | -------------------------------------------- | ---------------------------------- |
+| Web      | `<html data-a11y-cognitive="true">`          | `localStorage` + user profile sync |
+| iOS      | `UserDefaults.cognitiveAccessibilityEnabled` | App-level setting                  |
+| Android  | `SharedPreferences.cognitiveAccessibility`   | App-level setting                  |
+| Windows  | `ApplicationData.cognitiveAccessibility`     | App-level setting                  |
 
 ### Relationship to Other Modes
 
@@ -116,13 +117,13 @@ Cognitive accessibility tokens follow the standard three-tier structure:
 
 **File:** `packages/design-tokens/tokens/primitive/cognitive.json`
 
-| Token | Value | Description |
-| ----- | ----- | ----------- |
-| `cognitive.touchTargetMin` | `48px` | Minimum interactive target size (WCAG 2.2 SC 2.5.5) |
-| `cognitive.focusRingWidth` | `3px` | Enhanced focus ring width |
-| `cognitive.focusRingOffset` | `3px` | Enhanced focus ring offset |
-| `cognitive.borderWidth` | `2px` | Enhanced border width for element definition |
-| `cognitive.maxChoicesPerGroup` | `5` | Max options in a single group (Miller's Law conservative) |
+| Token                          | Value  | Description                                               |
+| ------------------------------ | ------ | --------------------------------------------------------- |
+| `cognitive.touchTargetMin`     | `48px` | Minimum interactive target size (WCAG 2.2 SC 2.5.5)       |
+| `cognitive.focusRingWidth`     | `3px`  | Enhanced focus ring width                                 |
+| `cognitive.focusRingOffset`    | `3px`  | Enhanced focus ring offset                                |
+| `cognitive.borderWidth`        | `2px`  | Enhanced border width for element definition              |
+| `cognitive.maxChoicesPerGroup` | `5`    | Max options in a single group (Miller's Law conservative) |
 
 ### Semantic Layer
 
@@ -130,35 +131,35 @@ Cognitive accessibility tokens follow the standard three-tier structure:
 
 #### Type Scale (cognitiveTypeScale)
 
-| Role | Default | Cognitive | Change |
-| ---- | ------- | --------- | ------ |
-| display | 48px / 1.25 | 36px / 1.5 | Size ↓, line-height ↑ (less overwhelming) |
-| headline | 30px / 1.25 | 24px / 1.5 | Size ↓, line-height ↑ |
-| title | 20px / 1.5 | 20px / 1.75 | Line-height ↑ |
-| body | 16px / 1.5 | 18px / 1.75 | Size ↑, line-height ↑ |
-| label | 14px / 1.5 | 16px / 1.75 | Size ↑, line-height ↑ |
-| caption | 12px / 1.5 | 14px / 1.75 | Size ↑, line-height ↑ |
+| Role     | Default     | Cognitive   | Change                                    |
+| -------- | ----------- | ----------- | ----------------------------------------- |
+| display  | 48px / 1.25 | 36px / 1.5  | Size ↓, line-height ↑ (less overwhelming) |
+| headline | 30px / 1.25 | 24px / 1.5  | Size ↓, line-height ↑                     |
+| title    | 20px / 1.5  | 20px / 1.75 | Line-height ↑                             |
+| body     | 16px / 1.5  | 18px / 1.75 | Size ↑, line-height ↑                     |
+| label    | 14px / 1.5  | 16px / 1.75 | Size ↑, line-height ↑                     |
+| caption  | 12px / 1.5  | 14px / 1.75 | Size ↑, line-height ↑                     |
 
-**Design rationale:** Display and headline sizes are *reduced* because in cognitive mode, the goal is to minimize visual hierarchy extremes — very large display text can feel overwhelming. Body, label, and caption text are *increased* because readability of content text matters more than dramatic headlines.
+**Design rationale:** Display and headline sizes are _reduced_ because in cognitive mode, the goal is to minimize visual hierarchy extremes — very large display text can feel overwhelming. Body, label, and caption text are _increased_ because readability of content text matters more than dramatic headlines.
 
 #### Spacing (cognitiveSpacing)
 
-| Token | Value | Purpose |
-| ----- | ----- | ------- |
-| `sectionGap` | 32px | Gap between major page sections |
-| `cardGap` | 24px | Gap between cards in a list/grid |
-| `elementGap` | 16px | Gap between elements within a section |
-| `inlinePadding` | 24px | Horizontal padding inside containers |
-| `blockPadding` | 20px | Vertical padding inside containers |
+| Token           | Value | Purpose                               |
+| --------------- | ----- | ------------------------------------- |
+| `sectionGap`    | 32px  | Gap between major page sections       |
+| `cardGap`       | 24px  | Gap between cards in a list/grid      |
+| `elementGap`    | 16px  | Gap between elements within a section |
+| `inlinePadding` | 24px  | Horizontal padding inside containers  |
+| `blockPadding`  | 20px  | Vertical padding inside containers    |
 
 #### Elevation (cognitiveElevation)
 
-| Level | Default | Cognitive | Change |
-| ----- | ------- | --------- | ------ |
-| none | none | none | — |
-| low | shadow-sm | shadow-sm | Same |
+| Level  | Default   | Cognitive | Change    |
+| ------ | --------- | --------- | --------- |
+| none   | none      | none      | —         |
+| low    | shadow-sm | shadow-sm | Same      |
 | medium | shadow-md | shadow-sm | Flattened |
-| high | shadow-lg | shadow-md | Flattened |
+| high   | shadow-lg | shadow-md | Flattened |
 
 ### Component Layer
 
@@ -166,41 +167,41 @@ Cognitive accessibility tokens follow the standard three-tier structure:
 
 #### Button (cognitiveButton)
 
-| Property | Default | Cognitive | Change |
-| -------- | ------- | --------- | ------ |
-| paddingX | 16px | 24px | +50% |
-| paddingY | 8px | 12px | +50% |
-| borderRadius | 8px | 12px | Softer |
-| minHeight | — | 48px | New (enforced) |
-| secondary borderWidth | 1px | 2px | Clearer boundary |
+| Property              | Default | Cognitive | Change           |
+| --------------------- | ------- | --------- | ---------------- |
+| paddingX              | 16px    | 24px      | +50%             |
+| paddingY              | 8px     | 12px      | +50%             |
+| borderRadius          | 8px     | 12px      | Softer           |
+| minHeight             | —       | 48px      | New (enforced)   |
+| secondary borderWidth | 1px     | 2px       | Clearer boundary |
 
 #### Card (cognitiveCard)
 
-| Property | Default | Cognitive | Change |
-| -------- | ------- | --------- | ------ |
-| padding | 16px | 24px | +50% |
-| borderRadius | 12px | 16px | Softer |
-| borderWidth | 1px | 2px | Clearer boundary |
-| gap (content) | ~8px | 16px | More breathing room |
+| Property      | Default | Cognitive | Change              |
+| ------------- | ------- | --------- | ------------------- |
+| padding       | 16px    | 24px      | +50%                |
+| borderRadius  | 12px    | 16px      | Softer              |
+| borderWidth   | 1px     | 2px       | Clearer boundary    |
+| gap (content) | ~8px    | 16px      | More breathing room |
 
 #### Input (cognitiveInput)
 
-| Property | Default | Cognitive | Change |
-| -------- | ------- | --------- | ------ |
-| paddingX | 12px | 16px | +33% |
-| paddingY | 8px | 12px | +50% |
-| borderRadius | 8px | 12px | Softer |
-| borderWidth | 1px | 2px | Clearer boundary |
-| minHeight | — | 48px | New (enforced) |
+| Property     | Default | Cognitive | Change           |
+| ------------ | ------- | --------- | ---------------- |
+| paddingX     | 12px    | 16px      | +33%             |
+| paddingY     | 8px     | 12px      | +50%             |
+| borderRadius | 8px     | 12px      | Softer           |
+| borderWidth  | 1px     | 2px       | Clearer boundary |
+| minHeight    | —       | 48px      | New (enforced)   |
 
 #### Navigation (cognitiveNavigation)
 
-| Property | Value | Purpose |
-| -------- | ----- | ------- |
-| itemMinHeight | 48px | Touch target enforcement |
-| itemPaddingX | 20px | Adequate tap area |
-| itemPaddingY | 12px | Adequate tap area |
-| itemGap | 8px | Prevents mis-taps |
+| Property      | Value | Purpose                  |
+| ------------- | ----- | ------------------------ |
+| itemMinHeight | 48px  | Touch target enforcement |
+| itemPaddingX  | 20px  | Adequate tap area        |
+| itemPaddingY  | 12px  | Adequate tap area        |
+| itemGap       | 8px   | Prevents mis-taps        |
 
 ---
 
@@ -208,16 +209,16 @@ Cognitive accessibility tokens follow the standard three-tier structure:
 
 All interactive elements MUST meet the 48×48px minimum target size in cognitive mode:
 
-| Element Type | Minimum Size | Notes |
-| ------------ | ------------ | ----- |
-| Buttons | 48×48px | Padding ensures this even with short labels |
-| Links | 48px height | Width determined by content |
-| Text inputs | 48px height | Width is typically full-width |
-| Checkboxes | 24×24px visual, 48×48px tap area | Padding/margin extends hit area |
-| Radio buttons | 24×24px visual, 48×48px tap area | Same as checkboxes |
-| Navigation items | 48px height, 48px min-width | Both dimensions enforced |
-| List items (interactive) | 48px height | Applies to clickable/tappable lists |
-| Tab items | 48×48px | Both dimensions enforced |
+| Element Type             | Minimum Size                     | Notes                                       |
+| ------------------------ | -------------------------------- | ------------------------------------------- |
+| Buttons                  | 48×48px                          | Padding ensures this even with short labels |
+| Links                    | 48px height                      | Width determined by content                 |
+| Text inputs              | 48px height                      | Width is typically full-width               |
+| Checkboxes               | 24×24px visual, 48×48px tap area | Padding/margin extends hit area             |
+| Radio buttons            | 24×24px visual, 48×48px tap area | Same as checkboxes                          |
+| Navigation items         | 48px height, 48px min-width      | Both dimensions enforced                    |
+| List items (interactive) | 48px height                      | Applies to clickable/tappable lists         |
+| Tab items                | 48×48px                          | Both dimensions enforced                    |
 
 ### DO ✅
 
@@ -267,25 +268,25 @@ Both sets of rules are defined in `apps/web/src/styles/cognitive.css` and `apps/
 
 ## Visual Simplification
 
-| Aspect | Default | Cognitive Mode |
-| ------ | ------- | -------------- |
-| Card hover lift | `translateY(-2px)` | Disabled |
-| Button active scale | `scale(0.97)` | Disabled |
-| Focus glow (inputs) | `box-shadow: 0 0 0 3px` | Removed — outline only |
-| Elevation levels | 4 tiers | 3 tiers (medium → sm, high → md) |
-| Border width | 1px | 2px on interactive elements |
-| Decorative shadows | Present | Simplified |
+| Aspect              | Default                 | Cognitive Mode                   |
+| ------------------- | ----------------------- | -------------------------------- |
+| Card hover lift     | `translateY(-2px)`      | Disabled                         |
+| Button active scale | `scale(0.97)`           | Disabled                         |
+| Focus glow (inputs) | `box-shadow: 0 0 0 3px` | Removed — outline only           |
+| Elevation levels    | 4 tiers                 | 3 tiers (medium → sm, high → md) |
+| Border width        | 1px                     | 2px on interactive elements      |
+| Decorative shadows  | Present                 | Simplified                       |
 
 ---
 
 ## Focus Indicators
 
-| Property | Default | Cognitive Mode |
-| -------- | ------- | -------------- |
-| Outline width | 2px | 3px |
-| Outline offset | 2px | 3px |
-| Outline style | solid | solid |
-| Outline color | `--semantic-border-focus` | `--semantic-border-focus` (unchanged) |
+| Property       | Default                   | Cognitive Mode                        |
+| -------------- | ------------------------- | ------------------------------------- |
+| Outline width  | 2px                       | 3px                                   |
+| Outline offset | 2px                       | 3px                                   |
+| Outline style  | solid                     | solid                                 |
+| Outline color  | `--semantic-border-focus` | `--semantic-border-focus` (unchanged) |
 
 In high-contrast compound state (`prefers-contrast: more` + cognitive mode), the outline becomes even more prominent through the forced border color adjustments.
 
@@ -299,14 +300,14 @@ When cognitive mode is active, platform engineers SHOULD follow these content ru
 
 ### Language
 
-| Instead of | Use |
-| ---------- | --- |
+| Instead of                | Use                           |
+| ------------------------- | ----------------------------- |
 | "Reconcile your accounts" | "Check your account balances" |
-| "Amortization schedule" | "Payment plan over time" |
-| "Discretionary spending" | "Spending you choose" |
-| "Year-over-year variance" | "Change from last year" |
-| "Allocate funds" | "Move money" |
-| "Insufficient funds" | "Not enough money" |
+| "Amortization schedule"   | "Payment plan over time"      |
+| "Discretionary spending"  | "Spending you choose"         |
+| "Year-over-year variance" | "Change from last year"       |
+| "Allocate funds"          | "Move money"                  |
+| "Insufficient funds"      | "Not enough money"            |
 
 ### Information Density
 
@@ -420,14 +421,14 @@ When both cognitive mode and system high contrast are active:
 
 ### Files Created / Modified
 
-| File | Status | Description |
-| ---- | ------ | ----------- |
-| `packages/design-tokens/tokens/primitive/cognitive.json` | New | Primitive cognitive token values |
-| `packages/design-tokens/tokens/semantic/cognitive.json` | New | Semantic cognitive token mappings |
-| `packages/design-tokens/tokens/component/cognitive.json` | New | Component-level cognitive overrides |
-| `apps/web/src/styles/cognitive.css` | New | Web CSS custom properties & rules |
-| `apps/web/src/theme/tokens.css` | Modified | Import cognitive CSS, enhance high-contrast |
-| `docs/design/cognitive-accessibility.md` | New | This specification document |
+| File                                                     | Status   | Description                                 |
+| -------------------------------------------------------- | -------- | ------------------------------------------- |
+| `packages/design-tokens/tokens/primitive/cognitive.json` | New      | Primitive cognitive token values            |
+| `packages/design-tokens/tokens/semantic/cognitive.json`  | New      | Semantic cognitive token mappings           |
+| `packages/design-tokens/tokens/component/cognitive.json` | New      | Component-level cognitive overrides         |
+| `apps/web/src/styles/cognitive.css`                      | New      | Web CSS custom properties & rules           |
+| `apps/web/src/theme/tokens.css`                          | Modified | Import cognitive CSS, enhance high-contrast |
+| `docs/design/cognitive-accessibility.md`                 | New      | This specification document                 |
 
 ---
 
