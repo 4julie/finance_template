@@ -26,6 +26,7 @@ import { serve } from 'https://deno.land/std@0.208.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 import { handleCorsPreflightRequest } from '../_shared/cors.ts';
 import { createLogger } from '../_shared/logger.ts';
+import { validateEnv } from '../_shared/env.ts';
 import {
   checkRateLimit,
   getClientIp,
@@ -50,6 +51,10 @@ serve(async (req: Request): Promise<Response> => {
 
   const logger = createLogger('process-recurring');
   logger.info('Request received', { method: req.method });
+
+  // Validate required environment variables (#616)
+  const envError = validateEnv('process-recurring', req);
+  if (envError) return envError;
 
   // Only accept POST
   if (req.method !== 'POST') {
