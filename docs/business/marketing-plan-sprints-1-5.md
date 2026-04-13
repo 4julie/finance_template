@@ -23,14 +23,14 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 
 ### Key Differentiators to Emphasize
 
-| Differentiator | Claim | Technical Basis |
-|---|---|---|
-| **Offline-first** | "Your money never leaves your device unless you choose" | SQLCipher AES-256 at rest, PowerSync opt-in sync |
-| **Expertise-tiered UI** | "Works with your brain — adapts to your comfort level" | 3-tier system changes terminology, features, charts |
-| **Non-judgmental** | "Facts, not judgments — observes and informs, never shames" | Product-wide UX principle, no guilt-based copy |
-| **Native per platform** | "Truly native on iOS, Android, Web, and Windows" | SwiftUI, Jetpack Compose, React, Compose Desktop |
-| **ADHD-friendly** | "Designed for cognitive accessibility" | Reduced motion, simplified views, 30-second habit loop |
-| **Free forever (core)** | "Complete financial tracker, free forever" | No artificial feature gating on core features |
+| Differentiator          | Claim                                                       | Technical Basis                                        |
+| ----------------------- | ----------------------------------------------------------- | ------------------------------------------------------ |
+| **Offline-first**       | "Your money never leaves your device unless you choose"     | SQLCipher AES-256 at rest, PowerSync opt-in sync       |
+| **Expertise-tiered UI** | "Works with your brain — adapts to your comfort level"      | 3-tier system changes terminology, features, charts    |
+| **Non-judgmental**      | "Facts, not judgments — observes and informs, never shames" | Product-wide UX principle, no guilt-based copy         |
+| **Native per platform** | "Truly native on iOS, Android, Web, and Windows"            | SwiftUI, Jetpack Compose, React, Compose Desktop       |
+| **ADHD-friendly**       | "Designed for cognitive accessibility"                      | Reduced motion, simplified views, 30-second habit loop |
+| **Free forever (core)** | "Complete financial tracker, free forever"                  | No artificial feature gating on core features          |
 
 ### Target Personas (from design/personas.md)
 
@@ -52,12 +52,14 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-brand-voice-guide`
 
 **Deliverables:**
+
 - `docs/business/brand-voice-guide.md` — Tone, vocabulary, do/don't examples
 - Messaging matrix: 3 key messages × 4 personas (Alex, Jordan, Casey, Sam)
 - Elevator pitch: 15-second, 30-second, and 60-second versions
 - Tagline candidates (5–7 options for human review)
 
 **Acceptance criteria:**
+
 - [ ] Every message passes the "non-judgmental" test — no shame, no guilt, no artificial urgency
 - [ ] Privacy claims verified against ADR-0003 (local storage) and ADR-0004 (auth/security)
 - [ ] Accessibility messaging validated against actual WCAG 2.2 AA implementation
@@ -73,6 +75,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-aso-keyword-research`
 
 **Deliverables:**
+
 - `docs/business/aso-keyword-research.md` — Keyword analysis across all 4 stores
 - Refined iOS keywords (100-char limit, currently at 74 — room for optimization)
 - Refined Android tags and short description
@@ -80,6 +83,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - Updated store-metadata.md with optimized copy (PR to existing file)
 
 **Acceptance criteria:**
+
 - [ ] iOS keyword string uses ≥90 of 100 available characters
 - [ ] Android short description A/B test variants drafted (2–3 options)
 - [ ] Keywords include accessibility-related terms (e.g., "accessible," "ADHD-friendly")
@@ -95,12 +99,14 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-screenshot-spec`
 
 **Deliverables:**
+
 - `docs/business/screenshot-spec.md` — Detailed spec for all screenshot sets
 - Copy overlays for each of the 5 required screens (Dashboard, Quick Entry, Budgets, Reports, Goals)
 - Device frame and background color recommendations per platform
 - Sample data specification (realistic, diverse, inclusive amounts and names)
 
 **Acceptance criteria:**
+
 - [ ] Overlay text ≤ 6 words per screenshot (readability at store thumbnail size)
 - [ ] Sample data uses diverse names and realistic-but-not-aspirational amounts
 - [ ] Dark mode screenshot variants specified (required for iOS, recommended for Android)
@@ -116,12 +122,14 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-competitive-positioning`
 
 **Deliverables:**
+
 - `docs/business/competitive-positioning.md` — Detailed competitive analysis
 - Feature comparison matrix: Finance vs. YNAB vs. Monarch vs. Copilot vs. Goodbudget vs. PocketGuard
 - "Why Finance?" one-pager for press kit and landing page
 - Privacy differentiation explainer (technical depth for press, plain language for users)
 
 **Acceptance criteria:**
+
 - [ ] All competitor claims are factual and current (verified against their public pages)
 - [ ] Positioning emphasizes what Finance does differently, not what competitors do wrong
 - [ ] Privacy comparison cites specific technical implementations (SQLCipher, no ATT, etc.)
@@ -142,6 +150,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-beta-recruitment`
 
 **Deliverables:**
+
 - `docs/business/beta-recruitment-plan.md` — Channel strategy and timeline
 - Beta landing page copy (for human to build/deploy)
 - Recruitment messages for each channel:
@@ -154,6 +163,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - Beta tester welcome email sequence (3 emails: welcome, week-1 check-in, feedback request)
 
 **Acceptance criteria:**
+
 - [ ] Recruitment targets 40+ testers across 4 platforms (per beta-testing.md § 1)
 - [ ] Screening ensures coverage: ≥3 accessibility testers, all 3 expertise tiers, ≥2 per platform
 - [ ] All recruitment copy is honest — no "exclusive" or "limited spots" artificial urgency
@@ -161,6 +171,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - [ ] Reddit posts comply with each subreddit's self-promotion rules
 
 **Dependencies:**
+
 - Engineering: Beta builds available on TestFlight (iOS), internal track (Android), staging (Web), MSIX (Windows)
 - Issue #653 (App Store submission prep) should be in progress
 
@@ -172,6 +183,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-content-calendar`
 
 **Deliverables:**
+
 - `docs/business/content-calendar.md` — 12-week content calendar (Sprint 2 through post-launch)
 - 3 blog post drafts (long-form, 1200–1800 words each):
   1. **"Why We Built Finance Offline-First"** — Technical story, privacy rationale, Signal comparison
@@ -180,6 +192,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - Social media content templates (10 posts for Twitter/X, 5 for LinkedIn)
 
 **Acceptance criteria:**
+
 - [ ] Blog posts are technically accurate (reviewed against architecture docs)
 - [ ] Content calendar has clear ownership (who writes) and deadlines
 - [ ] Social posts use consistent hashtags: #PrivacyFirst #OfflineFirst #Budgeting
@@ -196,6 +209,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-press-kit`
 
 **Deliverables:**
+
 - `docs/business/press-kit/` directory containing:
   - `press-release-v1.md` — Launch press release draft
   - `fact-sheet.md` — One-page company/product fact sheet
@@ -205,6 +219,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - Press release follows AP style, includes privacy-first angle, and avoids superlatives
 
 **Acceptance criteria:**
+
 - [ ] Press release includes concrete differentiators (not generic "revolutionary app" language)
 - [ ] Fact sheet covers: platforms, pricing, privacy architecture, accessibility, open source (BSL)
 - [ ] FAQ includes answers for: "How do you make money?", "Where is data stored?", "Is it really free?"
@@ -221,6 +236,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-privacy-messaging`
 
 **Deliverables:**
+
 - `docs/business/privacy-marketing-messaging.md` — Privacy messaging framework
 - "Privacy card" — 5-sentence summary suitable for app store descriptions and landing pages
 - Technical accuracy matrix: every privacy marketing claim mapped to its architecture verification
@@ -228,9 +244,10 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - In-app privacy explainer copy for onboarding Step 1 (Welcome screen)
 
 **Acceptance criteria:**
+
 - [ ] Every claim has a citation to a specific ADR, audit doc, or code reference
 - [ ] Claims use "currently" or "as of v1.0" language to avoid future-proofing violations
-- [ ] Messaging explains *what users gain* from privacy (control, peace of mind), not just what's absent
+- [ ] Messaging explains _what users gain_ from privacy (control, peace of mind), not just what's absent
 - [ ] No FUD (fear, uncertainty, doubt) about competitors — focus on Finance's affirmative choices
 - [ ] Aligned with issue #340 (Privacy-as-premium marketing)
 
@@ -249,6 +266,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-beta-launch`
 
 **Deliverables:**
+
 - Beta recruitment posts published (Reddit, HN, Twitter — human executes, we provide copy)
 - Product Hunt "Upcoming" page submitted (human executes)
 - TestFlight and Play Store beta links distributed to recruited testers
@@ -258,6 +276,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - Weekly beta feedback summary template
 
 **Acceptance criteria:**
+
 - [ ] ≥40 testers across all 4 platforms (per beta-testing.md requirements)
 - [ ] At least 3 accessibility testers actively participating
 - [ ] Feedback collection mechanism works on all platforms (in-app + external)
@@ -265,6 +284,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - [ ] First weekly feedback summary published within 7 days of beta launch
 
 **Dependencies:**
+
 - Engineering: Beta builds on all 4 platform channels
 - Issue #653 complete (App Store submission prep for TestFlight)
 - Beta recruitment materials from Task 2.1
@@ -277,6 +297,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-screenshot-capture`
 
 **Deliverables:**
+
 - Screenshot sets for all platforms (per store-metadata.md dimensions):
   - iOS: iPhone 16 Pro Max (1320×2868) + iPad Pro 13" (2064×2752)
   - Android: Phone (1080×1920) + Tablet (1200×1920) + Feature Graphic (1024×500)
@@ -287,6 +308,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - App icon verified at all required sizes per platform
 
 **Acceptance criteria:**
+
 - [ ] All screenshots from release builds with realistic sample data (never dev builds)
 - [ ] Sample data uses diverse, inclusive names and realistic amounts
 - [ ] Screenshots cover the 5 required screens in order: Dashboard, Quick Entry, Budgets, Reports, Goals
@@ -294,6 +316,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - [ ] File names follow platform conventions and are stored in correct directories
 
 **Dependencies:**
+
 - Engineering: Feature-frozen release builds on all platforms
 - Screenshot spec from Task 1.3
 - Sample data set defined and loaded into the app
@@ -306,6 +329,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-community-setup`
 
 **Deliverables:**
+
 - `docs/business/community-strategy.md` — Community building plan
 - GitHub Discussions category structure:
   - 📣 Announcements (team only)
@@ -317,6 +341,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - Social media account naming and bio recommendations (human creates accounts)
 
 **Acceptance criteria:**
+
 - [ ] Discussion categories are actionable — templates guide users to provide useful information
 - [ ] Community guidelines emphasize: no financial advice, privacy respect, inclusive language
 - [ ] Social bios consistently use the core tagline and link to the privacy policy
@@ -337,6 +362,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-beta-insights`
 
 **Deliverables:**
+
 - `docs/business/beta-insights-report.md` — Marketing insights distilled from beta feedback
 - Top 5 "aha moments" from beta testers (quotes for social proof, with consent)
 - Common first-impression reactions categorized by persona type
@@ -345,6 +371,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - Recommendations for store description emphasis based on what resonates
 
 **Acceptance criteria:**
+
 - [ ] All tester quotes used with explicit permission
 - [ ] Insights cover all 4 platforms — not biased toward one ecosystem
 - [ ] Friction points reported to engineering with specific recommendations
@@ -352,6 +379,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - [ ] NPS or satisfaction score from beta testers included (if surveyed)
 
 **Dependencies:**
+
 - Beta program running for ≥2 weeks (from Task 3.1)
 - Beta feedback summaries collected weekly
 
@@ -363,6 +391,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-final-store-listings`
 
 **Deliverables:**
+
 - Final store-metadata.md updates based on beta feedback and ASO learnings
 - A/B test variants for:
   - iOS promotional text (170 chars — 2 variants)
@@ -373,6 +402,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - All `{{PLACEHOLDER}}` values in store-metadata.md resolved or flagged for human
 
 **Acceptance criteria:**
+
 - [ ] All character limits verified (iOS subtitle ≤30, Android short ≤80, keywords ≤100)
 - [ ] Privacy labels / data safety sections match actual app behavior post-beta
 - [ ] Release notes use plain language (no jargon, no version numbers in prominent text)
@@ -380,6 +410,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - [ ] Store listings pass a readability check (Flesch-Kincaid ≤ 8th grade level)
 
 **Dependencies:**
+
 - Beta insights (Task 4.1)
 - Engineering: Privacy policy and terms of service hosted at public URLs (issue #639)
 - Screenshots from Task 3.2
@@ -392,6 +423,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-launch-comms`
 
 **Deliverables:**
+
 - Finalized press release (from Task 2.3 draft, updated with beta tester quotes and final feature list)
 - Product Hunt launch plan:
   - Tagline, description, first comment draft, maker bio
@@ -407,6 +439,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - Hacker News "Show HN" post draft
 
 **Acceptance criteria:**
+
 - [ ] Launch sequence does NOT use artificial urgency ("limited time!" "act now!")
 - [ ] Product Hunt first comment is authentic and personal — explains the "why" behind Finance
 - [ ] HN post leads with the technical angle (KMP, SQLCipher, PowerSync, offline-first)
@@ -414,6 +447,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - [ ] All launch copy reviewed against brand voice guide (Task 1.1)
 
 **Dependencies:**
+
 - Press kit (Task 2.3), brand voice guide (Task 1.1)
 - Engineering: Confirmed v1.0 release date (or release candidate milestone)
 
@@ -425,6 +459,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-onboarding-audit`
 
 **Deliverables:**
+
 - `docs/business/onboarding-messaging-audit.md` — Review of all in-app copy from first launch through day 7
 - Audit of onboarding flow copy against brand voice guide and non-judgmental principles
 - Empty-state messaging review (what users see before they've entered any data)
@@ -432,6 +467,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - Conversion point messaging (free → premium upsell touchpoints, if any exist)
 
 **Acceptance criteria:**
+
 - [ ] No guilt-based language anywhere in the first 7 days of use
 - [ ] Empty states are encouraging and actionable ("Add your first transaction — it takes 3 taps")
 - [ ] Notification copy previewed by at least 1 person who identifies as a Casey persona
@@ -439,6 +475,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - [ ] Aligned with issues #385 (Two-path onboarding) and #384 (Opt-in notifications)
 
 **Dependencies:**
+
 - Onboarding strategy doc (already exists)
 - Engineering: Onboarding flow implemented and testable
 - Issues #385, #384, #379 should be in progress or complete
@@ -456,6 +493,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-launch-day`
 
 **Deliverables:**
+
 - `docs/business/launch-day-marketing-checklist.md` — Minute-by-minute marketing timeline for launch day
 - Pre-launch verification:
   - [ ] All store listings live and correct
@@ -478,12 +516,14 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
   - [ ] Coordinate with engineering on any launch-day issues
 
 **Acceptance criteria:**
+
 - [ ] Checklist aligns with engineering launch-readiness-plan.md timeline
 - [ ] Rollback / "pause marketing" trigger defined (if engineering needs to halt rollout)
 - [ ] Response templates ready for common questions and feedback
 - [ ] Someone is explicitly assigned to each checklist item (no "TBD" owners)
 
 **Dependencies:**
+
 - Engineering: v1.0 approved and live on all stores
 - All prior sprint deliverables complete
 - Launch readiness plan GO decision
@@ -496,6 +536,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-growth-strategy`
 
 **Deliverables:**
+
 - `docs/business/growth-strategy-post-launch.md` — 90-day post-launch growth plan
 - Organic growth channels:
   - **Content marketing:** Publish blog posts from Sprint 2 on a weekly cadence
@@ -518,6 +559,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
   - Community growth (GitHub stars, Discussion activity)
 
 **Acceptance criteria:**
+
 - [ ] No growth tactics require invasive user tracking
 - [ ] Referral strategy respects user autonomy — no forced sharing or social pressure
 - [ ] Partnership outreach is genuine — not "use community for marketing"
@@ -534,6 +576,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-review-strategy`
 
 **Deliverables:**
+
 - `docs/business/review-strategy.md` — Ethical approach to app store reviews
 - In-app review prompt strategy:
   - **Timing:** After a positive moment (goal milestone reached, 7-day streak, first successful budget month)
@@ -548,6 +591,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - Store review monitoring cadence (daily for first 2 weeks, then weekly)
 
 **Acceptance criteria:**
+
 - [ ] Review prompt never appears during a frustrating moment (error, over-budget notification)
 - [ ] Prompt uses neutral language ("Enjoying Finance? A review helps others find us" — not "Rate us 5 stars!")
 - [ ] No differential treatment based on predicted rating (no "If you like us, leave a review; if not, email us")
@@ -555,6 +599,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - [ ] Aligned with issue #384 (Opt-in notification system) for prompt timing
 
 **Dependencies:**
+
 - Engineering: StoreKit 2 / Google Play In-App Review API integration
 - App live on stores with initial reviews
 
@@ -566,6 +611,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 **GitHub Issue:** `mktg-launch-retro`
 
 **Deliverables:**
+
 - `docs/business/launch-retrospective-week-1.md` — Marketing retrospective
 - What worked: channels that drove downloads, content that resonated, community engagement
 - What didn't: channels with low ROI, messaging that didn't land, unexpected friction
@@ -578,6 +624,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
   - Localization / internationalization marketing prep (if applicable)
 
 **Acceptance criteria:**
+
 - [ ] Retrospective is honest — includes failures, not just wins
 - [ ] Data-driven where possible, clearly labeled as anecdotal where not
 - [ ] Includes input from engineering team (what they heard from users)
@@ -585,6 +632,7 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 - [ ] Identifies any brand voice adjustments needed based on real-world reception
 
 **Dependencies:**
+
 - v1.0 live for ≥7 days
 - App store analytics dashboards accessible
 
@@ -592,13 +640,13 @@ Finance is approaching v1.0 readiness with 22 of 71 issues remaining. The engine
 
 ## Sprint Summary Matrix
 
-| Sprint | Theme | Critical Tasks | Medium Tasks | Key Deliverables |
-|--------|-------|---------------|-------------|-----------------|
-| **1** | Foundation & Brand | 2 (Voice Guide, ASO) | 2 (Screenshots, Positioning) | Brand voice guide, keyword research, screenshot spec, competitive analysis |
-| **2** | Content & Beta Prep | 2 (Beta Recruitment, Privacy Messaging) | 2 (Content Calendar, Press Kit) | Beta materials, 3 blog posts, press kit, privacy messaging framework |
-| **3** | Beta Launch & Assets | 2 (Beta Launch, Screenshots) | 1 (Community) | Live beta program, production screenshots, community channels |
-| **4** | Feedback & Launch Prep | 2 (Beta Insights, Store Listings) | 2 (Launch Comms, Onboarding Audit) | Final store listings, launch package, onboarding copy review |
-| **5** | Launch & Growth | 1 (Launch Day) | 3 (Growth, Reviews, Retro) | Launch execution, 90-day growth plan, review strategy, retrospective |
+| Sprint | Theme                  | Critical Tasks                          | Medium Tasks                       | Key Deliverables                                                           |
+| ------ | ---------------------- | --------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------- |
+| **1**  | Foundation & Brand     | 2 (Voice Guide, ASO)                    | 2 (Screenshots, Positioning)       | Brand voice guide, keyword research, screenshot spec, competitive analysis |
+| **2**  | Content & Beta Prep    | 2 (Beta Recruitment, Privacy Messaging) | 2 (Content Calendar, Press Kit)    | Beta materials, 3 blog posts, press kit, privacy messaging framework       |
+| **3**  | Beta Launch & Assets   | 2 (Beta Launch, Screenshots)            | 1 (Community)                      | Live beta program, production screenshots, community channels              |
+| **4**  | Feedback & Launch Prep | 2 (Beta Insights, Store Listings)       | 2 (Launch Comms, Onboarding Audit) | Final store listings, launch package, onboarding copy review               |
+| **5**  | Launch & Growth        | 1 (Launch Day)                          | 3 (Growth, Reviews, Retro)         | Launch execution, 90-day growth plan, review strategy, retrospective       |
 
 ---
 
@@ -621,16 +669,16 @@ Sprint 1                Sprint 2                Sprint 3                Sprint 4
 
 ## Existing Issue Alignment
 
-| GitHub Issue | Sprint Relevance | Marketing Action |
-|---|---|---|
-| #653 — App Store submission prep (iOS) | Sprint 1–3 | Store listings, screenshots, privacy labels |
-| #639 — Privacy policy content in app | Sprint 2–4 | In-app privacy messaging, store compliance |
-| #340 — Privacy-as-premium marketing | Sprint 2 | Privacy messaging framework (Task 2.4) |
-| #338 — Premium subscription IAP | Sprint 4–5 | Conversion messaging, upsell copy review |
-| #337 — Freemium tier feature gating | Sprint 4–5 | Free vs. premium messaging clarity |
-| #385 — Two-path onboarding | Sprint 4 | Onboarding messaging audit (Task 4.4) |
-| #379 — Expertise tier system | Sprint 1–2 | Brand messaging around "works with your brain" |
-| #384 — Opt-in notification system | Sprint 4–5 | Notification copy, review prompt timing |
+| GitHub Issue                           | Sprint Relevance | Marketing Action                               |
+| -------------------------------------- | ---------------- | ---------------------------------------------- |
+| #653 — App Store submission prep (iOS) | Sprint 1–3       | Store listings, screenshots, privacy labels    |
+| #639 — Privacy policy content in app   | Sprint 2–4       | In-app privacy messaging, store compliance     |
+| #340 — Privacy-as-premium marketing    | Sprint 2         | Privacy messaging framework (Task 2.4)         |
+| #338 — Premium subscription IAP        | Sprint 4–5       | Conversion messaging, upsell copy review       |
+| #337 — Freemium tier feature gating    | Sprint 4–5       | Free vs. premium messaging clarity             |
+| #385 — Two-path onboarding             | Sprint 4         | Onboarding messaging audit (Task 4.4)          |
+| #379 — Expertise tier system           | Sprint 1–2       | Brand messaging around "works with your brain" |
+| #384 — Opt-in notification system      | Sprint 4–5       | Notification copy, review prompt timing        |
 
 ---
 
@@ -638,17 +686,17 @@ Sprint 1                Sprint 2                Sprint 3                Sprint 4
 
 All metrics come from platform-provided dashboards or aggregate opt-in analytics. No user-level tracking.
 
-| Metric | Source | Target (90 days post-launch) |
-|---|---|---|
-| Total downloads (all platforms) | App Store Connect, Play Console, MS Partner Center, web analytics | 1,000+ |
-| App Store rating (iOS) | App Store Connect | ≥ 4.5 stars |
-| Play Store rating (Android) | Play Console | ≥ 4.5 stars |
-| Beta → GA retention | Manual count (beta testers still active at day 30) | ≥ 50% |
-| Product Hunt upvotes | Product Hunt dashboard | Top 5 of the day |
-| GitHub stars | GitHub | 500+ |
-| Blog post views | Website analytics (privacy-preserving, e.g., Plausible) | 5,000+ total |
-| Community members (GitHub Discussions) | GitHub | 100+ |
-| Press mentions | Manual tracking | 3+ |
+| Metric                                 | Source                                                            | Target (90 days post-launch) |
+| -------------------------------------- | ----------------------------------------------------------------- | ---------------------------- |
+| Total downloads (all platforms)        | App Store Connect, Play Console, MS Partner Center, web analytics | 1,000+                       |
+| App Store rating (iOS)                 | App Store Connect                                                 | ≥ 4.5 stars                  |
+| Play Store rating (Android)            | Play Console                                                      | ≥ 4.5 stars                  |
+| Beta → GA retention                    | Manual count (beta testers still active at day 30)                | ≥ 50%                        |
+| Product Hunt upvotes                   | Product Hunt dashboard                                            | Top 5 of the day             |
+| GitHub stars                           | GitHub                                                            | 500+                         |
+| Blog post views                        | Website analytics (privacy-preserving, e.g., Plausible)           | 5,000+ total                 |
+| Community members (GitHub Discussions) | GitHub                                                            | 100+                         |
+| Press mentions                         | Manual tracking                                                   | 3+                           |
 
 ---
 

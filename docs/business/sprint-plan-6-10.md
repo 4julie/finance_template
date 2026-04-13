@@ -21,17 +21,18 @@ Sprints 6-10 cover the first 10 weeks after v1.0 launch. The strategy follows a 
 
 ### Milestone Mapping
 
-| Sprint | Weeks  | Milestone | Theme                         |
-| ------ | ------ | --------- | ----------------------------- |
-| 6      | 11-12  | v1.1      | Post-Launch Stabilization     |
-| 7      | 13-14  | v1.1      | Monetization Foundation       |
-| 8      | 15-16  | v1.2      | Growth and Retention          |
-| 9      | 17-18  | v1.2      | Smart Features                |
-| 10     | 19-20  | v1.2      | Advanced Features and Expansion |
+| Sprint | Weeks | Milestone | Theme                           |
+| ------ | ----- | --------- | ------------------------------- |
+| 6      | 11-12 | v1.1      | Post-Launch Stabilization       |
+| 7      | 13-14 | v1.1      | Monetization Foundation         |
+| 8      | 15-16 | v1.2      | Growth and Retention            |
+| 9      | 17-18 | v1.2      | Smart Features                  |
+| 10     | 19-20 | v1.2      | Advanced Features and Expansion |
 
 ### v1.1 Release Scope (Sprints 6-7)
 
 v1.1 bundles post-launch stabilization with monetization:
+
 - Production monitoring and APM
 - Security hardening (rate limiting, certificate pinning)
 - Contextual tips, notification scheduling
@@ -41,6 +42,7 @@ v1.1 bundles post-launch stabilization with monetization:
 ### v1.2 Release Scope (Sprints 8-10)
 
 v1.2 is a major feature release:
+
 - Dashboard widgets + platform home screen widgets
 - Internationalization framework
 - AI-powered categorization, NLP input, anomaly detection
@@ -91,16 +93,16 @@ Ensure production stability with APM and monitoring, close critical security gap
 
 ### Issues
 
-| #     | Title                                              | Agent Type       | Priority | Effort | Source      |
-| ----- | -------------------------------------------------- | ---------------- | -------- | ------ | ----------- |
-| #304  | Performance monitoring and APM                     | backend + devops | P1       | L      | V2 backlog  |
-| #332  | Rate limiting on all Edge Functions                | backend          | P1       | M      | Stage 11    |
-| #329  | Certificate pinning on all platforms               | ios/android/win  | P1       | L      | Stage 11    |
-| #320  | Contextual financial tips                          | kmp + platforms  | P2       | M      | Descoped v1 |
-| #305  | Notification scheduling and smart alerts           | backend + kmp    | P2       | L      | V2 backlog  |
-| —     | Bug fix buffer (post-launch P0/P1 issues)          | all              | P1       | M      | Buffer      |
-| NEW-1 | Post-launch analytics review and feedback synthesis| product          | P1       | S      | NEW         |
-| NEW-2 | v1.1 release planning and app store optimization   | marketing        | P2       | S      | NEW         |
+| #     | Title                                               | Agent Type       | Priority | Effort | Source      |
+| ----- | --------------------------------------------------- | ---------------- | -------- | ------ | ----------- |
+| #304  | Performance monitoring and APM                      | backend + devops | P1       | L      | V2 backlog  |
+| #332  | Rate limiting on all Edge Functions                 | backend          | P1       | M      | Stage 11    |
+| #329  | Certificate pinning on all platforms                | ios/android/win  | P1       | L      | Stage 11    |
+| #320  | Contextual financial tips                           | kmp + platforms  | P2       | M      | Descoped v1 |
+| #305  | Notification scheduling and smart alerts            | backend + kmp    | P2       | L      | V2 backlog  |
+| —     | Bug fix buffer (post-launch P0/P1 issues)           | all              | P1       | M      | Buffer      |
+| NEW-1 | Post-launch analytics review and feedback synthesis | product          | P1       | S      | NEW         |
+| NEW-2 | v1.1 release planning and app store optimization    | marketing        | P2       | S      | NEW         |
 
 **Total: 8 items (5 engineering + 1 buffer + 2 business)**
 
@@ -131,12 +133,12 @@ Ensure production stability with APM and monitoring, close critical security gap
 
 ### Risks
 
-| Risk | Impact | Mitigation |
-| ---- | ------ | ---------- |
-| Post-launch P0 bugs consume entire sprint capacity | High | Bug buffer allocated; defer #320 (tips) to Sprint 7 if needed |
-| Certificate pinning breaks existing user sessions | Medium | Implement with graceful fallback; staged rollout per platform |
-| APM tooling choice delays integration | Low | Pre-decide tooling: Sentry (errors) + custom Supabase dashboards (metrics) |
-| Rate limiting too aggressive, blocks legitimate users | Medium | Start with generous limits (100 req/min); tune based on #304 APM data |
+| Risk                                                  | Impact | Mitigation                                                                 |
+| ----------------------------------------------------- | ------ | -------------------------------------------------------------------------- |
+| Post-launch P0 bugs consume entire sprint capacity    | High   | Bug buffer allocated; defer #320 (tips) to Sprint 7 if needed              |
+| Certificate pinning breaks existing user sessions     | Medium | Implement with graceful fallback; staged rollout per platform              |
+| APM tooling choice delays integration                 | Low    | Pre-decide tooling: Sentry (errors) + custom Supabase dashboards (metrics) |
+| Rate limiting too aggressive, blocks legitimate users | Medium | Start with generous limits (100 req/min); tune based on #304 APM data      |
 
 ### Definition of Done
 
@@ -166,15 +168,15 @@ Implement the freemium monetization model: define free vs. premium feature bound
 
 ### Issues
 
-| #     | Title                                              | Agent Type           | Priority | Effort | Source     |
-| ----- | -------------------------------------------------- | -------------------- | -------- | ------ | ---------- |
-| #337  | Freemium tier feature gating                       | kmp                  | P1       | XL     | Stage 12   |
-| #338  | Premium subscription IAP across platforms          | ios/android/web/win  | P1       | XL     | Stage 12   |
-| #344  | Annual subscription discount                       | backend              | P2       | S      | Stage 12   |
-| #341  | Optional tip jar for development support           | kmp + platforms      | P3       | S      | Stage 12   |
-| #340  | Privacy-as-premium marketing                       | marketing            | P2       | M      | Stage 12   |
-| NEW-3 | Premium upgrade UX — paywall and comparison design | design               | P1       | M      | NEW        |
-| NEW-4 | Conversion funnel analytics and pricing validation | product + analytics  | P2       | M      | NEW        |
+| #     | Title                                              | Agent Type          | Priority | Effort | Source   |
+| ----- | -------------------------------------------------- | ------------------- | -------- | ------ | -------- |
+| #337  | Freemium tier feature gating                       | kmp                 | P1       | XL     | Stage 12 |
+| #338  | Premium subscription IAP across platforms          | ios/android/web/win | P1       | XL     | Stage 12 |
+| #344  | Annual subscription discount                       | backend             | P2       | S      | Stage 12 |
+| #341  | Optional tip jar for development support           | kmp + platforms     | P3       | S      | Stage 12 |
+| #340  | Privacy-as-premium marketing                       | marketing           | P2       | M      | Stage 12 |
+| NEW-3 | Premium upgrade UX — paywall and comparison design | design              | P1       | M      | NEW      |
+| NEW-4 | Conversion funnel analytics and pricing validation | product + analytics | P2       | M      | NEW      |
 
 **Total: 7 items (4 engineering + 1 design + 2 business)**
 
@@ -200,26 +202,26 @@ Implement the freemium monetization model: define free vs. premium feature bound
 
 This must be decided before Sprint 7 engineering begins:
 
-| Feature                    | Free | Premium |
-| -------------------------- | ---- | ------- |
-| Unlimited accounts         | Yes  | Yes     |
-| Unlimited transactions     | Yes  | Yes     |
-| Budgets (up to 5)          | Yes  | Yes     |
-| Budgets (unlimited)        | —    | Yes     |
-| Goals (up to 3)            | Yes  | Yes     |
-| Goals (unlimited)          | —    | Yes     |
-| Data export (JSON/CSV)     | Yes  | Yes     |
-| Financial insights         | Yes  | Yes     |
-| Custom categories          | Yes  | Yes     |
-| Custom reports             | —    | Yes     |
-| AI categorization          | —    | Yes     |
-| NLP transaction input      | —    | Yes     |
-| Anomaly detection          | —    | Yes     |
-| Bank connections (Plaid)   | —    | Yes     |
-| Receipt OCR                | —    | Yes     |
-| Family/household (add-on)  | —    | Yes     |
-| Priority support           | —    | Yes     |
-| Widget customization       | Partial | Yes  |
+| Feature                   | Free    | Premium |
+| ------------------------- | ------- | ------- |
+| Unlimited accounts        | Yes     | Yes     |
+| Unlimited transactions    | Yes     | Yes     |
+| Budgets (up to 5)         | Yes     | Yes     |
+| Budgets (unlimited)       | —       | Yes     |
+| Goals (up to 3)           | Yes     | Yes     |
+| Goals (unlimited)         | —       | Yes     |
+| Data export (JSON/CSV)    | Yes     | Yes     |
+| Financial insights        | Yes     | Yes     |
+| Custom categories         | Yes     | Yes     |
+| Custom reports            | —       | Yes     |
+| AI categorization         | —       | Yes     |
+| NLP transaction input     | —       | Yes     |
+| Anomaly detection         | —       | Yes     |
+| Bank connections (Plaid)  | —       | Yes     |
+| Receipt OCR               | —       | Yes     |
+| Family/household (add-on) | —       | Yes     |
+| Priority support          | —       | Yes     |
+| Widget customization      | Partial | Yes     |
 
 > **Philosophy:** Core tracking is free forever. Premium unlocks intelligence, automation, and advanced features. No artificial limits on the core budgeting experience.
 
@@ -236,13 +238,13 @@ NEW-3 (design) --> #338 (platforms implement the designed UX)
 
 ### Risks
 
-| Risk | Impact | Mitigation |
-| ---- | ------ | ---------- |
-| App store IAP review rejection (especially Apple) | High | Follow App Store Review Guidelines exactly; have appeal ready |
-| Freemium tier too generous — no conversion incentive | Medium | Start generous, tighten later based on data. Core must stay free. |
-| Freemium tier too restrictive — user backlash | High | Never gate v1.0 features. Only gate new features added post-launch. |
-| Multi-platform IAP complexity (4 stores + Stripe) | High | Backend is source of truth for entitlements. Platform validates receipt and syncs to backend. |
-| Receipt validation security (preventing piracy) | Medium | Server-side receipt validation for iOS/Android. Stripe handles Web. |
+| Risk                                                 | Impact | Mitigation                                                                                    |
+| ---------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------- |
+| App store IAP review rejection (especially Apple)    | High   | Follow App Store Review Guidelines exactly; have appeal ready                                 |
+| Freemium tier too generous — no conversion incentive | Medium | Start generous, tighten later based on data. Core must stay free.                             |
+| Freemium tier too restrictive — user backlash        | High   | Never gate v1.0 features. Only gate new features added post-launch.                           |
+| Multi-platform IAP complexity (4 stores + Stripe)    | High   | Backend is source of truth for entitlements. Platform validates receipt and syncs to backend. |
+| Receipt validation security (preventing piracy)      | Medium | Server-side receipt validation for iOS/Android. Stripe handles Web.                           |
 
 ### Definition of Done
 
@@ -274,16 +276,16 @@ Expand the app's reach and stickiness: add home screen widgets across platforms 
 
 ### Issues
 
-| #     | Title                                              | Agent Type          | Priority | Effort | Source      |
-| ----- | -------------------------------------------------- | ------------------- | -------- | ------ | ----------- |
-| #315  | Customizable dashboard widgets                     | kmp + platforms     | P2       | L      | Descoped v1 |
-| #293  | Widget support across all platforms                | ios/android/win     | P2       | XL     | V2 backlog  |
-| #264  | Internationalization (i18n) and localization       | kmp + platforms     | P2       | XL     | Post-launch |
-| #319  | Quick-entry transaction mode                       | kmp + platforms     | P2       | M      | Descoped v1 |
-| #318  | Bulk transaction editing                           | kmp + platforms     | P2       | M      | Descoped v1 |
-| #342  | Referral program                                   | backend + kmp       | P2       | L      | Stage 12    |
-| NEW-5 | i18n launch language selection and translation prep| marketing + docs    | P2       | M      | NEW         |
-| NEW-6 | v1.1 launch campaign and growth marketing plan     | marketing           | P2       | M      | NEW         |
+| #     | Title                                               | Agent Type       | Priority | Effort | Source      |
+| ----- | --------------------------------------------------- | ---------------- | -------- | ------ | ----------- |
+| #315  | Customizable dashboard widgets                      | kmp + platforms  | P2       | L      | Descoped v1 |
+| #293  | Widget support across all platforms                 | ios/android/win  | P2       | XL     | V2 backlog  |
+| #264  | Internationalization (i18n) and localization        | kmp + platforms  | P2       | XL     | Post-launch |
+| #319  | Quick-entry transaction mode                        | kmp + platforms  | P2       | M      | Descoped v1 |
+| #318  | Bulk transaction editing                            | kmp + platforms  | P2       | M      | Descoped v1 |
+| #342  | Referral program                                    | backend + kmp    | P2       | L      | Stage 12    |
+| NEW-5 | i18n launch language selection and translation prep | marketing + docs | P2       | M      | NEW         |
+| NEW-6 | v1.1 launch campaign and growth marketing plan      | marketing        | P2       | M      | NEW         |
 
 **Total: 8 items (6 engineering + 2 business)**
 
@@ -305,13 +307,13 @@ Expand the app's reach and stickiness: add home screen widgets across platforms 
 
 ### Platform Widget Specifications
 
-| Widget Type          | iOS (WidgetKit) | Android (Glance) | Windows | Web (Dashboard) |
-| -------------------- | --------------- | ---------------- | ------- | --------------- |
-| Daily Spending       | Small/Medium    | 2x1 / 4x2       | Small   | Card            |
-| Budget Progress      | Medium/Large    | 4x2 / 4x4       | Medium  | Card            |
-| Quick Transaction    | Small           | 2x1              | Small   | N/A (in-app)    |
-| Account Balance      | Small           | 2x1              | Small   | Card            |
-| Goal Progress        | Medium          | 4x2              | Medium  | Card            |
+| Widget Type       | iOS (WidgetKit) | Android (Glance) | Windows | Web (Dashboard) |
+| ----------------- | --------------- | ---------------- | ------- | --------------- |
+| Daily Spending    | Small/Medium    | 2x1 / 4x2        | Small   | Card            |
+| Budget Progress   | Medium/Large    | 4x2 / 4x4        | Medium  | Card            |
+| Quick Transaction | Small           | 2x1              | Small   | N/A (in-app)    |
+| Account Balance   | Small           | 2x1              | Small   | Card            |
+| Goal Progress     | Medium          | 4x2              | Medium  | Card            |
 
 ### Dependencies
 
@@ -326,13 +328,13 @@ Expand the app's reach and stickiness: add home screen widgets across platforms 
 
 ### Risks
 
-| Risk | Impact | Mitigation |
-| ---- | ------ | ---------- |
-| i18n framework retrofitting is invasive (touching every string) | High | Phase 1: extract strings + framework only. Phase 2 (post-sprint): actual translations |
-| Widget APIs vary significantly across platforms | Medium | Define shared data contract in KMP; platform-specific rendering is expected |
-| Quick-entry NLP parsing accuracy for diverse formats | Medium | Start with structured quick-entry (amount + category); NLP comes in Sprint 9 |
-| Referral fraud (self-referrals, fake accounts) | Low | Rate limit referrals per account; require minimum activity before reward |
-| Android widget styling inconsistencies across OEMs | Low | Use Glance composables with Material You; test on 3+ OEM skins |
+| Risk                                                            | Impact | Mitigation                                                                            |
+| --------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------- |
+| i18n framework retrofitting is invasive (touching every string) | High   | Phase 1: extract strings + framework only. Phase 2 (post-sprint): actual translations |
+| Widget APIs vary significantly across platforms                 | Medium | Define shared data contract in KMP; platform-specific rendering is expected           |
+| Quick-entry NLP parsing accuracy for diverse formats            | Medium | Start with structured quick-entry (amount + category); NLP comes in Sprint 9          |
+| Referral fraud (self-referrals, fake accounts)                  | Low    | Rate limit referrals per account; require minimum activity before reward              |
+| Android widget styling inconsistencies across OEMs              | Low    | Use Glance composables with Material You; test on 3+ OEM skins                        |
 
 ### Definition of Done
 
@@ -365,15 +367,15 @@ Build the AI/ML intelligence layer: auto-categorize transactions using ML, enabl
 
 ### Issues
 
-| #     | Title                                              | Agent Type       | Priority | Effort | Source     |
-| ----- | -------------------------------------------------- | ---------------- | -------- | ------ | ---------- |
-| #263  | AI-powered transaction categorization              | kmp + backend    | P1       | XL     | Post-launch|
-| #322  | Natural language transaction input                 | kmp              | P2       | L      | Stage 10   |
-| #323  | Anomaly detection for unusual transactions         | backend + kmp    | P2       | L      | Stage 10   |
-| #324  | Predictive end-of-month balance                    | kmp              | P2       | M      | Stage 10   |
-| #325  | Smart subscription detection                       | kmp              | P2       | M      | Stage 10   |
-| #299  | Financial health score with benchmarking           | kmp + design     | P2       | L      | V2 backlog |
-| NEW-7 | AI features launch campaign and premium positioning| marketing + docs | P2       | M      | NEW        |
+| #     | Title                                               | Agent Type       | Priority | Effort | Source      |
+| ----- | --------------------------------------------------- | ---------------- | -------- | ------ | ----------- |
+| #263  | AI-powered transaction categorization               | kmp + backend    | P1       | XL     | Post-launch |
+| #322  | Natural language transaction input                  | kmp              | P2       | L      | Stage 10    |
+| #323  | Anomaly detection for unusual transactions          | backend + kmp    | P2       | L      | Stage 10    |
+| #324  | Predictive end-of-month balance                     | kmp              | P2       | M      | Stage 10    |
+| #325  | Smart subscription detection                        | kmp              | P2       | M      | Stage 10    |
+| #299  | Financial health score with benchmarking            | kmp + design     | P2       | L      | V2 backlog  |
+| NEW-7 | AI features launch campaign and premium positioning | marketing + docs | P2       | M      | NEW         |
 
 **Total: 7 items (6 engineering + 1 business)**
 
@@ -390,12 +392,12 @@ Build the AI/ML intelligence layer: auto-categorize transactions using ML, enabl
 
 Before Sprint 9 begins, the team must decide:
 
-| Decision | Option A (Recommended) | Option B |
-| -------- | --------------------- | -------- |
-| Categorization model | On-device (edge-first, privacy-aligned) | Server-side (more powerful, privacy trade-off) |
-| NLP parsing | Rule-based regex + heuristics | LLM API call (latency + cost + privacy concerns) |
-| Anomaly detection | Server-side (needs cross-user baselines) | On-device only (limited to individual patterns) |
-| Model format | TensorFlow Lite (KMP-compatible) | ONNX Runtime or CoreML + TFLite per platform |
+| Decision             | Option A (Recommended)                   | Option B                                         |
+| -------------------- | ---------------------------------------- | ------------------------------------------------ |
+| Categorization model | On-device (edge-first, privacy-aligned)  | Server-side (more powerful, privacy trade-off)   |
+| NLP parsing          | Rule-based regex + heuristics            | LLM API call (latency + cost + privacy concerns) |
+| Anomaly detection    | Server-side (needs cross-user baselines) | On-device only (limited to individual patterns)  |
+| Model format         | TensorFlow Lite (KMP-compatible)         | ONNX Runtime or CoreML + TFLite per platform     |
 
 **Recommendation:** Edge-first for categorization and NLP (aligns with privacy brand). Server-side for anomaly detection (benefits from aggregate patterns, but anonymized). Consult @architect and @security-reviewer.
 
@@ -412,14 +414,14 @@ Before Sprint 9 begins, the team must decide:
 
 ### Risks
 
-| Risk | Impact | Mitigation |
-| ---- | ------ | ---------- |
-| On-device ML model size too large (impacts app download) | High | Start with rule-based categorization + small model (under 5MB). Download full model on-demand. |
-| NLP parsing accuracy insufficient for production | Medium | Ship as beta feature with explicit user feedback loop. Rule-based first, ML later. |
-| Anomaly detection false positives annoy users | Medium | High confidence threshold (over 95 percent); mute option; learn from user feedback |
-| Financial health score methodology controversial | Low | Transparent scoring with explanations; never frame as judgment; cite methodology |
-| Model training data insufficient (new app) | High | Use synthetic training data + public datasets. Improve with real (anonymized, consented) data over time. |
-| Privacy concerns with ML training on financial data | Critical | All training on-device. No financial data sent to servers for ML. Document in privacy policy. |
+| Risk                                                     | Impact   | Mitigation                                                                                               |
+| -------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| On-device ML model size too large (impacts app download) | High     | Start with rule-based categorization + small model (under 5MB). Download full model on-demand.           |
+| NLP parsing accuracy insufficient for production         | Medium   | Ship as beta feature with explicit user feedback loop. Rule-based first, ML later.                       |
+| Anomaly detection false positives annoy users            | Medium   | High confidence threshold (over 95 percent); mute option; learn from user feedback                       |
+| Financial health score methodology controversial         | Low      | Transparent scoring with explanations; never frame as judgment; cite methodology                         |
+| Model training data insufficient (new app)               | High     | Use synthetic training data + public datasets. Improve with real (anonymized, consented) data over time. |
+| Privacy concerns with ML training on financial data      | Critical | All training on-device. No financial data sent to servers for ML. Document in privacy policy.            |
 
 ### Definition of Done
 
@@ -451,16 +453,16 @@ Ship the highest-value advanced features: bank connection API for automatic tran
 
 ### Issues
 
-| #     | Title                                              | Agent Type           | Priority | Effort | Source     |
-| ----- | -------------------------------------------------- | -------------------- | -------- | ------ | ---------- |
-| #265  | Bank connection API integration (Plaid/MX)         | backend + kmp        | P1       | XL     | Post-launch|
-| #301  | Smart receipt scanning and OCR                     | kmp + ios/android    | P2       | L      | V2 backlog |
-| #270  | Family/household collaboration features            | backend + kmp        | P1       | XL     | Post-launch|
-| #339  | Family/household premium plan                      | backend              | P2       | M      | Stage 12   |
-| #330  | Runtime application self-protection (RASP)         | ios/android/win      | P2       | L      | Stage 11   |
-| #302  | Offline-first data migration and backup            | kmp + backend        | P2       | L      | V2 backlog |
-| NEW-8 | Enterprise plan scoping and v1.2 release planning  | product              | P2       | M      | NEW        |
-| NEW-9 | v1.2 launch campaign and family plan marketing     | marketing            | P2       | M      | NEW        |
+| #     | Title                                             | Agent Type        | Priority | Effort | Source      |
+| ----- | ------------------------------------------------- | ----------------- | -------- | ------ | ----------- |
+| #265  | Bank connection API integration (Plaid/MX)        | backend + kmp     | P1       | XL     | Post-launch |
+| #301  | Smart receipt scanning and OCR                    | kmp + ios/android | P2       | L      | V2 backlog  |
+| #270  | Family/household collaboration features           | backend + kmp     | P1       | XL     | Post-launch |
+| #339  | Family/household premium plan                     | backend           | P2       | M      | Stage 12    |
+| #330  | Runtime application self-protection (RASP)        | ios/android/win   | P2       | L      | Stage 11    |
+| #302  | Offline-first data migration and backup           | kmp + backend     | P2       | L      | V2 backlog  |
+| NEW-8 | Enterprise plan scoping and v1.2 release planning | product           | P2       | M      | NEW         |
+| NEW-9 | v1.2 launch campaign and family plan marketing    | marketing         | P2       | M      | NEW         |
 
 **Total: 8 items (6 engineering + 2 business)**
 
@@ -483,6 +485,7 @@ Client (app) --> Supabase Edge Function --> Plaid/MX API --> Bank API
 ```
 
 **Security requirements:**
+
 - Plaid/MX access tokens stored **only** on server (never on client)
 - All bank credentials handled by Plaid/MX — Finance app never sees them
 - Token refresh and revocation handled server-side
@@ -491,12 +494,12 @@ Client (app) --> Supabase Edge Function --> Plaid/MX API --> Bank API
 
 ### Family Collaboration Model
 
-| Role   | Permissions                                                |
-| ------ | ---------------------------------------------------------- |
-| Owner  | Full access, manage members, billing, delete household     |
-| Admin  | Full access, manage members (not billing)                  |
-| Member | View shared accounts/budgets, add transactions, set goals  |
-| View   | Read-only access to shared financial data                  |
+| Role   | Permissions                                               |
+| ------ | --------------------------------------------------------- |
+| Owner  | Full access, manage members, billing, delete household    |
+| Admin  | Full access, manage members (not billing)                 |
+| Member | View shared accounts/budgets, add transactions, set goals |
+| View   | Read-only access to shared financial data                 |
 
 ### Dependencies
 
@@ -513,14 +516,14 @@ Client (app) --> Supabase Edge Function --> Plaid/MX API --> Bank API
 
 ### Risks
 
-| Risk | Impact | Mitigation |
-| ---- | ------ | ---------- |
-| Plaid/MX API costs significant at scale | High | Start with Plaid Sandbox then Development. Negotiate pricing. Pass cost to premium tier. |
-| Bank connection security audit failure | Critical | Engage @security-reviewer early. Follow Plaid security best practices. Never store credentials. |
-| Family collaboration RLS complexity | High | Extensive testing with multi-user scenarios. Edge cases: member removal, household deletion, data ownership on leave. |
-| OCR accuracy varies by receipt quality | Medium | Set expectations in UI: works best with clear receipts. User confirms/edits parsed data. |
-| RASP false positives on rooted/dev devices | Medium | Warn, do not block. Allow developer mode override in debug builds only. |
-| Plaid institution coverage gaps | Low | Support manual entry as fallback. Display coming soon for unsupported banks. |
+| Risk                                       | Impact   | Mitigation                                                                                                            |
+| ------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| Plaid/MX API costs significant at scale    | High     | Start with Plaid Sandbox then Development. Negotiate pricing. Pass cost to premium tier.                              |
+| Bank connection security audit failure     | Critical | Engage @security-reviewer early. Follow Plaid security best practices. Never store credentials.                       |
+| Family collaboration RLS complexity        | High     | Extensive testing with multi-user scenarios. Edge cases: member removal, household deletion, data ownership on leave. |
+| OCR accuracy varies by receipt quality     | Medium   | Set expectations in UI: works best with clear receipts. User confirms/edits parsed data.                              |
+| RASP false positives on rooted/dev devices | Medium   | Warn, do not block. Allow developer mode override in debug builds only.                                               |
+| Plaid institution coverage gaps            | Low      | Support manual entry as fallback. Display coming soon for unsupported banks.                                          |
 
 ### Definition of Done
 
@@ -577,17 +580,17 @@ Sprint 6                    Sprint 7                Sprint 8              Sprint
 
 These issues should be created before Sprint 6 begins:
 
-| ID    | Title                                                           | Sprint | Labels                          | Agent Type |
-| ----- | --------------------------------------------------------------- | ------ | ------------------------------- | ---------- |
-| NEW-1 | task(product): Post-launch analytics review and feedback synthesis  | 6   | task, analytics, priority:high  | product    |
-| NEW-2 | task(marketing): v1.1 release planning and app store optimization   | 6   | task, priority:medium           | marketing  |
-| NEW-3 | task(design): Premium upgrade UX — paywall and comparison design    | 7   | task, ui, priority:high         | design     |
-| NEW-4 | task(product): Conversion funnel analytics and pricing validation   | 7   | task, analytics, priority:medium| product    |
-| NEW-5 | task(marketing): i18n launch language selection and translation prep | 8   | task, priority:medium           | marketing  |
-| NEW-6 | task(marketing): v1.1 launch campaign and growth marketing plan     | 8   | task, priority:medium           | marketing  |
-| NEW-7 | task(marketing): AI features launch campaign and premium positioning| 9   | task, priority:medium           | marketing  |
-| NEW-8 | task(product): Enterprise plan scoping and v1.2 release planning    | 10  | task, priority:medium           | product    |
-| NEW-9 | task(marketing): v1.2 launch campaign and family plan marketing     | 10  | task, priority:medium           | marketing  |
+| ID    | Title                                                                | Sprint | Labels                           | Agent Type |
+| ----- | -------------------------------------------------------------------- | ------ | -------------------------------- | ---------- |
+| NEW-1 | task(product): Post-launch analytics review and feedback synthesis   | 6      | task, analytics, priority:high   | product    |
+| NEW-2 | task(marketing): v1.1 release planning and app store optimization    | 6      | task, priority:medium            | marketing  |
+| NEW-3 | task(design): Premium upgrade UX — paywall and comparison design     | 7      | task, ui, priority:high          | design     |
+| NEW-4 | task(product): Conversion funnel analytics and pricing validation    | 7      | task, analytics, priority:medium | product    |
+| NEW-5 | task(marketing): i18n launch language selection and translation prep | 8      | task, priority:medium            | marketing  |
+| NEW-6 | task(marketing): v1.1 launch campaign and growth marketing plan      | 8      | task, priority:medium            | marketing  |
+| NEW-7 | task(marketing): AI features launch campaign and premium positioning | 9      | task, priority:medium            | marketing  |
+| NEW-8 | task(product): Enterprise plan scoping and v1.2 release planning     | 10     | task, priority:medium            | product    |
+| NEW-9 | task(marketing): v1.2 launch campaign and family plan marketing      | 10     | task, priority:medium            | marketing  |
 
 ---
 
@@ -595,45 +598,45 @@ These issues should be created before Sprint 6 begins:
 
 All items descoped from v1.0 are now scheduled:
 
-| #     | Title                          | Scheduled | Notes                                    |
-| ----- | ------------------------------ | --------- | ---------------------------------------- |
-| #237  | NLP transaction input          | —         | **Duplicate of #322.** Close #237.       |
-| #242  | Gamification                   | Backlog   | Deferred to v1.3+. Not in Sprints 6-10.  |
-| #315  | Customizable dashboard widgets | Sprint 8  | Paired with #293 (platform widgets)      |
-| #316  | Spending watchlists            | Backlog   | Deferred. #323 (anomaly) covers some scope. |
-| #318  | Bulk transaction editing       | Sprint 8  | Power user feature, grouped with growth  |
-| #319  | Quick-entry transaction mode   | Sprint 8  | High-demand feature, grouped with growth |
-| #320  | Contextual financial tips      | Sprint 6  | Quick win — content-driven, lower risk   |
-| #338  | Premium subscription IAP       | Sprint 7  | Core monetization sprint                 |
-| #337  | Freemium tier feature gating   | Sprint 7  | Core monetization sprint                 |
+| #    | Title                          | Scheduled | Notes                                       |
+| ---- | ------------------------------ | --------- | ------------------------------------------- |
+| #237 | NLP transaction input          | —         | **Duplicate of #322.** Close #237.          |
+| #242 | Gamification                   | Backlog   | Deferred to v1.3+. Not in Sprints 6-10.     |
+| #315 | Customizable dashboard widgets | Sprint 8  | Paired with #293 (platform widgets)         |
+| #316 | Spending watchlists            | Backlog   | Deferred. #323 (anomaly) covers some scope. |
+| #318 | Bulk transaction editing       | Sprint 8  | Power user feature, grouped with growth     |
+| #319 | Quick-entry transaction mode   | Sprint 8  | High-demand feature, grouped with growth    |
+| #320 | Contextual financial tips      | Sprint 6  | Quick win — content-driven, lower risk      |
+| #338 | Premium subscription IAP       | Sprint 7  | Core monetization sprint                    |
+| #337 | Freemium tier feature gating   | Sprint 7  | Core monetization sprint                    |
 
 ### Items NOT in Sprints 6-10 (Backlog for v1.3+)
 
-| #     | Title                                    | Reason                                   |
-| ----- | ---------------------------------------- | ---------------------------------------- |
-| #242  | Gamification                             | Engagement feature; needs data on what users respond to first |
-| #316  | Spending watchlists                      | Partially covered by #323 (anomaly detection). Revisit after Sprint 9. |
-| #266  | Apple Watch / Wear OS tiles              | Companion app is v2 scope. Widgets (#293) are higher priority. |
-| #267  | Browser extension                        | Niche. Web PWA covers most use cases.    |
-| #294  | Siri/Google Assistant/Cortana            | Platform integrations — v2 after core intelligence layer ships |
-| #295  | Biometric-protected categories           | Niche security feature. Revisit with user demand data. |
-| #300  | Collaborative budget negotiation         | Complex UX. Revisit after #270 (family collab) ships. |
-| #303  | Custom report builder                    | Premium feature. Revisit in v1.3 alongside advanced analytics. |
-| #326  | Personalized savings suggestions         | AI feature. Revisit after Sprint 9 intelligence layer ships. |
-| #327  | AI budget recommendations                | AI feature. Revisit after Sprint 9 intelligence layer ships. |
-| #328  | Spending forecast w/ confidence intervals| AI feature. Revisit after Sprint 9 intelligence layer ships. |
-| #331  | Device attestation                       | Security hardening. Revisit after #330 (RASP) ships. |
-| #333  | Biometric liveness detection             | Security hardening. Revisit after #330 (RASP) ships. |
-| #334  | Session binding / device fingerprinting  | Security hardening. Revisit after #330 (RASP) ships. |
-| #343  | Enterprise/team plan                     | NEW-8 scopes this in Sprint 10. Execution is v1.3+. |
-| #377  | Can I Afford This widget                 | Fun feature. Revisit after widgets (#293) ship. |
-| #378  | Contextual financial education           | Partially covered by #320 (tips). Expand later. |
-| #379  | Expertise tier system                    | UX enhancement. Revisit with user skill data. |
-| #381  | Android home screen widgets              | **Covered by #293** (widget support across all platforms). Link as sub-task. |
-| #382  | Financial learning paths (Premium)       | Premium content. Revisit in v1.3. |
-| #383  | Non-manipulative streak tracking         | Engagement. Revisit alongside #242 (gamification). |
-| #384  | Opt-in notification system               | **Partially covered by #305** (notification scheduling). |
-| #385  | Two-path onboarding                      | Onboarding #768 shipped in v1.0. Revisit if data shows drop-off. |
+| #    | Title                                     | Reason                                                                       |
+| ---- | ----------------------------------------- | ---------------------------------------------------------------------------- |
+| #242 | Gamification                              | Engagement feature; needs data on what users respond to first                |
+| #316 | Spending watchlists                       | Partially covered by #323 (anomaly detection). Revisit after Sprint 9.       |
+| #266 | Apple Watch / Wear OS tiles               | Companion app is v2 scope. Widgets (#293) are higher priority.               |
+| #267 | Browser extension                         | Niche. Web PWA covers most use cases.                                        |
+| #294 | Siri/Google Assistant/Cortana             | Platform integrations — v2 after core intelligence layer ships               |
+| #295 | Biometric-protected categories            | Niche security feature. Revisit with user demand data.                       |
+| #300 | Collaborative budget negotiation          | Complex UX. Revisit after #270 (family collab) ships.                        |
+| #303 | Custom report builder                     | Premium feature. Revisit in v1.3 alongside advanced analytics.               |
+| #326 | Personalized savings suggestions          | AI feature. Revisit after Sprint 9 intelligence layer ships.                 |
+| #327 | AI budget recommendations                 | AI feature. Revisit after Sprint 9 intelligence layer ships.                 |
+| #328 | Spending forecast w/ confidence intervals | AI feature. Revisit after Sprint 9 intelligence layer ships.                 |
+| #331 | Device attestation                        | Security hardening. Revisit after #330 (RASP) ships.                         |
+| #333 | Biometric liveness detection              | Security hardening. Revisit after #330 (RASP) ships.                         |
+| #334 | Session binding / device fingerprinting   | Security hardening. Revisit after #330 (RASP) ships.                         |
+| #343 | Enterprise/team plan                      | NEW-8 scopes this in Sprint 10. Execution is v1.3+.                          |
+| #377 | Can I Afford This widget                  | Fun feature. Revisit after widgets (#293) ship.                              |
+| #378 | Contextual financial education            | Partially covered by #320 (tips). Expand later.                              |
+| #379 | Expertise tier system                     | UX enhancement. Revisit with user skill data.                                |
+| #381 | Android home screen widgets               | **Covered by #293** (widget support across all platforms). Link as sub-task. |
+| #382 | Financial learning paths (Premium)        | Premium content. Revisit in v1.3.                                            |
+| #383 | Non-manipulative streak tracking          | Engagement. Revisit alongside #242 (gamification).                           |
+| #384 | Opt-in notification system                | **Partially covered by #305** (notification scheduling).                     |
+| #385 | Two-path onboarding                       | Onboarding #768 shipped in v1.0. Revisit if data shows drop-off.             |
 
 ---
 
@@ -641,76 +644,76 @@ All items descoped from v1.0 are now scheduled:
 
 ### Sprint Sizing Assumptions
 
-| Metric                   | Sprints 1-5 Actuals | Sprints 6-10 Target |
-| ------------------------ | ------------------- | ------------------- |
-| Issues per sprint        | 8-11                | 7-8                 |
-| Engineering tasks        | 6-9                 | 5-6                 |
-| Business tasks           | 1-2                 | 2                   |
-| XL items per sprint      | 0-1                 | 1-2 (max)           |
-| Agent parallelism        | 5-6 agents          | 5-7 agents          |
-| Bug buffer               | 10-15%              | 15-20% (post-launch)|
+| Metric              | Sprints 1-5 Actuals | Sprints 6-10 Target  |
+| ------------------- | ------------------- | -------------------- |
+| Issues per sprint   | 8-11                | 7-8                  |
+| Engineering tasks   | 6-9                 | 5-6                  |
+| Business tasks      | 1-2                 | 2                    |
+| XL items per sprint | 0-1                 | 1-2 (max)            |
+| Agent parallelism   | 5-6 agents          | 5-7 agents           |
+| Bug buffer          | 10-15%              | 15-20% (post-launch) |
 
 > **Rationale for lower velocity target:** Post-launch sprints carry higher interrupt load (bug reports, user feedback, app store issues). We also tackle more XL-effort features (IAP, i18n, AI, bank connections). Planning for 7-8 issues per sprint with 15-20% buffer is more realistic.
 
 ### Agent Utilization Across Sprints 6-10
 
-| Agent            | Sprint 6       | Sprint 7       | Sprint 8              | Sprint 9                    | Sprint 10              |
-| ---------------- | -------------- | -------------- | --------------------- | --------------------------- | ---------------------- |
-| KMP/Shared       | #320           | #337, #341     | #315, #264, #319, #318| #263, #322, #324, #325, #299| #265, #270, #301, #302 |
-| Backend          | #304, #332, #305| #344          | #342                  | #263, #323                  | #265, #270, #339, #302 |
-| iOS              | #329           | #338           | #293, #264            | platform integration        | #301, #330             |
-| Android          | #329           | #338           | #293, #264            | platform integration        | #301, #330             |
-| Web              | —              | #338           | #264                  | platform integration        | #265                   |
-| Windows          | #329           | #338           | #293, #264            | platform integration        | #330                   |
-| DevOps           | #304           | —              | —                     | —                           | —                      |
-| Design           | —              | NEW-3          | —                     | #299                        | —                      |
-| Product          | NEW-1          | NEW-4          | —                     | —                           | NEW-8                  |
-| Marketing        | NEW-2          | #340           | NEW-5, NEW-6          | NEW-7                       | NEW-9                  |
+| Agent      | Sprint 6         | Sprint 7   | Sprint 8               | Sprint 9                     | Sprint 10              |
+| ---------- | ---------------- | ---------- | ---------------------- | ---------------------------- | ---------------------- |
+| KMP/Shared | #320             | #337, #341 | #315, #264, #319, #318 | #263, #322, #324, #325, #299 | #265, #270, #301, #302 |
+| Backend    | #304, #332, #305 | #344       | #342                   | #263, #323                   | #265, #270, #339, #302 |
+| iOS        | #329             | #338       | #293, #264             | platform integration         | #301, #330             |
+| Android    | #329             | #338       | #293, #264             | platform integration         | #301, #330             |
+| Web        | —                | #338       | #264                   | platform integration         | #265                   |
+| Windows    | #329             | #338       | #293, #264             | platform integration         | #330                   |
+| DevOps     | #304             | —          | —                      | —                            | —                      |
+| Design     | —                | NEW-3      | —                      | #299                         | —                      |
+| Product    | NEW-1            | NEW-4      | —                      | —                            | NEW-8                  |
+| Marketing  | NEW-2            | #340       | NEW-5, NEW-6           | NEW-7                        | NEW-9                  |
 
 ---
 
 ## Sprint Metrics to Track (Post-Launch KPIs)
 
-| Metric                          | Target              | Measured From |
-| ------------------------------- | ------------------- | ------------- |
-| Sprint completion rate          | 80% or greater      | Sprint close  |
-| P0/P1 bug response time        | Under 24 hours      | Issue triage  |
-| Crash-free rate                 | 99.5% or greater    | APM (#304)    |
-| DAU / MAU                       | 25% or greater      | Analytics     |
-| Free to Premium conversion     | 3% or greater (30d) | Funnel (NEW-4)|
-| App store rating                | 4.5 stars or greater| Stores        |
-| Feature adoption (new features) | 30% of MAU or greater| Analytics    |
-| Premium ARPU                    | Track (no target)   | Revenue       |
-| Referral program virality       | 1.1 K-factor or greater| #342 metrics|
-| i18n expansion readiness        | 5 languages         | #264 status   |
-| AI categorization accuracy      | 80% or greater (top-3)| ML metrics  |
+| Metric                          | Target                  | Measured From  |
+| ------------------------------- | ----------------------- | -------------- |
+| Sprint completion rate          | 80% or greater          | Sprint close   |
+| P0/P1 bug response time         | Under 24 hours          | Issue triage   |
+| Crash-free rate                 | 99.5% or greater        | APM (#304)     |
+| DAU / MAU                       | 25% or greater          | Analytics      |
+| Free to Premium conversion      | 3% or greater (30d)     | Funnel (NEW-4) |
+| App store rating                | 4.5 stars or greater    | Stores         |
+| Feature adoption (new features) | 30% of MAU or greater   | Analytics      |
+| Premium ARPU                    | Track (no target)       | Revenue        |
+| Referral program virality       | 1.1 K-factor or greater | #342 metrics   |
+| i18n expansion readiness        | 5 languages             | #264 status    |
+| AI categorization accuracy      | 80% or greater (top-3)  | ML metrics     |
 
 ---
 
 ## Release Calendar
 
-| Date (Relative)  | Event                                    | Milestone |
-| ---------------- | ---------------------------------------- | --------- |
-| Week 12          | v1.1-rc1 — stabilization + security      | v1.1      |
-| Week 14          | v1.1 release — monetization live         | v1.1      |
-| Week 15          | v1.1 marketing push — premium launch     | v1.1      |
-| Week 16          | v1.2-alpha — widgets + i18n preview      | v1.2      |
-| Week 18          | v1.2-beta — AI features beta             | v1.2      |
-| Week 20          | v1.2 release — full feature release      | v1.2      |
-| Week 21          | v1.2 marketing push — bank + family      | v1.2      |
+| Date (Relative) | Event                                | Milestone |
+| --------------- | ------------------------------------ | --------- |
+| Week 12         | v1.1-rc1 — stabilization + security  | v1.1      |
+| Week 14         | v1.1 release — monetization live     | v1.1      |
+| Week 15         | v1.1 marketing push — premium launch | v1.1      |
+| Week 16         | v1.2-alpha — widgets + i18n preview  | v1.2      |
+| Week 18         | v1.2-beta — AI features beta         | v1.2      |
+| Week 20         | v1.2 release — full feature release  | v1.2      |
+| Week 21         | v1.2 marketing push — bank + family  | v1.2      |
 
 ---
 
 ## Summary: Issue Count by Sprint
 
-| Sprint | Eng | Design | Business | Buffer | Total | XL Items | Key Risk                |
-| ------ | --- | ------ | -------- | ------ | ----- | -------- | ----------------------- |
-| 6      | 5   | 0      | 2        | 1      | 8     | 0        | Post-launch bug volume  |
-| 7      | 4   | 1      | 2        | 0      | 7     | 2        | App store IAP rejection |
-| 8      | 6   | 0      | 2        | 0      | 8     | 2        | i18n retrofitting scope |
-| 9      | 6   | 0      | 1        | 0      | 7     | 1        | ML model size/accuracy  |
-| 10     | 6   | 0      | 2        | 0      | 8     | 2        | Bank API security audit |
-| **Total** | **27** | **1** | **9** | **1** | **38** | **7** |                     |
+| Sprint    | Eng    | Design | Business | Buffer | Total  | XL Items | Key Risk                |
+| --------- | ------ | ------ | -------- | ------ | ------ | -------- | ----------------------- |
+| 6         | 5      | 0      | 2        | 1      | 8      | 0        | Post-launch bug volume  |
+| 7         | 4      | 1      | 2        | 0      | 7      | 2        | App store IAP rejection |
+| 8         | 6      | 0      | 2        | 0      | 8      | 2        | i18n retrofitting scope |
+| 9         | 6      | 0      | 1        | 0      | 7      | 1        | ML model size/accuracy  |
+| 10        | 6      | 0      | 2        | 0      | 8      | 2        | Bank API security audit |
+| **Total** | **27** | **1**  | **9**    | **1**  | **38** | **7**    |                         |
 
 ### All Existing Issues Scheduled (27 issues from backlog)
 
@@ -729,4 +732,4 @@ NEW-1 through NEW-9 (see New Issues to Create section above)
 
 ---
 
-*This document is the source of truth for post-launch sprint execution. Updated after each sprint retrospective. Predecessor: [Sprint Plan 1-5](sprint-plan-1-5.md).*
+_This document is the source of truth for post-launch sprint execution. Updated after each sprint retrospective. Predecessor: [Sprint Plan 1-5](sprint-plan-1-5.md)._

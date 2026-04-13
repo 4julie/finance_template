@@ -24,12 +24,12 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 
 ### Key Upcoming Features (Engineering Roadmap)
 
-| Sprint | Feature | Marketing Opportunity |
-|--------|---------|----------------------|
-| **7** | Premium subscriptions, freemium tiers (#338, #337) | Pricing communication, upgrade flow copy, value proposition |
-| **8** | Widgets, quick-entry improvements, i18n | New market entry, platform-specific promotion, daily habit messaging |
-| **9** | AI categorization, spending predictions | Privacy-first AI positioning, competitive differentiation |
-| **10** | Bank connections (Plaid), receipt scanning | Partnership outreach, trust-building for data-sharing features |
+| Sprint | Feature                                            | Marketing Opportunity                                                |
+| ------ | -------------------------------------------------- | -------------------------------------------------------------------- |
+| **7**  | Premium subscriptions, freemium tiers (#338, #337) | Pricing communication, upgrade flow copy, value proposition          |
+| **8**  | Widgets, quick-entry improvements, i18n            | New market entry, platform-specific promotion, daily habit messaging |
+| **9**  | AI categorization, spending predictions            | Privacy-first AI positioning, competitive differentiation            |
+| **10** | Bank connections (Plaid), receipt scanning         | Partnership outreach, trust-building for data-sharing features       |
 
 ### Marketing Principles (Carried from Sprints 1–5 — Non-Negotiable)
 
@@ -54,6 +54,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-review-monitoring-program`
 
 **Deliverables:**
+
 - `docs/business/review-monitoring-dashboard.md` — Monitoring cadence, response SLAs, escalation paths
 - Daily review scan process for all stores (iOS, Android, Microsoft Store) for first 30 days
 - Response templates refined from Task 5.3 based on actual reviews received in Week 1:
@@ -66,6 +67,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - Escalation criteria: when to flag a review to engineering (crash reports, data concerns, security)
 
 **Acceptance criteria:**
+
 - [ ] Response SLA: ≤24 hours for negative reviews (1–2 stars), ≤48 hours for all others
 - [ ] Every response is personalized — no copy-paste boilerplate visible to users
 - [ ] Responses never reveal non-public roadmap items or promise specific delivery dates
@@ -73,6 +75,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Weekly sentiment summary shared with engineering team to inform Sprint 7 priorities
 
 **Dependencies:**
+
 - Review strategy (Task 5.3) — templates and ethical prompting guidelines
 - App live on stores with initial reviews accumulating
 
@@ -84,6 +87,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-community-engagement-playbook`
 
 **Deliverables:**
+
 - `docs/business/community-engagement-playbook.md` — Comprehensive engagement strategy
 - **GitHub Discussions activation:**
   - Seed 3–5 discussion threads: "How do you use Finance?", "Feature wishlist for v1.1", "Tips for quick-entry workflows"
@@ -99,6 +103,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - **Feedback loop:** Route community insights → engineering backlog → public acknowledgment when shipped
 
 **Acceptance criteria:**
+
 - [ ] Reddit engagement follows each subreddit's self-promotion rules (checked before posting)
 - [ ] Community engagement is genuinely helpful — not every interaction mentions Finance
 - [ ] "This week in Finance" posts are honest about what's in progress and what's delayed
@@ -106,6 +111,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Community metrics baseline established: GitHub Discussions posts, response times, sentiment
 
 **Dependencies:**
+
 - Community channels from Task 3.3 (GitHub Discussions, social accounts)
 - Launch retrospective insights (Task 5.4) for initial community sentiment
 
@@ -117,18 +123,18 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-post-launch-content`
 
 **Deliverables:**
+
 - Publish first 2 blog posts from Sprint 2 content calendar (drafted in Task 2.2):
   1. **"Why We Built Finance Offline-First"** — Technical story, updated with launch-day learnings
   2. **"Budgeting Without the Guilt Trip"** — Non-judgmental design philosophy
-- 2 new blog post drafts based on launch feedback:
-  3. **"What We Learned from 1,000 Beta Testers"** — Authentic launch story (with anonymized insights)
-  4. **"Your Financial App's Privacy Label: What It Actually Means"** — Educational content about App Store privacy labels, using Finance as a case study
+- 2 new blog post drafts based on launch feedback: 3. **"What We Learned from 1,000 Beta Testers"** — Authentic launch story (with anonymized insights) 4. **"Your Financial App's Privacy Label: What It Actually Means"** — Educational content about App Store privacy labels, using Finance as a case study
 - SEO optimization for target keywords:
   - "private budget app" / "offline expense tracker" / "ADHD-friendly finance app"
   - "budget app no bank connection" / "finance app that doesn't sell data"
 - Content distribution plan: where each post gets shared and why
 
 **Acceptance criteria:**
+
 - [ ] Blog posts are technically accurate — privacy/security claims verified against ADR-0003, ADR-0004
 - [ ] "Beta testers" post uses only anonymized, consented quotes
 - [ ] Content is genuinely educational — valuable even for people who never use Finance
@@ -136,6 +142,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Each post includes a clear, non-manipulative CTA: "Try Finance — free on [platforms]"
 
 **Dependencies:**
+
 - Blog post drafts from Task 2.2 (Sprint 2)
 - Launch data and beta insights from Tasks 4.1 and 5.4
 
@@ -147,6 +154,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-aso-iteration-v1`
 
 **Deliverables:**
+
 - `docs/business/aso-iteration-report-v1.md` — First ASO optimization cycle
 - Keyword performance analysis: which terms drive impressions vs. installs (from App Store Connect, Play Console)
 - A/B test results from store listing experiments launched in Sprint 4 (Task 4.2)
@@ -158,6 +166,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - Recommended store listing updates for next iteration (copy changes for human to apply)
 
 **Acceptance criteria:**
+
 - [ ] Analysis based on ≥14 days of real store data (not projections)
 - [ ] Keyword changes are data-driven — each swap justified by impression/conversion metrics
 - [ ] No competitor brand names used in keywords (policy compliance)
@@ -165,6 +174,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Updated store-metadata.md PR prepared with tracked changes
 
 **Dependencies:**
+
 - App live on stores for ≥2 weeks with measurable traffic
 - App Store Connect and Play Console analytics access
 - Initial ASO research from Task 1.2
@@ -183,27 +193,29 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-premium-value-proposition`
 
 **Deliverables:**
+
 - `docs/business/premium-messaging-framework.md` — Complete premium tier messaging
 - **Tier comparison copy** (for in-app, website, and store listings):
 
-  | Tier | Positioning | Tone |
-  |------|-------------|------|
-  | **Free** | "Everything you need to track your money, forever" | Confident, complete — never "limited" or "basic" |
-  | **Premium** | "Power tools for people who want to go deeper" | Aspirational, additive — never "unlock what you're missing" |
+  | Tier        | Positioning                                        | Tone                                                        |
+  | ----------- | -------------------------------------------------- | ----------------------------------------------------------- |
+  | **Free**    | "Everything you need to track your money, forever" | Confident, complete — never "limited" or "basic"            |
+  | **Premium** | "Power tools for people who want to go deeper"     | Aspirational, additive — never "unlock what you're missing" |
 
 - Pricing page copy:
   - Feature comparison table with honest, specific descriptions
-  - "Why pay?" section that focuses on what users *gain*, not what free users *lack*
+  - "Why pay?" section that focuses on what users _gain_, not what free users _lack_
   - FAQ: "Will the free tier ever get worse?" → "No. We will never remove features from the free tier."
   - FAQ: "Where does my subscription money go?" → Transparent about costs (servers, development, App Store fees)
 - In-app upgrade prompts:
-  - **Contextual, not interruptive:** Shown when a user *tries* a premium feature, not on app launch
+  - **Contextual, not interruptive:** Shown when a user _tries_ a premium feature, not on app launch
   - **Dismissable with one tap** — and doesn't reappear for ≥30 days after dismissal
   - **No countdown timers, no "limited offers," no red urgency colors**
   - Copy: "This is a Premium feature. [What's included] — [Try free for 7 days] / [Not now]"
 - Store listing updates: "What's New" text for premium launch
 
 **Acceptance criteria:**
+
 - [ ] Free tier is never described as "basic," "limited," "starter," or "lite"
 - [ ] No language implies free users are missing out or falling behind
 - [ ] Premium upgrade prompts pass the "would I be annoyed by this?" test (honest internal review)
@@ -212,6 +224,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Aligned with issues #338 (Premium subscription IAP) and #337 (Freemium tier gating)
 
 **Dependencies:**
+
 - Engineering: Freemium gating implemented (#337), IAP integration complete (#338)
 - Monetization analysis from ADR-0009 for pricing strategy context
 - Brand voice guide (Task 1.1) for tone consistency
@@ -224,9 +237,10 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-referral-program-design` (aligned with #342)
 
 **Deliverables:**
+
 - `docs/business/referral-program-spec.md` — Referral program design and copy
 - **Program structure** (non-manipulative):
-  - Reward: Extended premium trial or a premium month — rewards referrer *and* referee equally
+  - Reward: Extended premium trial or a premium month — rewards referrer _and_ referee equally
   - No tiered pressure ("invite 5 friends to unlock!") — each referral stands alone
   - Shareable link + personalized invite message templates (user customizable)
   - Clear terms: "Share Finance with someone who'd find it useful. If they sign up, you both get [reward]."
@@ -241,6 +255,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - Referral dashboard (user-facing): How many people signed up via their link, rewards earned
 
 **Acceptance criteria:**
+
 - [ ] Program never requires sharing to access features or content
 - [ ] No contact list access, address book scanning, or social graph integration
 - [ ] Referral prompts are ≤1 per month and only after positive moments (never after errors or frustration)
@@ -249,6 +264,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Aligned with issue #342 (Referral program)
 
 **Dependencies:**
+
 - Engineering: Referral tracking infrastructure (#342)
 - Premium tier live (Task 7.1) for reward fulfillment
 
@@ -260,8 +276,9 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-premium-launch-announcement`
 
 **Deliverables:**
+
 - **Blog post:** "Introducing Finance Premium — And Why the Free Version Isn't Going Anywhere"
-  - Explains what premium adds and *why* those features cost money (server costs, API fees, development time)
+  - Explains what premium adds and _why_ those features cost money (server costs, API fees, development time)
   - Reaffirms free tier commitment: "We believe everyone deserves a great financial tracker, regardless of budget"
   - Includes pricing table, feature comparison, and honest FAQ
 - **Social media announcement sequence:**
@@ -277,13 +294,15 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
   - Unsubscribe link prominent. No "act now" language.
 
 **Acceptance criteria:**
-- [ ] Every announcement leads with what's *not* changing (free tier stays the same)
+
+- [ ] Every announcement leads with what's _not_ changing (free tier stays the same)
 - [ ] Blog post includes real cost transparency (server, API, development — ballpark numbers)
 - [ ] Social posts are informational, not salesy — no "🔥 LAUNCH SALE 🔥" energy
 - [ ] Email sent only to users who opted into marketing communications
 - [ ] No artificial scarcity ("first 100 subscribers get...") or time-limited launch pricing
 
 **Dependencies:**
+
 - Premium value proposition (Task 7.1)
 - Engineering: Premium tier live and purchasable on all platforms
 
@@ -301,6 +320,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-widget-campaign`
 
 **Deliverables:**
+
 - **Widget-focused store listing update:**
   - New screenshot: Widget on home screen with overlay "Your budget, always visible"
   - Updated feature list: "Home screen widgets — see your spending at a glance"
@@ -322,6 +342,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
   - Mention quick-entry improvement: "Even faster transaction entry — we shaved off a tap"
 
 **Acceptance criteria:**
+
 - [ ] Widget screenshots use realistic data with diverse, inclusive sample content
 - [ ] Campaign emphasizes habit-building, not app addiction — "awareness, not obsession"
 - [ ] ADHD-friendly messaging is authentic and respectful — not performative ("we get ADHD people!")
@@ -329,6 +350,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Video concept spec includes accessibility: captions, no flashing, clear text at small sizes
 
 **Dependencies:**
+
 - Engineering: Widgets implemented on ≥2 platforms
 - Screenshot assets from working widget builds
 
@@ -340,13 +362,14 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-i18n-launch-strategy`
 
 **Deliverables:**
+
 - `docs/business/i18n-marketing-strategy.md` — Market entry plan for first new locales
 - **Locale prioritization** (marketing perspective):
   - Tier 1 (launch-day locales): Languages with highest App Store search volume for budget/finance apps
   - Tier 2 (fast-follow): Languages where privacy messaging resonates most strongly (e.g., German/DACH market where GDPR awareness is high)
   - Criteria: market size, privacy-consciousness, competitor weakness, community demand
 - **Localized store listings:**
-  - Translated and *culturally adapted* (not just word-for-word translation) store descriptions
+  - Translated and _culturally adapted_ (not just word-for-word translation) store descriptions
   - Locale-appropriate screenshot sample data (local currency, culturally relevant category names, local merchant names)
   - Localized keywords for each market (ASO research per locale)
   - Locale-specific promotional text highlighting relevant differentiators
@@ -362,6 +385,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
   - [ ] Colors and imagery reviewed for cultural associations
 
 **Acceptance criteria:**
+
 - [ ] Store listings translated by native speakers (not machine translation alone)
 - [ ] Each locale has localized ASO keyword research (not English keywords translated)
 - [ ] Sample data in screenshots reflects local economic context (realistic amounts, local currency)
@@ -369,6 +393,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Marketing materials reviewed by someone from each target culture for tone and appropriateness
 
 **Dependencies:**
+
 - Engineering: i18n framework implemented, strings externalized, locale support in builds
 - Budget for professional translation / native-speaker review
 
@@ -380,6 +405,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-feature-update-template`
 
 **Deliverables:**
+
 - `docs/business/feature-update-communication-template.md` — Reusable template for all future feature releases
 - **Template sections:**
   1. **User benefit headline:** What this means for the user (not what engineers built)
@@ -397,8 +423,9 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
   - [ ] Screenshot/video assets ready before store submission
 
 **Acceptance criteria:**
+
 - [ ] Template is reusable for Sprints 9 and 10 without significant restructuring
-- [ ] Includes guidance on what *not* to say (no "finally!" — implies the app was incomplete)
+- [ ] Includes guidance on what _not_ to say (no "finally!" — implies the app was incomplete)
 - [ ] Maps every feature to at least one persona — no feature is marketed without a user story
 - [ ] Includes a "hold/no-go" criteria: don't market a feature until it's stable for ≥3 days in production
 
@@ -418,17 +445,19 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-privacy-first-ai-messaging`
 
 **Deliverables:**
+
 - `docs/business/ai-privacy-messaging-framework.md` — Comprehensive AI messaging strategy
-- **Core AI privacy message:** Define the one-sentence position (e.g., "Finance's AI runs on your device — your spending data never touches our servers for AI processing" — *only if technically accurate per architecture docs*)
+- **Core AI privacy message:** Define the one-sentence position (e.g., "Finance's AI runs on your device — your spending data never touches our servers for AI processing" — _only if technically accurate per architecture docs_)
 - **Technical accuracy matrix:**
 
-  | AI Feature | Data Flow | Where Processing Happens | What Leaves Device | Marketing-Safe Claim |
-  |-----------|-----------|------------------------|-------------------|---------------------|
-  | Auto-categorization | Transaction → ML model | [On-device / Edge / Server — verify with engineering] | [Specify exactly] | [Approved claim] |
-  | Spending predictions | Historical transactions → model | [On-device / Edge / Server] | [Specify exactly] | [Approved claim] |
-  | Budget suggestions | Budget + actuals → model | [On-device / Edge / Server] | [Specify exactly] | [Approved claim] |
+  | AI Feature           | Data Flow                       | Where Processing Happens                              | What Leaves Device | Marketing-Safe Claim |
+  | -------------------- | ------------------------------- | ----------------------------------------------------- | ------------------ | -------------------- |
+  | Auto-categorization  | Transaction → ML model          | [On-device / Edge / Server — verify with engineering] | [Specify exactly]  | [Approved claim]     |
+  | Spending predictions | Historical transactions → model | [On-device / Edge / Server]                           | [Specify exactly]  | [Approved claim]     |
+  | Budget suggestions   | Budget + actuals → model        | [On-device / Edge / Server]                           | [Specify exactly]  | [Approved claim]     |
 
-  *(Table must be completed with engineering team — no assumptions about AI data flow)*
+  _(Table must be completed with engineering team — no assumptions about AI data flow)_
+
 - **Comparison messaging** (Finance AI vs. competitors' AI):
   - What Finance does differently (specifics, not hand-waving)
   - What competitors' AI approaches require (bank connections, server processing, data sharing)
@@ -439,6 +468,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
   - AI confidence indicators: "AI suggested this category (87% confident). [Accept] [Change]" — never auto-apply without user awareness
 
 **Acceptance criteria:**
+
 - [ ] **CRITICAL:** Every AI privacy claim verified with engineering — no marketing-invented claims about on-device processing
 - [ ] If any AI feature requires server-side processing, messaging is transparent about this (no "runs on your device" hand-waving)
 - [ ] In-app AI disclosure passes GDPR Article 22 requirements (automated decision-making transparency)
@@ -447,6 +477,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Aligned with issue #340 (Privacy-as-premium marketing) — AI privacy is a premium differentiator
 
 **Dependencies:**
+
 - Engineering: AI feature architecture finalized — data flow documented
 - Privacy audit (privacy-audit-v1.md) updated with AI data processing assessment
 - ADR-0004 reviewed for AI-related data handling
@@ -459,6 +490,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-ai-feature-launch-content`
 
 **Deliverables:**
+
 - **Blog post:** "How Finance Uses AI Without Compromising Your Privacy"
   - Technical depth: explain the architecture (on-device ML, model size, what data is used)
   - Comparison: how most fintech AI works (send data to servers, train on aggregate data, share with partners) vs. Finance's approach
@@ -478,6 +510,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
   - Include benchmarks: categorization accuracy, model size, battery impact
 
 **Acceptance criteria:**
+
 - [ ] Blog post reviewed by engineering for technical accuracy before publication
 - [ ] Store listing privacy labels updated to reflect any new data processing from AI features
 - [ ] Social media posts are specific and verifiable — no vague "AI-powered" marketing speak
@@ -485,6 +518,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Honest about limitations: "AI categorization works best for [X]; you may need to correct it for [Y]"
 
 **Dependencies:**
+
 - AI privacy messaging framework (Task 9.1) — claims must be approved before content is created
 - Engineering: AI features stable and demonstrable
 
@@ -496,6 +530,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-privacy-premium-refinement` (aligned with #340)
 
 **Deliverables:**
+
 - Updated `docs/business/privacy-marketing-messaging.md` — v2 based on post-launch learnings and AI feature addition
 - **Campaign:** "What Your Finance App Knows About You"
   - Educational content series (3 posts) showing what data various finance app categories collect:
@@ -513,6 +548,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
   - Clear language about what each AI feature does with data
 
 **Acceptance criteria:**
+
 - [ ] Educational content is factual — competitor data practices cited from their published privacy policies
 - [ ] No FUD or fear-based marketing — tone is "here's what to know," not "be afraid"
 - [ ] Privacy card update verified against current technical implementation (including AI)
@@ -520,6 +556,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Content is useful for the broader privacy community, not just Finance marketing
 
 **Dependencies:**
+
 - AI privacy messaging (Task 9.1) — establishes the claims this campaign builds on
 - Privacy audit (privacy-audit-v1.md) for accurate data inventory
 - Sprint 6 review sentiment — what privacy themes are users asking about?
@@ -538,6 +575,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-bank-connection-trust`
 
 **Deliverables:**
+
 - `docs/business/bank-connection-messaging.md` — Complete messaging for bank connection feature
 - **Onboarding copy for bank connection flow:**
   - Step 1: "Finance can connect to your bank to automatically import transactions. This is completely optional — Finance works great without it."
@@ -561,14 +599,16 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
   - The opt-in philosophy: "We'd rather have users who trust us than users who connected because we didn't give them a choice"
 
 **Acceptance criteria:**
+
 - [ ] **CRITICAL:** Data flow description verified with engineering — every claim about what Plaid accesses/stores is accurate
-- [ ] Store privacy labels / data safety sections updated *before* the feature goes live (not after)
+- [ ] Store privacy labels / data safety sections updated _before_ the feature goes live (not after)
 - [ ] Bank connection is never described as "the better way" or "the smart way" — it's "another way"
 - [ ] Users who don't connect their bank never see reminders, nudges, or "you're missing out" messaging
 - [ ] Disconnect flow copy is clear and reassuring — no "are you sure?" dark patterns
 - [ ] FAQ addresses the most common objection: "I don't trust apps with my bank info" — with respect, not dismissal
 
 **Dependencies:**
+
 - Engineering: Plaid integration complete, data flow documented
 - Privacy policy updated to reflect Plaid data sharing
 - Legal review of Plaid-related disclosures
@@ -581,6 +621,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-receipt-scanning-launch`
 
 **Deliverables:**
+
 - **Feature announcement copy:**
   - Headline: "Snap a receipt, skip the typing"
   - Body: Explain on-device OCR processing — "Receipt scanning happens entirely on your device. The image is processed locally, data is extracted, and the image is discarded (or saved locally if you choose). Nothing is uploaded to any server."
@@ -598,6 +639,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - **Privacy disclosure:** Clear in-app explanation that camera permission is used only for receipt scanning, images are processed locally, and no receipt data is transmitted
 
 **Acceptance criteria:**
+
 - [ ] "On-device OCR" claim verified with engineering — confirm no cloud OCR API is used
 - [ ] Camera permission rationale copy complies with Apple and Google requirements (clear, specific purpose)
 - [ ] Receipt scanning is marketed as a convenience feature, not a replacement for manual entry
@@ -605,6 +647,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Accessibility: feature works with VoiceOver/TalkBack guidance for camera positioning
 
 **Dependencies:**
+
 - Engineering: On-device OCR implemented and stable
 - Camera permission strings approved for each platform
 
@@ -616,16 +659,17 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-partnership-outreach`
 
 **Deliverables:**
+
 - `docs/business/partnership-strategy.md` — Partnership outreach plan and templates
 - **Partnership categories and targets:**
 
-  | Category | Target Organizations | Value Proposition |
-  |----------|---------------------|-------------------|
-  | **Privacy advocacy** | EFF, Privacy International, NOYB | "Finance proves privacy and usability aren't trade-offs" |
-  | **Neurodivergent communities** | CHADD, ADDitude Magazine, ADHD community creators | "Designed with cognitive accessibility as a core principle" |
-  | **Financial literacy nonprofits** | NFCC, JumpStart, local credit unions | "Free, private financial tracking for people building financial skills" |
-  | **Developer community** | KMP community, Jetpack Compose showcases, SwiftUI showcases | "Real-world multi-platform app built with modern tools" |
-  | **Accessibility organizations** | A11Y Project, disability rights orgs | "WCAG 2.2 AA compliant financial tracker" |
+  | Category                          | Target Organizations                                        | Value Proposition                                                       |
+  | --------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------- |
+  | **Privacy advocacy**              | EFF, Privacy International, NOYB                            | "Finance proves privacy and usability aren't trade-offs"                |
+  | **Neurodivergent communities**    | CHADD, ADDitude Magazine, ADHD community creators           | "Designed with cognitive accessibility as a core principle"             |
+  | **Financial literacy nonprofits** | NFCC, JumpStart, local credit unions                        | "Free, private financial tracking for people building financial skills" |
+  | **Developer community**           | KMP community, Jetpack Compose showcases, SwiftUI showcases | "Real-world multi-platform app built with modern tools"                 |
+  | **Accessibility organizations**   | A11Y Project, disability rights orgs                        | "WCAG 2.2 AA compliant financial tracker"                               |
 
 - **Outreach templates** (customized per category):
   - Introduction email: Who we are, what we built, why we're reaching out
@@ -638,6 +682,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
   - If a partnership doesn't serve the partner's community, don't pursue it
 
 **Acceptance criteria:**
+
 - [ ] Every partnership target has a genuine values alignment — not just marketing reach
 - [ ] Outreach templates are honest about Finance's stage (post-launch, growing, not a major corporation)
 - [ ] ADHD/neurodivergent outreach reviewed by someone from that community before sending
@@ -645,6 +690,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Each partnership has a clear "what's in it for them" that's genuinely useful to their community
 
 **Dependencies:**
+
 - App stable and feature-rich enough to recommend (Sprint 10 features shipped)
 - Privacy and accessibility claims verified and documented
 
@@ -656,20 +702,21 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 **GitHub Issue:** `mktg-90-day-growth-retro`
 
 **Deliverables:**
+
 - `docs/business/growth-retrospective-90-day.md` — Comprehensive 90-day post-launch marketing retrospective
 - **Metrics review** (against targets from Sprint 5 Task 5.2):
 
-  | Metric | Target (Sprint 5) | Actual | Analysis |
-  |--------|-------------------|--------|----------|
-  | Total downloads (all platforms) | 1,000+ | [measure] | |
-  | App Store rating (iOS) | ≥ 4.5 stars | [measure] | |
-  | Play Store rating (Android) | ≥ 4.5 stars | [measure] | |
-  | Beta → GA retention (day 30) | ≥ 50% | [measure] | |
-  | GitHub stars | 500+ | [measure] | |
-  | Blog post views | 5,000+ total | [measure] | |
-  | Community members | 100+ | [measure] | |
-  | Premium conversion rate | — | [measure] | [New metric post-Sprint 7] |
-  | Referral program participation | — | [measure] | [New metric post-Sprint 7] |
+  | Metric                          | Target (Sprint 5) | Actual    | Analysis                   |
+  | ------------------------------- | ----------------- | --------- | -------------------------- |
+  | Total downloads (all platforms) | 1,000+            | [measure] |                            |
+  | App Store rating (iOS)          | ≥ 4.5 stars       | [measure] |                            |
+  | Play Store rating (Android)     | ≥ 4.5 stars       | [measure] |                            |
+  | Beta → GA retention (day 30)    | ≥ 50%             | [measure] |                            |
+  | GitHub stars                    | 500+              | [measure] |                            |
+  | Blog post views                 | 5,000+ total      | [measure] |                            |
+  | Community members               | 100+              | [measure] |                            |
+  | Premium conversion rate         | —                 | [measure] | [New metric post-Sprint 7] |
+  | Referral program participation  | —                 | [measure] | [New metric post-Sprint 7] |
 
 - **Channel effectiveness analysis:**
   - Which acquisition channels drive the highest-quality users (retention, not just installs)?
@@ -688,6 +735,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
   - Finance's positioning: does it still resonate, or does messaging need evolution?
 
 **Acceptance criteria:**
+
 - [ ] Retrospective is brutally honest — includes failures, not just wins
 - [ ] Metrics are measured from privacy-preserving sources only (store dashboards, aggregate analytics)
 - [ ] Channel analysis includes qualitative insights (user sentiment, not just numbers)
@@ -695,6 +743,7 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 - [ ] Document is useful as input for Sprint 11+ planning sessions
 
 **Dependencies:**
+
 - 90 days of post-launch data (covers Sprints 6–10)
 - All prior sprint deliverables accessible for retrospective analysis
 - App Store / Play Console analytics access
@@ -703,13 +752,13 @@ Finance is **live on all four platforms** (iOS, Android, Web, Windows). Sprints 
 
 ## Sprint Summary Matrix
 
-| Sprint | Theme | Critical Tasks | Medium Tasks | Key Deliverables |
-|--------|-------|---------------|-------------|-----------------|
-| **6** | Post-Launch Monitoring | 2 (Review Monitoring, Community Playbook) | 2 (Content Marketing, ASO Iteration) | Review response program, community playbook, first blog posts, ASO optimization |
-| **7** | Premium Tier Launch | 1 (Premium Messaging) | 2 (Referral Program, Premium Announcement) | Premium messaging framework, referral program, upgrade flow copy, pricing page |
-| **8** | Feature Updates & i18n | 2 (Widget Campaign, i18n Strategy) | 1 (Update Template) | Widget marketing, localized store listings, feature update template |
-| **9** | AI & Privacy Positioning | 1 (AI Privacy Messaging) | 2 (AI Content, Privacy Campaign) | AI privacy framework, technical accuracy matrix, privacy-as-premium refresh |
-| **10** | Bank Connections & Growth | 1 (Bank Connection Trust) | 3 (Receipt Scanning, Partnerships, Retro) | Bank connection messaging, partnership strategy, 90-day retrospective |
+| Sprint | Theme                     | Critical Tasks                            | Medium Tasks                               | Key Deliverables                                                                |
+| ------ | ------------------------- | ----------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------- |
+| **6**  | Post-Launch Monitoring    | 2 (Review Monitoring, Community Playbook) | 2 (Content Marketing, ASO Iteration)       | Review response program, community playbook, first blog posts, ASO optimization |
+| **7**  | Premium Tier Launch       | 1 (Premium Messaging)                     | 2 (Referral Program, Premium Announcement) | Premium messaging framework, referral program, upgrade flow copy, pricing page  |
+| **8**  | Feature Updates & i18n    | 2 (Widget Campaign, i18n Strategy)        | 1 (Update Template)                        | Widget marketing, localized store listings, feature update template             |
+| **9**  | AI & Privacy Positioning  | 1 (AI Privacy Messaging)                  | 2 (AI Content, Privacy Campaign)           | AI privacy framework, technical accuracy matrix, privacy-as-premium refresh     |
+| **10** | Bank Connections & Growth | 1 (Bank Connection Trust)                 | 3 (Receipt Scanning, Partnerships, Retro)  | Bank connection messaging, partnership strategy, 90-day retrospective           |
 
 ---
 
@@ -730,12 +779,12 @@ Sprint 6                Sprint 7                Sprint 8                Sprint 9
 
 ## Existing Issue Alignment
 
-| GitHub Issue | Sprint Relevance | Marketing Action |
-|---|---|---|
-| #342 — Referral program | Sprint 7 | Referral program design and messaging (Task 7.2) |
-| #340 — Privacy-as-premium marketing | Sprint 9 | Privacy campaign refinement, AI privacy positioning (Tasks 9.1, 9.3) |
-| #338 — Premium subscription IAP | Sprint 7 | Premium value proposition, pricing page copy (Task 7.1) |
-| #337 — Freemium tier feature gating | Sprint 7 | Free vs. premium messaging, tier comparison (Task 7.1) |
+| GitHub Issue                        | Sprint Relevance | Marketing Action                                                     |
+| ----------------------------------- | ---------------- | -------------------------------------------------------------------- |
+| #342 — Referral program             | Sprint 7         | Referral program design and messaging (Task 7.2)                     |
+| #340 — Privacy-as-premium marketing | Sprint 9         | Privacy campaign refinement, AI privacy positioning (Tasks 9.1, 9.3) |
+| #338 — Premium subscription IAP     | Sprint 7         | Premium value proposition, pricing page copy (Task 7.1)              |
+| #337 — Freemium tier feature gating | Sprint 7         | Free vs. premium messaging, tier comparison (Task 7.1)               |
 
 ---
 
@@ -743,35 +792,35 @@ Sprint 6                Sprint 7                Sprint 8                Sprint 9
 
 All metrics come from platform-provided dashboards or aggregate opt-in analytics. No user-level tracking.
 
-| Metric | Source | Sprint 6 Baseline | Sprint 10 Target |
-|---|---|---|---|
-| Total downloads (all platforms) | Store dashboards | Measure at Sprint 6 start | 5,000+ |
-| App Store rating (iOS) | App Store Connect | Measure | ≥ 4.5 stars (maintain) |
-| Play Store rating (Android) | Play Console | Measure | ≥ 4.5 stars (maintain) |
-| Day-7 retention | Store dashboards (aggregate) | Measure | ≥ 40% |
-| Day-30 retention | Store dashboards (aggregate) | Measure | ≥ 25% |
-| Premium conversion rate | RevenueCat/Stripe dashboard | N/A (Sprint 7 launch) | ≥ 3% of active users |
-| Referral program participation | Internal referral tracking | N/A (Sprint 7 launch) | ≥ 10% of active users shared |
-| Blog post views (total) | Privacy-preserving analytics | Measure | 15,000+ |
-| GitHub stars | GitHub | Measure | 1,500+ |
-| Community members (Discussions) | GitHub | Measure | 500+ |
-| New markets (i18n locales live) | Store dashboards per locale | 1 (English) | ≥ 3 locales |
-| App Store search rank (primary keywords) | ASO tool | Measure | Top 20 for 5+ keywords |
-| Press/media mentions | Manual tracking | Measure | 10+ |
-| Partnership conversations initiated | CRM/manual | 0 | 5+ active conversations |
+| Metric                                   | Source                       | Sprint 6 Baseline         | Sprint 10 Target             |
+| ---------------------------------------- | ---------------------------- | ------------------------- | ---------------------------- |
+| Total downloads (all platforms)          | Store dashboards             | Measure at Sprint 6 start | 5,000+                       |
+| App Store rating (iOS)                   | App Store Connect            | Measure                   | ≥ 4.5 stars (maintain)       |
+| Play Store rating (Android)              | Play Console                 | Measure                   | ≥ 4.5 stars (maintain)       |
+| Day-7 retention                          | Store dashboards (aggregate) | Measure                   | ≥ 40%                        |
+| Day-30 retention                         | Store dashboards (aggregate) | Measure                   | ≥ 25%                        |
+| Premium conversion rate                  | RevenueCat/Stripe dashboard  | N/A (Sprint 7 launch)     | ≥ 3% of active users         |
+| Referral program participation           | Internal referral tracking   | N/A (Sprint 7 launch)     | ≥ 10% of active users shared |
+| Blog post views (total)                  | Privacy-preserving analytics | Measure                   | 15,000+                      |
+| GitHub stars                             | GitHub                       | Measure                   | 1,500+                       |
+| Community members (Discussions)          | GitHub                       | Measure                   | 500+                         |
+| New markets (i18n locales live)          | Store dashboards per locale  | 1 (English)               | ≥ 3 locales                  |
+| App Store search rank (primary keywords) | ASO tool                     | Measure                   | Top 20 for 5+ keywords       |
+| Press/media mentions                     | Manual tracking              | Measure                   | 10+                          |
+| Partnership conversations initiated      | CRM/manual                   | 0                         | 5+ active conversations      |
 
 ---
 
 ## Key Risks & Mitigations
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Premium launch causes backlash ("going corporate") | Medium | High | Lead every announcement with free-tier commitment; be transparent about costs |
-| AI privacy claims are inaccurate | Low | Critical | **Mandatory** engineering review of every AI claim before publication |
-| i18n store listings contain cultural insensitivities | Medium | Medium | Native-speaker review for every locale; cultural sensitivity checklist |
-| Bank connection erodes privacy brand | Medium | High | Radical transparency; always position as optional; never nudge non-connected users |
-| Competitor launches similar privacy-first app | Low | Medium | Focus on execution quality, community, and trust — not features alone |
-| Community grows but becomes toxic | Low | Medium | Clear guidelines, active moderation, zero tolerance for financial shaming |
+| Risk                                                 | Likelihood | Impact   | Mitigation                                                                         |
+| ---------------------------------------------------- | ---------- | -------- | ---------------------------------------------------------------------------------- |
+| Premium launch causes backlash ("going corporate")   | Medium     | High     | Lead every announcement with free-tier commitment; be transparent about costs      |
+| AI privacy claims are inaccurate                     | Low        | Critical | **Mandatory** engineering review of every AI claim before publication              |
+| i18n store listings contain cultural insensitivities | Medium     | Medium   | Native-speaker review for every locale; cultural sensitivity checklist             |
+| Bank connection erodes privacy brand                 | Medium     | High     | Radical transparency; always position as optional; never nudge non-connected users |
+| Competitor launches similar privacy-first app        | Low        | Medium   | Focus on execution quality, community, and trust — not features alone              |
+| Community grows but becomes toxic                    | Low        | Medium   | Clear guidelines, active moderation, zero tolerance for financial shaming          |
 
 ---
 
