@@ -172,10 +172,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
-          script: |
-            ./gradlew :apps:android:connectedDebugAndroidTest \
-              -Pandroid.testInstrumentationRunnerArguments.package=com.finance.android.e2e \
-              --stacktrace
+          script: ./gradlew :apps:android:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.package=com.finance.android.e2e --stacktrace
 
       - name: Upload instrumented test results
         if: always()
