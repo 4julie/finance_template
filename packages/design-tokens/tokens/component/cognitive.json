@@ -1,0 +1,163 @@
+{
+  "$description": "Component-level tokens for cognitive accessibility mode. These override the default component tokens when cognitive mode is enabled, providing larger touch targets, more generous padding, and simplified visual treatments.",
+  "cognitiveButton": {
+    "primary": {
+      "paddingX": {
+        "$value": "{spacing.6}",
+        "$type": "dimension",
+        "$description": "Increased horizontal padding (24px, up from 16px) for larger hit area."
+      },
+      "paddingY": {
+        "$value": "{spacing.3}",
+        "$type": "dimension",
+        "$description": "Increased vertical padding (12px, up from 8px) — ensures min 48px touch target with 18px text."
+      },
+      "borderRadius": {
+        "$value": "{borderRadius.lg}",
+        "$type": "dimension",
+        "$description": "Larger radius (12px, up from 8px) for softer, less harsh appearance."
+      },
+      "minHeight": {
+        "$value": "{cognitive.touchTargetMin}",
+        "$type": "dimension",
+        "$description": "Minimum button height enforced at 48px."
+      }
+    },
+    "secondary": {
+      "paddingX": {
+        "$value": "{spacing.6}",
+        "$type": "dimension",
+        "$description": "Increased horizontal padding to match primary button cognitive sizing."
+      },
+      "paddingY": {
+        "$value": "{spacing.3}",
+        "$type": "dimension",
+        "$description": "Increased vertical padding to match primary button cognitive sizing."
+      },
+      "borderRadius": {
+        "$value": "{borderRadius.lg}",
+        "$type": "dimension"
+      },
+      "borderWidth": {
+        "$value": "{cognitive.borderWidth}",
+        "$type": "dimension",
+        "$description": "2px border (up from 1px) for clearer element definition on secondary (outline) buttons."
+      },
+      "minHeight": {
+        "$value": "{cognitive.touchTargetMin}",
+        "$type": "dimension"
+      }
+    },
+    "destructive": {
+      "paddingX": {
+        "$value": "{spacing.6}",
+        "$type": "dimension"
+      },
+      "paddingY": {
+        "$value": "{spacing.3}",
+        "$type": "dimension"
+      },
+      "borderRadius": {
+        "$value": "{borderRadius.lg}",
+        "$type": "dimension"
+      },
+      "minHeight": {
+        "$value": "{cognitive.touchTargetMin}",
+        "$type": "dimension"
+      }
+    }
+  },
+  "cognitiveCard": {
+    "padding": {
+      "$value": "{spacing.6}",
+      "$type": "dimension",
+      "$description": "Increased card padding (24px, up from 16px) for more breathing room."
+    },
+    "borderRadius": {
+      "$value": "{borderRadius.xl}",
+      "$type": "dimension",
+      "$description": "Larger radius (16px, up from 12px) for softer appearance."
+    },
+    "borderWidth": {
+      "$value": "{cognitive.borderWidth}",
+      "$type": "dimension",
+      "$description": "2px border for clearer card boundary definition."
+    },
+    "gap": {
+      "$value": "{spacing.4}",
+      "$type": "dimension",
+      "$description": "16px gap between card content elements (up from default ~8-12px)."
+    }
+  },
+  "cognitiveInput": {
+    "paddingX": {
+      "$value": "{spacing.4}",
+      "$type": "dimension",
+      "$description": "Increased horizontal padding (16px, up from 12px)."
+    },
+    "paddingY": {
+      "$value": "{spacing.3}",
+      "$type": "dimension",
+      "$description": "Increased vertical padding (12px, up from 8px) — ensures min 48px touch target."
+    },
+    "borderRadius": {
+      "$value": "{borderRadius.lg}",
+      "$type": "dimension",
+      "$description": "Larger radius (12px, up from 8px)."
+    },
+    "borderWidth": {
+      "$value": "{cognitive.borderWidth}",
+      "$type": "dimension",
+      "$description": "2px border for clearer input boundary."
+    },
+    "minHeight": {
+      "$value": "{cognitive.touchTargetMin}",
+      "$type": "dimension",
+      "$description": "Minimum input height enforced at 48px."
+    }
+  },
+  "cognitiveNavigation": {
+    "itemMinHeight": {
+      "$value": "{cognitive.touchTargetMin}",
+      "$type": "dimension",
+      "$description": "Minimum navigation item height — 48px touch target."
+    },
+    "itemPaddingX": {
+      "$value": "{spacing.5}",
+      "$type": "dimension",
+      "$description": "Increased horizontal padding (20px) for navigation items."
+    },
+    "itemPaddingY": {
+      "$value": "{spacing.3}",
+      "$type": "dimension",
+      "$description": "Increased vertical padding (12px) for navigation items."
+    },
+    "itemGap": {
+      "$value": "{spacing.2}",
+      "$type": "dimension",
+      "$description": "8px gap between navigation items to prevent mis-taps."
+    }
+  },
+  "cognitiveListItem": {
+    "minHeight": {
+      "$value": "{cognitive.touchTargetMin}",
+      "$type": "dimension",
+      "$description": "Minimum list item height — 48px touch target."
+    },
+    "paddingX": {
+      "$value": "{spacing.5}",
+      "$type": "dimension",
+      "$description": "Increased horizontal padding (20px)."
+    },
+    "paddingY": {
+      "$value": "{spacing.3}",
+      "$type": "dimension",
+      "$description": "Increased vertical padding (12px)."
+    },
+    "gap": {
+      "$value": "{spacing.2}",
+      "$type": "dimension",
+      "$description": "8px gap between list items."
+    }
+  }
+}

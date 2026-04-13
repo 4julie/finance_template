@@ -1,0 +1,359 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/**
+ * Cognitive Accessibility Mode — Web CSS overrides.
+ *
+ * Activates when `data-a11y-cognitive="true"` is set on the <html> element.
+ * This mode provides a simplified, less overwhelming UI for users with
+ * cognitive disabilities (ADHD, autism, traumatic brain injury, learning
+ * disabilities, etc.).
+ *
+ * Changes applied:
+ *   - Larger font sizes with relaxed line heights
+ *   - Increased spacing and padding on all interactive elements
+ *   - Minimum 48×48px touch/click targets (WCAG 2.2 SC 2.5.5 Level AAA)
+ *   - Simplified elevation (flatter UI, fewer shadows)
+ *   - Enhanced focus indicators (3px ring, 3px offset)
+ *   - Enhanced border widths for clearer element boundaries
+ *   - All animations disabled (superset of prefers-reduced-motion)
+ *   - Consistent, predictable layout behavior
+ *
+ * Token references:
+ *   Primitive:  packages/design-tokens/tokens/primitive/cognitive.json
+ *   Semantic:   packages/design-tokens/tokens/semantic/cognitive.json
+ *   Component:  packages/design-tokens/tokens/component/cognitive.json
+ *
+ * @see docs/design/cognitive-accessibility.md
+ */
+
+/* ==========================================================================
+ * 1. Typography — Larger, more readable type scale
+ *
+ * Body text steps up from 16px → 18px. Caption (smallest text) steps
+ * from 12px → 14px. All line heights use relaxed (1.75) for improved
+ * reading flow and reduced visual density.
+ * ========================================================================== */
+
+[data-a11y-cognitive='true'] {
+  /* --- Type scale overrides --- */
+  --type-scale-display-font-size: var(--font-size-4xl);    /* 36px (was 48px) — less overwhelming */
+  --type-scale-display-line-height: var(--line-height-normal); /* 1.5 (was 1.25) */
+
+  --type-scale-headline-font-size: var(--font-size-2xl);   /* 24px (was 30px) */
+  --type-scale-headline-line-height: var(--line-height-normal); /* 1.5 (was 1.25) */
+
+  --type-scale-title-font-size: var(--font-size-xl);       /* 20px (unchanged) */
+  --type-scale-title-line-height: var(--line-height-relaxed); /* 1.75 (was 1.5) */
+
+  --type-scale-body-font-size: var(--font-size-lg);         /* 18px (was 16px) */
+  --type-scale-body-line-height: var(--line-height-relaxed); /* 1.75 (was 1.5) */
+
+  --type-scale-label-font-size: var(--font-size-base);      /* 16px (was 14px) */
+  --type-scale-label-line-height: var(--line-height-relaxed); /* 1.75 (was 1.5) */
+
+  --type-scale-caption-font-size: var(--font-size-sm);      /* 14px (was 12px) */
+  --type-scale-caption-line-height: var(--line-height-relaxed); /* 1.75 (was 1.5) */
+
+  /* --- Base html font size adjustment --- */
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+/* ==========================================================================
+ * 2. Spacing & Layout — More breathing room, clearer visual separation
+ * ========================================================================== */
+
+[data-a11y-cognitive='true'] {
+  /* --- Component spacing overrides --- */
+  --card-padding: var(--spacing-6);                         /* 24px (was 16px) */
+  --card-border-radius: var(--border-radius-xl);            /* 16px (was 12px) */
+
+  --button-primary-padding-x: var(--spacing-6);             /* 24px (was 16px) */
+  --button-primary-padding-y: var(--spacing-3);             /* 12px (was 8px) */
+  --button-primary-border-radius: var(--border-radius-lg);  /* 12px (was 8px) */
+
+  --button-secondary-padding-x: var(--spacing-6);
+  --button-secondary-padding-y: var(--spacing-3);
+  --button-secondary-border-radius: var(--border-radius-lg);
+
+  --button-destructive-padding-x: var(--spacing-6);
+  --button-destructive-padding-y: var(--spacing-3);
+  --button-destructive-border-radius: var(--border-radius-lg);
+
+  --input-padding-x: var(--spacing-4);                      /* 16px (was 12px) */
+  --input-padding-y: var(--spacing-3);                      /* 12px (was 8px) */
+  --input-border-radius: var(--border-radius-lg);           /* 12px (was 8px) */
+
+  /* --- Elevation simplification — flatter UI, less visual noise --- */
+  --elevation-medium: var(--shadow-sm);
+  --elevation-high: var(--shadow-md);
+}
+
+/* ==========================================================================
+ * 3. Touch Targets — Minimum 48×48px interactive areas
+ *
+ * WCAG 2.2 SC 2.5.5 Target Size (Enhanced, Level AAA) requires a
+ * minimum 44×44 CSS px target. We use 48px to align with Android
+ * Material 3 guidelines and provide extra margin.
+ * ========================================================================== */
+
+[data-a11y-cognitive='true'] button,
+[data-a11y-cognitive='true'] [role='button'],
+[data-a11y-cognitive='true'] a,
+[data-a11y-cognitive='true'] summary {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+[data-a11y-cognitive='true'] input,
+[data-a11y-cognitive='true'] select,
+[data-a11y-cognitive='true'] textarea {
+  min-height: 48px;
+}
+
+/* Navigation items — larger touch targets with spacing to prevent mis-taps */
+[data-a11y-cognitive='true'] nav a,
+[data-a11y-cognitive='true'] nav button,
+[data-a11y-cognitive='true'] [role='menuitem'],
+[data-a11y-cognitive='true'] [role='tab'] {
+  min-height: 48px;
+  min-width: 48px;
+  padding: var(--spacing-3) var(--spacing-5); /* 12px 20px */
+}
+
+/* List items — ensure interactive lists have adequate touch targets */
+[data-a11y-cognitive='true'] [role='listitem'],
+[data-a11y-cognitive='true'] [role='row'],
+[data-a11y-cognitive='true'] [role='option'],
+[data-a11y-cognitive='true'] li > a,
+[data-a11y-cognitive='true'] li > button {
+  min-height: 48px;
+  padding: var(--spacing-3) var(--spacing-5); /* 12px 20px */
+}
+
+/* Checkbox and radio — ensure adequate target size */
+[data-a11y-cognitive='true'] input[type='checkbox'],
+[data-a11y-cognitive='true'] input[type='radio'] {
+  min-height: 24px;
+  min-width: 24px;
+}
+
+/* ==========================================================================
+ * 4. Focus Indicators — Enhanced visibility
+ *
+ * Thicker focus ring (3px, up from 2px) with larger offset for
+ * improved discoverability during keyboard navigation.
+ * ========================================================================== */
+
+[data-a11y-cognitive='true'] :focus-visible {
+  outline-width: 3px;
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+ * 5. Border Enhancement — Clearer element boundaries
+ *
+ * Cognitive mode uses 2px borders for interactive elements to make
+ * form fields, cards, and buttons more visually distinct.
+ * ========================================================================== */
+
+[data-a11y-cognitive='true'] input,
+[data-a11y-cognitive='true'] select,
+[data-a11y-cognitive='true'] textarea {
+  border-width: 2px;
+}
+
+[data-a11y-cognitive='true'] .card,
+[data-a11y-cognitive='true'] [class*='card'] {
+  border-width: 2px;
+  border-style: solid;
+}
+
+/* ==========================================================================
+ * 6. Animations — Fully disabled in cognitive mode
+ *
+ * Cognitive mode disables ALL animations and transitions as a superset
+ * of prefers-reduced-motion. This applies regardless of the system
+ * motion preference because cognitive mode is an explicit user opt-in
+ * that takes priority.
+ * ========================================================================== */
+
+[data-a11y-cognitive='true'] *,
+[data-a11y-cognitive='true'] *::before,
+[data-a11y-cognitive='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ==========================================================================
+ * 7. Visual Simplification — Reduced decorative elements
+ *
+ * Strip decorative shadows, hover lifts, and other visual embellishments
+ * that add cognitive load without conveying information.
+ * ========================================================================== */
+
+/* Remove card hover lift effects — they can be disorienting */
+[data-a11y-cognitive='true'] .card:hover,
+[data-a11y-cognitive='true'] [class*='card']:hover {
+  transform: none;
+  box-shadow: var(--card-shadow);
+}
+
+/* Simplify button active effects */
+[data-a11y-cognitive='true'] button:active:not(:disabled),
+[data-a11y-cognitive='true'] [role='button']:active:not(:disabled) {
+  transform: none;
+}
+
+/* Remove focus glow — rely on the enhanced outline alone */
+[data-a11y-cognitive='true'] input:focus,
+[data-a11y-cognitive='true'] select:focus,
+[data-a11y-cognitive='true'] textarea:focus {
+  box-shadow: none;
+}
+
+/* ==========================================================================
+ * 8. Content density — Consistent spacing utilities
+ *
+ * Utility classes for cognitive mode layout. Platform engineers can
+ * apply these to sections that present options or information.
+ * ========================================================================== */
+
+/* Section spacing — increased gaps between major content blocks */
+[data-a11y-cognitive='true'] main > section,
+[data-a11y-cognitive='true'] main > div,
+[data-a11y-cognitive='true'] [role='main'] > section {
+  margin-bottom: var(--spacing-8); /* 32px between sections */
+}
+
+/* Grid/flex gap enhancement for card layouts */
+[data-a11y-cognitive='true'] .card-grid,
+[data-a11y-cognitive='true'] .card-list {
+  gap: var(--spacing-6); /* 24px between cards (up from typical 16px) */
+}
+
+/* Form element spacing */
+[data-a11y-cognitive='true'] .form-group,
+[data-a11y-cognitive='true'] fieldset > * + * {
+  margin-top: var(--spacing-5); /* 20px between form fields (up from typical 12-16px) */
+}
+
+/* ==========================================================================
+ * 9. Reduced-Motion Overrides (Enhanced)
+ *
+ * Standalone prefers-reduced-motion enhancements that apply even when
+ * cognitive mode is not active. These augment the base rules in
+ * tokens.css and animations.css.
+ * ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Remove all transform-based hover/active effects globally */
+  button:active:not(:disabled),
+  [role='button']:active:not(:disabled) {
+    transform: none !important;
+  }
+
+  .card:hover,
+  [class*='card']:hover {
+    transform: none !important;
+  }
+
+  /* Ensure smooth scroll is always off */
+  html {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+ * 10. High-Contrast Overrides (Enhanced)
+ *
+ * Augments the base prefers-contrast rules in tokens.css with
+ * additional high-contrast improvements.
+ * ========================================================================== */
+
+@media (prefers-contrast: more) {
+  :root {
+    /* Increase text weight for improved readability at high contrast */
+    --font-weight-regular: 500;
+
+    /* Stronger focus indicator for high-contrast mode */
+    --semantic-border-focus: var(--color-blue-800);
+  }
+
+  /* High-contrast dark mode */
+  [data-theme='dark'] {
+    --semantic-border-default: var(--color-neutral-300);
+    --card-border: var(--color-neutral-300);
+    --input-border: var(--color-neutral-300);
+    --navigation-border: var(--color-neutral-300);
+    --semantic-border-focus: var(--color-blue-200);
+  }
+
+  /* Ensure all interactive elements have visible borders */
+  button,
+  [role='button'],
+  input,
+  select,
+  textarea {
+    border: 2px solid currentColor;
+  }
+
+  /* Underline links for identification beyond color */
+  a:not([role='button']) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+/* ==========================================================================
+ * 11. Cognitive + High-Contrast compound state
+ *
+ * When both cognitive mode and high contrast are active, apply the
+ * most accessible combination of both override sets.
+ * ========================================================================== */
+
+@media (prefers-contrast: more) {
+  [data-a11y-cognitive='true'] {
+    /* Maximum border definition */
+    --semantic-border-default: var(--color-neutral-900);
+    --card-border: var(--color-neutral-900);
+    --input-border: var(--color-neutral-900);
+  }
+
+  [data-a11y-cognitive='true'][data-theme='dark'] {
+    --semantic-border-default: var(--color-neutral-200);
+    --card-border: var(--color-neutral-200);
+    --input-border: var(--color-neutral-200);
+  }
+
+  [data-a11y-cognitive='true'] :focus-visible {
+    outline-width: 3px;
+    outline-style: solid;
+    outline-offset: 3px;
+  }
+}
+
+/* ==========================================================================
+ * 12. Cognitive mode for forced-colors (Windows High Contrast)
+ *
+ * Ensures cognitive layout changes survive forced-colors mode where
+ * the browser overrides all colors. Layout tokens (spacing, sizing)
+ * still apply because they are not color properties.
+ * ========================================================================== */
+
+@media (forced-colors: active) {
+  [data-a11y-cognitive='true'] :focus-visible {
+    outline: 3px solid LinkText;
+    outline-offset: 3px;
+  }
+
+  [data-a11y-cognitive='true'] button,
+  [data-a11y-cognitive='true'] [role='button'],
+  [data-a11y-cognitive='true'] input,
+  [data-a11y-cognitive='true'] select,
+  [data-a11y-cognitive='true'] textarea {
+    border: 2px solid ButtonText;
+  }
+}
