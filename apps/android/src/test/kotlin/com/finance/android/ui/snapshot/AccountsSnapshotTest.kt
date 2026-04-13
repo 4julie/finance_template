@@ -7,8 +7,16 @@ import com.finance.android.ui.screens.AccountDetailScreen
 import com.finance.android.ui.screens.AccountsEmptyState
 import com.finance.android.ui.screens.AccountsList
 import com.finance.android.ui.viewmodel.AccountGroup
+import com.finance.models.Account
 import com.finance.models.AccountType
+import com.finance.models.Transaction
+import com.finance.models.TransactionStatus
+import com.finance.models.TransactionType
 import com.finance.models.types.Cents
+import com.finance.models.types.Currency
+import com.finance.models.types.SyncId
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import org.junit.Rule
 import org.junit.Test
 
@@ -124,14 +132,73 @@ class AccountsSnapshotTest {
     }
 
     // ── Account detail ──────────────────────────────────────────────────────
+    //
+    // Pinned dates so snapshots are deterministic and immune to calendar drift.
+    // The golden images were recorded on 2026-04-09; using those same dates
+    // keeps the rendered text identical across CI runs.
+
+    private val pinnedDate = LocalDate(2026, 4, 9)
+    private val pinnedYesterday = LocalDate(2026, 4, 8)
+    private val pinnedInstant = Instant.parse("2026-04-09T00:00:00Z")
+
+    private val pinnedAccount = Account(
+        id = SyncId("acc-checking"), householdId = SyncId("household-1"),
+        name = "Main Checking", type = AccountType.CHECKING,
+        currency = Currency.USD, currentBalance = Cents(524_73L),
+        isArchived = false, sortOrder = 0, icon = null, color = null,
+        createdAt = pinnedInstant, updatedAt = pinnedInstant,
+    )
+
+    private val pinnedTransactions = listOf(
+        Transaction(
+            id = SyncId("txn-1"), householdId = SyncId("household-1"),
+            accountId = SyncId("acc-checking"), categoryId = SyncId("cat-groceries"),
+            type = TransactionType.EXPENSE, status = TransactionStatus.CLEARED,
+            amount = Cents(-8_743L), currency = Currency.USD,
+            payee = "Whole Foods Market", date = pinnedDate,
+            createdAt = pinnedInstant, updatedAt = pinnedInstant,
+        ),
+        Transaction(
+            id = SyncId("txn-2"), householdId = SyncId("household-1"),
+            accountId = SyncId("acc-credit"), categoryId = SyncId("cat-dining"),
+            type = TransactionType.EXPENSE, status = TransactionStatus.CLEARED,
+            amount = Cents(-5_85L), currency = Currency.USD,
+            payee = "Starbucks", date = pinnedDate,
+            createdAt = pinnedInstant, updatedAt = pinnedInstant,
+        ),
+        Transaction(
+            id = SyncId("txn-3"), householdId = SyncId("household-1"),
+            accountId = SyncId("acc-credit"), categoryId = SyncId("cat-transport"),
+            type = TransactionType.EXPENSE, status = TransactionStatus.CLEARED,
+            amount = Cents(-14_50L), currency = Currency.USD,
+            payee = "Uber", date = pinnedDate,
+            createdAt = pinnedInstant, updatedAt = pinnedInstant,
+        ),
+        Transaction(
+            id = SyncId("txn-4"), householdId = SyncId("household-1"),
+            accountId = SyncId("acc-credit"), categoryId = SyncId("cat-shopping"),
+            type = TransactionType.EXPENSE, status = TransactionStatus.CLEARED,
+            amount = Cents(-67_42L), currency = Currency.USD,
+            payee = "Target", date = pinnedYesterday,
+            createdAt = pinnedInstant, updatedAt = pinnedInstant,
+        ),
+        Transaction(
+            id = SyncId("txn-5"), householdId = SyncId("household-1"),
+            accountId = SyncId("acc-checking"), categoryId = SyncId("cat-subscriptions"),
+            type = TransactionType.EXPENSE, status = TransactionStatus.CLEARED,
+            amount = Cents(-15_99L), currency = Currency.USD,
+            payee = "Netflix", date = pinnedYesterday,
+            createdAt = pinnedInstant, updatedAt = pinnedInstant,
+        ),
+    )
 
     @Test
     fun accountDetail_light_1x() {
         paparazzi.snapshot {
             SnapshotThemeWrapper(ThemeMode.LIGHT, FontScale.NORMAL) {
                 AccountDetailScreen(
-                    account = SampleData.accounts.first(),
-                    transactions = SampleData.transactions.take(5),
+                    account = pinnedAccount,
+                    transactions = pinnedTransactions,
                     onBack = {},
                 )
             }
@@ -143,8 +210,8 @@ class AccountsSnapshotTest {
         paparazzi.snapshot {
             SnapshotThemeWrapper(ThemeMode.DARK, FontScale.NORMAL) {
                 AccountDetailScreen(
-                    account = SampleData.accounts.first(),
-                    transactions = SampleData.transactions.take(5),
+                    account = pinnedAccount,
+                    transactions = pinnedTransactions,
                     onBack = {},
                 )
             }
@@ -156,8 +223,8 @@ class AccountsSnapshotTest {
         paparazzi.snapshot {
             SnapshotThemeWrapper(ThemeMode.HIGH_CONTRAST, FontScale.NORMAL) {
                 AccountDetailScreen(
-                    account = SampleData.accounts.first(),
-                    transactions = SampleData.transactions.take(5),
+                    account = pinnedAccount,
+                    transactions = pinnedTransactions,
                     onBack = {},
                 )
             }
@@ -169,8 +236,8 @@ class AccountsSnapshotTest {
         paparazzi.snapshot {
             SnapshotThemeWrapper(ThemeMode.LIGHT, FontScale.LARGE) {
                 AccountDetailScreen(
-                    account = SampleData.accounts.first(),
-                    transactions = SampleData.transactions.take(5),
+                    account = pinnedAccount,
+                    transactions = pinnedTransactions,
                     onBack = {},
                 )
             }
@@ -182,8 +249,8 @@ class AccountsSnapshotTest {
         paparazzi.snapshot {
             SnapshotThemeWrapper(ThemeMode.DARK, FontScale.LARGE) {
                 AccountDetailScreen(
-                    account = SampleData.accounts.first(),
-                    transactions = SampleData.transactions.take(5),
+                    account = pinnedAccount,
+                    transactions = pinnedTransactions,
                     onBack = {},
                 )
             }
@@ -195,8 +262,8 @@ class AccountsSnapshotTest {
         paparazzi.snapshot {
             SnapshotThemeWrapper(ThemeMode.HIGH_CONTRAST, FontScale.LARGE) {
                 AccountDetailScreen(
-                    account = SampleData.accounts.first(),
-                    transactions = SampleData.transactions.take(5),
+                    account = pinnedAccount,
+                    transactions = pinnedTransactions,
                     onBack = {},
                 )
             }
