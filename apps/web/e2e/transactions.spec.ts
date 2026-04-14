@@ -19,7 +19,7 @@ test.describe('Transactions page', () => {
   test('loads and shows the Transactions heading', async ({ authenticatedPage: page }) => {
     await page.goto('/transactions');
 
-    const heading = page.getByRole('heading', { name: /transactions/i });
+    const heading = page.getByRole('heading', { name: /transactions/i }).first();
     await expect(heading).toBeVisible();
   });
 

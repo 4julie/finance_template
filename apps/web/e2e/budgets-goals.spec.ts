@@ -18,7 +18,7 @@ test.describe('Budgets page', () => {
   test('loads and shows the Budgets heading', async ({ authenticatedPage: page }) => {
     await page.goto('/budgets');
 
-    const heading = page.getByRole('heading', { name: /budgets/i });
+    const heading = page.getByRole('heading', { name: /budgets/i }).first();
     await expect(heading).toBeVisible();
   });
 
@@ -103,7 +103,7 @@ test.describe('Goals page', () => {
   test('loads and shows the Goals heading', async ({ authenticatedPage: page }) => {
     await page.goto('/goals');
 
-    const heading = page.getByRole('heading', { name: /goals/i });
+    const heading = page.getByRole('heading', { name: /goals/i }).first();
     await expect(heading).toBeVisible();
   });
 
