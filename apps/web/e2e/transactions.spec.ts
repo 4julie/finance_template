@@ -105,7 +105,7 @@ test.describe('Transactions page', () => {
     await expect(accountSelect).toHaveAttribute('aria-required', 'true');
 
     // Category select (optional)
-    const categorySelect = page.getByLabel(/category/i);
+    const categorySelect = page.getByLabel(/category/i).first();
     await expect(categorySelect).toBeVisible();
 
     // Date input
