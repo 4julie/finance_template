@@ -165,7 +165,7 @@ class AccountsSnapshotTest {
         }
     }
 
-    @Ignore("SampleData uses Clock.System.now() — dates drift causing pixel mismatch at LARGE font scale")
+    @Ignore("SampleData uses Clock.System.now() — dates drift causing pixel mismatch at LARGE font scale. Pin dates to fix.")
     @Test
     fun accountDetail_light_2x() {
         paparazzi.snapshot {
@@ -192,7 +192,7 @@ class AccountsSnapshotTest {
         }
     }
 
-    @Ignore("SampleData uses Clock.System.now() — dates drift causing pixel mismatch at LARGE font scale")
+    @Ignore("SampleData uses Clock.System.now() — dates drift causing pixel mismatch at LARGE font scale. Pin dates to fix.")
     @Test
     fun accountDetail_highContrast_2x() {
         paparazzi.snapshot {
