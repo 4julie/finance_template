@@ -48,7 +48,15 @@ const supabaseUrl = authConfig.supabaseUrl;
 if (supabaseUrl && !supabaseUrl.includes('placeholder')) {
   void import('./db/sync/replayMutations').then((mod) => {
     if ('configureSyncEndpoint' in mod) {
-      (mod as { configureSyncEndpoint: (cfg: { baseUrl: string; pushEndpoint: string; apiKey: string }) => void }).configureSyncEndpoint({
+      (
+        mod as {
+          configureSyncEndpoint: (cfg: {
+            baseUrl: string;
+            pushEndpoint: string;
+            apiKey: string;
+          }) => void;
+        }
+      ).configureSyncEndpoint({
         baseUrl: `${supabaseUrl}/functions/v1`,
         pushEndpoint: '/sync-push',
         apiKey: authConfig.supabaseAnonKey,
