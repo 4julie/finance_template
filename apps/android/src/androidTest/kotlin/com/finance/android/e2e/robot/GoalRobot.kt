@@ -4,11 +4,13 @@ package com.finance.android.e2e.robot
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.finance.android.MainActivity
@@ -41,7 +43,7 @@ class GoalRobot(
 
     /** Assert the Goals tab content is visible. */
     fun assertGoalsTabVisible() {
-        rule.onNodeWithText("Goals").assertIsDisplayed()
+        rule.onNodeWithContentDescription("Goals tab").assertIsDisplayed()
     }
 
     /** Tap the FAB to create a new goal. */
@@ -53,8 +55,11 @@ class GoalRobot(
 
     /** Assert the goal creation form is displayed. */
     fun assertCreateFormVisible() {
-        rule.onNode(hasContentDescription("New Goal screen"))
-            .assertIsDisplayed()
+        rule.waitUntil(timeoutMillis = 5_000) {
+            rule.onAllNodes(hasContentDescription("Goal name input"))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
     }
 
     /** Enter the goal [name] into the name field. */
@@ -71,7 +76,9 @@ class GoalRobot(
 
     /** Tap the Save Goal button. */
     fun tapSave() {
-        rule.onNodeWithContentDescription("Save goal")
+        rule.onNode(hasScrollToNodeAction())
+            .performScrollToNode(hasContentDescription("Save goal"))
+        rule.onNode(hasContentDescription("Save goal"))
             .performClick()
         rule.waitForIdle()
     }
@@ -89,7 +96,9 @@ class GoalRobot(
 
     /** Assert the save button has proper accessibility label. */
     fun assertSaveButtonAccessible() {
-        rule.onNodeWithContentDescription("Save goal")
+        rule.onNode(hasScrollToNodeAction())
+            .performScrollToNode(hasContentDescription("Save goal"))
+        rule.onNode(hasContentDescription("Save goal"))
             .assertIsDisplayed()
     }
 

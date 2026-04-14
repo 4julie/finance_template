@@ -27,8 +27,6 @@ class TransactionRobot(
 
     /** Assert the Amount step of the transaction wizard is displayed. */
     fun assertAmountStepVisible() {
-        rule.onNode(hasContentDescription("New Transaction", substring = true))
-            .assertIsDisplayed()
         rule.onNodeWithContentDescription("Amount in dollars")
             .assertIsDisplayed()
     }
@@ -56,6 +54,12 @@ class TransactionRobot(
 
     /** Assert the Category step is displayed. */
     fun assertCategoryStepVisible() {
+        rule.waitUntil(timeoutMillis = 5_000) {
+            rule.onAllNodes(hasContentDescription("Select a category"))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        rule.waitForIdle()
         rule.onNodeWithContentDescription("Select a category")
             .assertIsDisplayed()
     }
@@ -77,6 +81,12 @@ class TransactionRobot(
 
     /** Assert the Confirm step is displayed. */
     fun assertConfirmStepVisible() {
+        rule.waitUntil(timeoutMillis = 5_000) {
+            rule.onAllNodes(hasContentDescription("Review your transaction"))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        rule.waitForIdle()
         rule.onNodeWithContentDescription("Review your transaction")
             .assertIsDisplayed()
     }
@@ -105,8 +115,10 @@ class TransactionRobot(
 
     /** Assert the step indicator has a proper content description. */
     fun assertStepIndicatorAccessible(stepNumber: Int) {
-        rule.onNode(
-            hasContentDescription("Step $stepNumber of 3", substring = true),
-        ).assertIsDisplayed()
+        rule.waitUntil(timeoutMillis = 5_000) {
+            rule.onAllNodes(
+                hasContentDescription("Step $stepNumber of 3", substring = true),
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
     }
 }

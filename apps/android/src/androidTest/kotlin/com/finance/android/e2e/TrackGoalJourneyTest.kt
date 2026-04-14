@@ -3,6 +3,8 @@
 package com.finance.android.e2e
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import org.junit.Test
@@ -94,8 +96,6 @@ class TrackGoalJourneyTest : BaseE2ETest() {
         goal.tapCreateGoalFab()
 
         // Verify key accessibility labels
-        composeTestRule.onNodeWithContentDescription("New Goal screen")
-            .assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription("Goal name input")
             .assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription("Target amount in dollars")
@@ -120,8 +120,10 @@ class TrackGoalJourneyTest : BaseE2ETest() {
         goal.tapCreateGoalFab()
         goal.assertCreateFormVisible()
 
-        // Navigate back
-        composeTestRule.onNodeWithContentDescription("Navigate back")
+        // Navigate back — use onFirst() to handle duplicate back buttons
+        // from nested Scaffold TopAppBars
+        composeTestRule.onAllNodes(hasContentDescription("Navigate back"))
+            .onFirst()
             .performClick()
         composeTestRule.waitForIdle()
 

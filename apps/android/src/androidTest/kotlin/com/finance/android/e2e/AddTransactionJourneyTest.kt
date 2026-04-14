@@ -61,6 +61,7 @@ class AddTransactionJourneyTest : BaseE2ETest() {
 
         // Step 2: Category
         txn.assertCategoryStepVisible()
+        txn.selectCategory("Groceries")
         txn.tapContinue()
 
         // Step 3: Confirm
@@ -93,6 +94,8 @@ class AddTransactionJourneyTest : BaseE2ETest() {
 
         // Step 2
         txn.assertStepIndicatorAccessible(2)
+        txn.assertCategoryStepVisible()
+        txn.selectCategory("Groceries")
         txn.tapContinue()
 
         // Step 3
