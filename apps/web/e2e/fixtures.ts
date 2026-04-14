@@ -188,7 +188,9 @@ async function loginViaForm(page: Page): Promise<void> {
   await page.getByLabel(/password/i).fill(TEST_PASSWORD);
 
   // Submit the form via the Sign in button.
-  await page.getByRole('button', { name: /sign in/i }).click();
+  // Use exact match to avoid ambiguity with the "Sign in with passkey" button
+  // that is rendered when the browser supports WebAuthn (headless Chromium does).
+  await page.getByRole('button', { name: /^sign in$/i }).click();
 
   // Wait for navigation away from the login page (redirect to /dashboard).
   await page.waitForURL('**/dashboard', { timeout: 10_000 });
