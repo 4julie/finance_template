@@ -47,24 +47,24 @@ class AddTransactionJourneyTest : BaseE2ETest() {
         val dash = DashboardRobot(composeTestRule)
         val txn = TransactionRobot(composeTestRule)
 
-        // Navigate to transaction create
+        // Navigate to transaction create via Scaffold FAB
         dash.waitForDashboardLoaded()
         composeTestRule.onNodeWithContentDescription("Create new transaction")
             .performClick()
         composeTestRule.waitForIdle()
 
-        // Step 1: Amount and Payee
+        // Step 1: Amount and Payee — wait for wizard to render
         txn.assertAmountStepVisible()
         txn.enterAmount("42.50")
         txn.enterPayee("Whole Foods")
         txn.tapContinue()
 
-        // Step 2: Category
+        // Step 2: Category — wait for step transition to complete
         txn.assertCategoryStepVisible()
         txn.selectCategory("Groceries")
         txn.tapContinue()
 
-        // Step 3: Confirm
+        // Step 3: Confirm — wait for step transition to complete
         txn.assertConfirmStepVisible()
         txn.assertSummaryContainsPayee("Whole Foods")
         txn.tapSaveTransaction()
@@ -84,7 +84,8 @@ class AddTransactionJourneyTest : BaseE2ETest() {
             .performClick()
         composeTestRule.waitForIdle()
 
-        // Step 1
+        // Step 1 — wait for the wizard to fully render before interacting
+        txn.assertAmountStepVisible()
         txn.assertStepIndicatorAccessible(1)
 
         // Fill step 1 minimally and advance
@@ -93,12 +94,13 @@ class AddTransactionJourneyTest : BaseE2ETest() {
         txn.tapContinue()
 
         // Step 2
-        txn.assertStepIndicatorAccessible(2)
         txn.assertCategoryStepVisible()
+        txn.assertStepIndicatorAccessible(2)
         txn.selectCategory("Groceries")
         txn.tapContinue()
 
         // Step 3
+        txn.assertConfirmStepVisible()
         txn.assertStepIndicatorAccessible(3)
     }
 

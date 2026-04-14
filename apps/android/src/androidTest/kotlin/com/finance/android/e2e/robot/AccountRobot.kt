@@ -46,10 +46,20 @@ class AccountRobot(
         rule.waitForIdle()
     }
 
-    /** Assert the account creation form is displayed. */
+    /**
+     * Assert the account creation form is displayed.
+     *
+     * Waits for the form's name input to appear, which signals
+     * the navigation transition has completed and the form
+     * has been composed.
+     */
     fun assertCreateFormVisible() {
-        rule.onNodeWithContentDescription("New Account screen")
-            .assertIsDisplayed()
+        rule.waitUntil(timeoutMillis = 5_000) {
+            rule.onAllNodes(hasContentDescription("Account name input"))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        rule.waitForIdle()
     }
 
     /** Type the given [name] into the Account Name field. */
@@ -64,10 +74,19 @@ class AccountRobot(
             .performTextInput(balance)
     }
 
-    /** Tap the Save Account button. */
+    /**
+     * Tap the Save Account button.
+     *
+     * Scrolls the [LazyColumn] to the save button before clicking.
+     * Adds [waitForIdle] between scroll and click for API 34 stability,
+     * where the nested Scaffold double top bar (FinanceTopBar + screen
+     * TopAppBar) pushes form content further down the page.
+     */
     fun tapSave() {
+        rule.waitForIdle()
         rule.onNode(hasScrollToNodeAction())
             .performScrollToNode(hasContentDescription("Save account"))
+        rule.waitForIdle()
         rule.onNode(hasContentDescription("Save account"))
             .performClick()
         rule.waitForIdle()

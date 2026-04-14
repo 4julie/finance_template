@@ -94,6 +94,7 @@ class TrackGoalJourneyTest : BaseE2ETest() {
         goal.tapGoalsTab()
         goal.waitForGoalsLoaded()
         goal.tapCreateGoalFab()
+        goal.assertCreateFormVisible()
 
         // Verify key accessibility labels
         composeTestRule.onNodeWithContentDescription("Goal name input")

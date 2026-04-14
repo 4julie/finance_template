@@ -25,8 +25,20 @@ class TransactionRobot(
 
     // ── Step 1: Amount & Payee ──────────────────────────────────────────
 
-    /** Assert the Amount step of the transaction wizard is displayed. */
+    /**
+     * Assert the Amount step of the transaction wizard is displayed.
+     *
+     * Uses [waitUntil] to handle the navigation transition from
+     * Dashboard to TransactionCreateScreen, which includes an
+     * [AnimatedContent] slide animation for the wizard step.
+     */
     fun assertAmountStepVisible() {
+        rule.waitUntil(timeoutMillis = 5_000) {
+            rule.onAllNodes(hasContentDescription("Amount in dollars"))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        rule.waitForIdle()
         rule.onNodeWithContentDescription("Amount in dollars")
             .assertIsDisplayed()
     }

@@ -89,8 +89,13 @@ class AccountCreationE2ETest : BaseE2ETest() {
             waitForAccountsScreen()
             tapAddAccountFab()
         }
+        // Wait for the form to fully render before scrolling
+        composeTestRule.waitForIdle()
         composeTestRule.onNode(hasScrollToNodeAction())
             .performScrollToNode(hasContentDescription("Save account"))
+        // Allow scroll to settle — nested Scaffold double top bar
+        // can delay final layout on API 34 emulators
+        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithContentDescription("Save account")
             .assertIsDisplayed()
     }

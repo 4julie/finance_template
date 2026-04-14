@@ -5,6 +5,7 @@ package com.finance.android.e2e.robot
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -34,16 +35,27 @@ class GoalRobot(
         }
     }
 
-    /** Tap the Goals tab in the Planning screen. */
+    /**
+     * Tap the Goals tab in the Planning screen.
+     *
+     * Uses [hasTestTag] to avoid ambiguity between the tab text "Goals"
+     * and the GoalsSummaryHeader heading "Goals" when both are rendered
+     * on the same screen (API 34 checkIsDisplayed resolves via text).
+     */
     fun tapGoalsTab() {
-        rule.onNodeWithContentDescription("Goals tab")
+        rule.onNode(hasTestTag("goals_tab"))
             .performClick()
         rule.waitForIdle()
     }
 
-    /** Assert the Goals tab content is visible. */
+    /**
+     * Assert the Goals tab content is visible.
+     *
+     * Matches the tab by its unique test tag rather than text/content
+     * description to avoid the duplicate-node issue on API 34.
+     */
     fun assertGoalsTabVisible() {
-        rule.onNodeWithContentDescription("Goals tab").assertIsDisplayed()
+        rule.onNode(hasTestTag("goals_tab")).assertIsDisplayed()
     }
 
     /** Tap the FAB to create a new goal. */
@@ -74,10 +86,19 @@ class GoalRobot(
             .performTextInput(amount)
     }
 
-    /** Tap the Save Goal button. */
+    /**
+     * Tap the Save Goal button.
+     *
+     * Uses [performScrollToNode] on the [LazyColumn] to scroll
+     * the save button into view before clicking, since it may not
+     * be composed yet in the lazy list. Adds [waitForIdle] between
+     * scroll and click for API 34 emulator stability.
+     */
     fun tapSave() {
+        rule.waitForIdle()
         rule.onNode(hasScrollToNodeAction())
             .performScrollToNode(hasContentDescription("Save goal"))
+        rule.waitForIdle()
         rule.onNode(hasContentDescription("Save goal"))
             .performClick()
         rule.waitForIdle()
@@ -94,10 +115,17 @@ class GoalRobot(
             .assertIsDisplayed()
     }
 
-    /** Assert the save button has proper accessibility label. */
+    /**
+     * Assert the save button has proper accessibility label.
+     *
+     * Scrolls the [LazyColumn] to the save button first, since it may
+     * be below the fold on smaller screens with nested Scaffolds.
+     */
     fun assertSaveButtonAccessible() {
+        rule.waitForIdle()
         rule.onNode(hasScrollToNodeAction())
             .performScrollToNode(hasContentDescription("Save goal"))
+        rule.waitForIdle()
         rule.onNode(hasContentDescription("Save goal"))
             .assertIsDisplayed()
     }

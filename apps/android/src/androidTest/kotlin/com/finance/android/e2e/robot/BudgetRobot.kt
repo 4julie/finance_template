@@ -4,6 +4,7 @@ package com.finance.android.e2e.robot
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -35,7 +36,7 @@ class BudgetRobot(
 
     /** Assert the Budgets tab is selected in the Planning screen. */
     fun assertBudgetsTabVisible() {
-        rule.onNodeWithText("Budgets").assertIsDisplayed()
+        rule.onNode(hasTestTag("budgets_tab")).assertIsDisplayed()
     }
 
     /** Tap the FAB to create a new budget. */
