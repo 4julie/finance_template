@@ -78,6 +78,19 @@ function createFakeJwt(): string {
  * returning HTML error pages that break JSON parsing.
  */
 async function installAuthMocks(page: Page): Promise<void> {
+  // Catch-all for any /api/ path not explicitly mocked below.
+  // Route handlers are matched LIFO, so specific handlers registered after
+  // this one take priority.  This prevents unmocked requests from reaching
+  // the Vite dev server (which has no backend) and returning HTML responses
+  // that break JSON parsing in the app.
+  await page.route('**/api/**', async (route) => {
+    await route.fulfill({
+      status: 404,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Not found (E2E catch-all)' }),
+    });
+  });
+
   // Mock the login endpoint — returns a fake access token and user object.
   await page.route('**/api/auth/login', async (route) => {
     await route.fulfill({
@@ -90,15 +103,16 @@ async function installAuthMocks(page: Page): Promise<void> {
     });
   });
 
-  // Mock the token refresh endpoint — returns a fresh fake token.
+  // Mock the token refresh endpoint — return 401 (no existing session).
+  // AuthProvider calls tryRestoreSession() on mount which hits this endpoint.
+  // Returning 200 would auto-authenticate the user before the login form
+  // renders, causing the form-based login flow to be skipped entirely
+  // (the LoginPage redirects to /dashboard when already authenticated).
   await page.route('**/api/auth/refresh', async (route) => {
     await route.fulfill({
-      status: 200,
+      status: 401,
       contentType: 'application/json',
-      body: JSON.stringify({
-        access_token: createFakeJwt(),
-        expires_in: 3600,
-      }),
+      body: JSON.stringify({ error: 'No session' }),
     });
   });
 
