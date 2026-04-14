@@ -163,7 +163,22 @@ async function installAuthMocks(page: Page): Promise<void> {
  * that the React auth context receives valid tokens and user data.
  */
 async function loginViaForm(page: Page): Promise<void> {
-  await page.goto('/login');
+  // Navigate to the login page and verify the server is actually responding.
+  // On CI, shard 1 can hit a Vite server that's still starting — the
+  // explicit response check surfaces the problem immediately instead of
+  // silently timing out 60 s later on the email input locator.
+  const response = await page.goto('/login');
+  if (!response || response.status() >= 400) {
+    throw new Error(
+      `App not serving — /login returned ${response?.status() ?? 'no response'}. ` +
+        'Is the Vite server ready?',
+    );
+  }
+
+  // Wait for the DOM to be fully parsed before interacting with React-
+  // rendered elements.  This avoids a race where the response is received
+  // (goto resolves) but React hasn't mounted yet.
+  await page.waitForLoadState('domcontentloaded');
 
   // Wait for the login form to be fully rendered.
   const emailInput = page.getByLabel(/email/i);

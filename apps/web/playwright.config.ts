@@ -1,5 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
+const isCI = !!process.env.CI;
+
 export default defineConfig({
   // Allow 60 seconds per test — CI runners with cold Vite dev server +
   // SQLite-WASM initialization can exceed the 30-second default.
@@ -17,9 +19,18 @@ export default defineConfig({
     serviceWorkers: 'block',
   },
   webServer: {
-    command: 'npm run dev',
+    // CI already builds the app before running E2E tests, so use `vite
+    // preview` which serves the pre-built dist/ and starts near-instantly.
+    // Locally, use `vite` (dev server) for the HMR workflow.
+    command: isCI ? 'npx vite preview --port 5173' : 'npx vite --port 5173',
     port: 5173,
-    reuseExistingServer: true,
-    timeout: 60_000,
+    // On CI there is no existing server — always start a fresh one.
+    // Locally, reuse a server the developer may already have running.
+    reuseExistingServer: !isCI,
+    // Cold starts on CI runners can exceed 60s. Give plenty of headroom.
+    timeout: 120_000,
+    // Pipe server output so CI logs show startup errors.
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });
