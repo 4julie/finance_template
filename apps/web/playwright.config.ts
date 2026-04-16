@@ -8,6 +8,15 @@ export default defineConfig({
   // headroom for Vite preview startup + React mount + auth restore.
   timeout: 60_000,
   testDir: './e2e',
+
+  // Retry flaky tests in CI (0 retries locally for fast feedback)
+  retries: isCI ? 2 : 0,
+
+  // Use blob reporter in CI for shard merging, HTML locally for debugging
+  reporter: isCI
+    ? [['blob', { outputDir: 'blob-report' }], ['github']]
+    : [['html', { open: 'never' }]],
+
   use: {
     baseURL: 'http://localhost:5173',
     headless: true,
@@ -18,6 +27,10 @@ export default defineConfig({
     // the SW installs and claims the page via clients.claim().
     // Service worker behaviour is validated separately in unit tests.
     serviceWorkers: 'block',
+
+    // Capture traces and screenshots on first retry for flaky test debugging
+    trace: isCI ? 'on-first-retry' : 'off',
+    screenshot: isCI ? 'only-on-failure' : 'off',
   },
   webServer: {
     // CI already builds the app before running E2E tests, so use `vite
