@@ -121,48 +121,48 @@ All metrics must meet the targets defined in [Performance Baselines](performance
 
 ### 3.1 App Startup
 
-| Platform    | Target Cold Start | Measured | Pass? |
-| ----------- | ----------------- | -------- | ----- |
-| Android     | < 2.0s            | ___ms    | [ ]   |
-| iOS         | < 1.5s            | ___ms    | [ ]   |
-| Web         | < 2.0s (TTI)      | ___ms    | [ ]   |
-| Windows     | < 2.0s            | ___ms    | [ ]   |
+| Platform | Target Cold Start | Measured | Pass? |
+| -------- | ----------------- | -------- | ----- |
+| Android  | < 2.0s            | \_\_\_ms | [ ]   |
+| iOS      | < 1.5s            | \_\_\_ms | [ ]   |
+| Web      | < 2.0s (TTI)      | \_\_\_ms | [ ]   |
+| Windows  | < 2.0s            | \_\_\_ms | [ ]   |
 
 ### 3.2 Core Operations
 
-| Operation                  | Target   | Measured | Pass? |
-| -------------------------- | -------- | -------- | ----- |
-| Dashboard load             | < 200ms  | ___ms    | [ ]   |
-| SQLite aggregation query   | < 100ms  | ___ms    | [ ]   |
-| Transaction creation       | < 50ms   | ___ms    | [ ]   |
-| List scroll (60fps)        | ≥ 60fps  | ___fps   | [ ]   |
-| Memory usage               | < 150MB  | ___MB    | [ ]   |
+| Operation                | Target  | Measured  | Pass? |
+| ------------------------ | ------- | --------- | ----- |
+| Dashboard load           | < 200ms | \_\_\_ms  | [ ]   |
+| SQLite aggregation query | < 100ms | \_\_\_ms  | [ ]   |
+| Transaction creation     | < 50ms  | \_\_\_ms  | [ ]   |
+| List scroll (60fps)      | ≥ 60fps | \_\_\_fps | [ ]   |
+| Memory usage             | < 150MB | \_\_\_MB  | [ ]   |
 
 ### 3.3 Sync Performance
 
-| Metric              | Target   | Measured | Pass? |
-| ------------------- | -------- | -------- | ----- |
-| Initial sync (100 records) | < 5s  | ___s    | [ ]   |
-| Delta sync (10 changes)    | < 2s  | ___s    | [ ]   |
-| Conflict resolution        | < 1s  | ___s    | [ ]   |
-| Sync after offline (1h)    | < 10s | ___s    | [ ]   |
+| Metric                     | Target | Measured | Pass? |
+| -------------------------- | ------ | -------- | ----- |
+| Initial sync (100 records) | < 5s   | \_\_\_s  | [ ]   |
+| Delta sync (10 changes)    | < 2s   | \_\_\_s  | [ ]   |
+| Conflict resolution        | < 1s   | \_\_\_s  | [ ]   |
+| Sync after offline (1h)    | < 10s  | \_\_\_s  | [ ]   |
 
 ### 3.4 Web Core Vitals
 
-| Metric | Target | Measured | Pass? |
-| ------ | ------ | -------- | ----- |
-| LCP    | < 2.5s | ___s     | [ ]   |
-| FID    | < 100ms| ___ms    | [ ]   |
-| CLS    | < 0.1  | ___      | [ ]   |
-| TTI    | < 3.5s | ___s     | [ ]   |
+| Metric | Target  | Measured | Pass? |
+| ------ | ------- | -------- | ----- |
+| LCP    | < 2.5s  | \_\_\_s  | [ ]   |
+| FID    | < 100ms | \_\_\_ms | [ ]   |
+| CLS    | < 0.1   | \_\_\_   | [ ]   |
+| TTI    | < 3.5s  | \_\_\_s  | [ ]   |
 
 ### 3.5 API Performance
 
-| Endpoint              | Target P95 | Measured P95 | Pass? |
-| --------------------- | ---------- | ------------ | ----- |
-| `health-check`        | < 200ms    | ___ms        | [ ]   |
-| `passkey-authenticate` | < 1s      | ___ms        | [ ]   |
-| PostgREST queries     | < 200ms    | ___ms        | [ ]   |
+| Endpoint               | Target P95 | Measured P95 | Pass? |
+| ---------------------- | ---------- | ------------ | ----- |
+| `health-check`         | < 200ms    | \_\_\_ms     | [ ]   |
+| `passkey-authenticate` | < 1s       | \_\_\_ms     | [ ]   |
+| PostgREST queries      | < 200ms    | \_\_\_ms     | [ ]   |
 
 ---
 
@@ -357,18 +357,18 @@ All platforms must meet WCAG 2.2 AA as mandated in ADR-0001.
 
 ## 11. Sign-Off
 
-| Category                    | Status | Verified By | Date |
-| --------------------------- | ------ | ----------- | ---- |
-| Infrastructure Readiness    | ⬜     |             |      |
-| Security Sign-Off           | ⬜     |             |      |
-| Performance Benchmarks      | ⬜     |             |      |
-| Accessibility Compliance    | ⬜     |             |      |
-| Platform Pre-Launch         | ⬜     |             |      |
-| Data Integrity              | ⬜     |             |      |
-| Monitoring & Alerting       | ⬜     |             |      |
-| Disaster Recovery           | ⬜     |             |      |
-| Legal & Compliance          | ⬜     |             |      |
-| **LAUNCH APPROVED**         | ⬜     |             |      |
+| Category                 | Status | Verified By | Date |
+| ------------------------ | ------ | ----------- | ---- |
+| Infrastructure Readiness | ⬜     |             |      |
+| Security Sign-Off        | ⬜     |             |      |
+| Performance Benchmarks   | ⬜     |             |      |
+| Accessibility Compliance | ⬜     |             |      |
+| Platform Pre-Launch      | ⬜     |             |      |
+| Data Integrity           | ⬜     |             |      |
+| Monitoring & Alerting    | ⬜     |             |      |
+| Disaster Recovery        | ⬜     |             |      |
+| Legal & Compliance       | ⬜     |             |      |
+| **LAUNCH APPROVED**      | ⬜     |             |      |
 
 ---
 

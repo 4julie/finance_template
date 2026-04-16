@@ -261,11 +261,11 @@ Add this to a migration file (`services/api/supabase/migrations/`) so it's appli
 
 ### 2.4 Environment-Specific PowerSync URLs
 
-| Environment | PowerSync URL                                       |
-| ----------- | --------------------------------------------------- |
-| Local       | `http://localhost:8080` (or bypass in dev)           |
-| Staging     | `https://staging.finance.example.com/sync`          |
-| Production  | `https://finance.example.com/sync`                  |
+| Environment | PowerSync URL                              |
+| ----------- | ------------------------------------------ |
+| Local       | `http://localhost:8080` (or bypass in dev) |
+| Staging     | `https://staging.finance.example.com/sync` |
+| Production  | `https://finance.example.com/sync`         |
 
 ---
 
@@ -277,56 +277,56 @@ Navigate to **Repository Settings → Secrets and variables → Actions**.
 
 **Repository-level secrets** (shared across all workflows):
 
-| Secret                    | Purpose                                | How to Generate                          |
-| ------------------------- | -------------------------------------- | ---------------------------------------- |
-| `SENTRY_AUTH_TOKEN`       | Upload source maps/dSYMs to Sentry    | Sentry → Settings → Auth Tokens          |
-| `CODECOV_TOKEN`           | Upload coverage reports                | Codecov dashboard                        |
-| `TURBO_TOKEN`             | Turborepo remote cache                 | `npx turbo login && npx turbo link`      |
-| `TURBO_TEAM`              | Turborepo team slug                    | From Vercel dashboard                    |
+| Secret              | Purpose                            | How to Generate                     |
+| ------------------- | ---------------------------------- | ----------------------------------- |
+| `SENTRY_AUTH_TOKEN` | Upload source maps/dSYMs to Sentry | Sentry → Settings → Auth Tokens     |
+| `CODECOV_TOKEN`     | Upload coverage reports            | Codecov dashboard                   |
+| `TURBO_TOKEN`       | Turborepo remote cache             | `npx turbo login && npx turbo link` |
+| `TURBO_TEAM`        | Turborepo team slug                | From Vercel dashboard               |
 
 ### 3.2 GitHub Environment Secrets
 
 **Environment: `staging`**
 
-| Secret                       | Purpose                              |
-| ---------------------------- | ------------------------------------ |
-| `STAGING_DEPLOY_SSH_KEY`     | SSH private key for VPS deployment   |
-| `STAGING_VPS_HOST`           | VPS IP/hostname for staging          |
-| `STAGING_VPS_USER`           | SSH user on VPS                      |
-| `STAGING_SUPABASE_URL`       | `https://staging.finance.example.com`|
-| `STAGING_ANON_KEY`           | Staging Supabase anon key            |
-| `STAGING_SERVICE_ROLE_KEY`   | Staging Supabase service role key    |
+| Secret                     | Purpose                               |
+| -------------------------- | ------------------------------------- |
+| `STAGING_DEPLOY_SSH_KEY`   | SSH private key for VPS deployment    |
+| `STAGING_VPS_HOST`         | VPS IP/hostname for staging           |
+| `STAGING_VPS_USER`         | SSH user on VPS                       |
+| `STAGING_SUPABASE_URL`     | `https://staging.finance.example.com` |
+| `STAGING_ANON_KEY`         | Staging Supabase anon key             |
+| `STAGING_SERVICE_ROLE_KEY` | Staging Supabase service role key     |
 
 **Environment: `production`** (with manual approval gate)
 
-| Secret                       | Purpose                              |
-| ---------------------------- | ------------------------------------ |
-| `PROD_DEPLOY_SSH_KEY`        | SSH private key for VPS deployment   |
-| `PROD_VPS_HOST`              | VPS IP/hostname for production       |
-| `PROD_VPS_USER`              | SSH user on VPS                      |
-| `PROD_SUPABASE_URL`          | `https://finance.example.com`        |
-| `PROD_ANON_KEY`              | Production Supabase anon key         |
-| `PROD_SERVICE_ROLE_KEY`      | Production service role key          |
+| Secret                  | Purpose                            |
+| ----------------------- | ---------------------------------- |
+| `PROD_DEPLOY_SSH_KEY`   | SSH private key for VPS deployment |
+| `PROD_VPS_HOST`         | VPS IP/hostname for production     |
+| `PROD_VPS_USER`         | SSH user on VPS                    |
+| `PROD_SUPABASE_URL`     | `https://finance.example.com`      |
+| `PROD_ANON_KEY`         | Production Supabase anon key       |
+| `PROD_SERVICE_ROLE_KEY` | Production service role key        |
 
 **Platform release secrets** (in `production` environment):
 
-| Secret                       | Purpose                              |
-| ---------------------------- | ------------------------------------ |
-| `APPLE_API_KEY_ID`           | App Store Connect API key ID         |
-| `APPLE_API_KEY_ISSUER_ID`    | App Store Connect issuer ID          |
-| `APPLE_API_KEY_CONTENT`      | App Store Connect API private key    |
-| `MATCH_PASSWORD`             | Fastlane Match encryption password   |
-| `MATCH_GIT_URL`              | Git repo URL for Match certificates  |
-| `GOOGLE_PLAY_JSON_KEY`       | Play Console service account JSON    |
-| `ANDROID_KEYSTORE`           | Base64-encoded release keystore      |
-| `ANDROID_KEYSTORE_PASSWORD`  | Keystore password                    |
-| `ANDROID_KEY_ALIAS`          | Key alias within keystore            |
-| `ANDROID_KEY_PASSWORD`       | Key password                         |
-| `WINDOWS_SIGNING_CERT`       | Base64-encoded MSIX signing cert     |
-| `WINDOWS_SIGNING_CERT_PW`   | Certificate password                 |
-| `MS_STORE_SELLER_ID`         | Microsoft Partner Center seller ID   |
-| `MS_STORE_CLIENT_ID`         | Azure AD app client ID               |
-| `MS_STORE_CLIENT_SECRET`     | Azure AD app client secret           |
+| Secret                      | Purpose                             |
+| --------------------------- | ----------------------------------- |
+| `APPLE_API_KEY_ID`          | App Store Connect API key ID        |
+| `APPLE_API_KEY_ISSUER_ID`   | App Store Connect issuer ID         |
+| `APPLE_API_KEY_CONTENT`     | App Store Connect API private key   |
+| `MATCH_PASSWORD`            | Fastlane Match encryption password  |
+| `MATCH_GIT_URL`             | Git repo URL for Match certificates |
+| `GOOGLE_PLAY_JSON_KEY`      | Play Console service account JSON   |
+| `ANDROID_KEYSTORE`          | Base64-encoded release keystore     |
+| `ANDROID_KEYSTORE_PASSWORD` | Keystore password                   |
+| `ANDROID_KEY_ALIAS`         | Key alias within keystore           |
+| `ANDROID_KEY_PASSWORD`      | Key password                        |
+| `WINDOWS_SIGNING_CERT`      | Base64-encoded MSIX signing cert    |
+| `WINDOWS_SIGNING_CERT_PW`   | Certificate password                |
+| `MS_STORE_SELLER_ID`        | Microsoft Partner Center seller ID  |
+| `MS_STORE_CLIENT_ID`        | Azure AD app client ID              |
+| `MS_STORE_CLIENT_SECRET`    | Azure AD app client secret          |
 
 ### 3.3 GitHub Environment Configuration
 
@@ -413,20 +413,20 @@ supabase db migrations list --db-url <connection_string>
 
 Current Edge Functions in `services/api/supabase/functions/`:
 
-| Function               | Auth Required | Purpose                                  |
-| ---------------------- | ------------- | ---------------------------------------- |
-| `health-check`         | No            | Service health verification              |
-| `auth-webhook`         | Webhook secret| Auth event processing                    |
-| `passkey-register`     | JWT           | WebAuthn registration ceremony           |
-| `passkey-authenticate` | JWT           | WebAuthn authentication ceremony         |
-| `household-invite`     | JWT           | Send/manage household invitations        |
-| `account-deletion`     | JWT           | GDPR account deletion (crypto-shredding) |
-| `data-export`          | JWT           | GDPR data export                         |
-| `process-recurring`    | Cron secret   | Generate recurring transactions          |
-| `send-notification`    | Service role  | Push notification dispatch               |
-| `sync-health-report`   | JWT           | Client sync health reporting             |
-| `admin-dashboard`      | Service role  | Admin metrics and management             |
-| `manage-webhooks`      | JWT           | Webhook configuration                    |
+| Function               | Auth Required  | Purpose                                  |
+| ---------------------- | -------------- | ---------------------------------------- |
+| `health-check`         | No             | Service health verification              |
+| `auth-webhook`         | Webhook secret | Auth event processing                    |
+| `passkey-register`     | JWT            | WebAuthn registration ceremony           |
+| `passkey-authenticate` | JWT            | WebAuthn authentication ceremony         |
+| `household-invite`     | JWT            | Send/manage household invitations        |
+| `account-deletion`     | JWT            | GDPR account deletion (crypto-shredding) |
+| `data-export`          | JWT            | GDPR data export                         |
+| `process-recurring`    | Cron secret    | Generate recurring transactions          |
+| `send-notification`    | Service role   | Push notification dispatch               |
+| `sync-health-report`   | JWT            | Client sync health reporting             |
+| `admin-dashboard`      | Service role   | Admin metrics and management             |
+| `manage-webhooks`      | JWT            | Webhook configuration                    |
 
 ### 5.2 Deployment per Environment
 
@@ -461,14 +461,14 @@ docker compose -p <env> restart edge-functions
 
 Edge Functions receive environment variables via the Docker Compose configuration. All secrets are injected from the `.env` file — functions never contain hardcoded values.
 
-| Variable              | Used By                               |
-| --------------------- | ------------------------------------- |
-| `JWT_SECRET`          | All authenticated functions            |
-| `SUPABASE_DB_URL`     | Functions with direct DB access        |
-| `AUTH_WEBHOOK_SECRET`  | `auth-webhook`                        |
-| `CRON_SECRET`         | `process-recurring`                    |
+| Variable              | Used By                                    |
+| --------------------- | ------------------------------------------ |
+| `JWT_SECRET`          | All authenticated functions                |
+| `SUPABASE_DB_URL`     | Functions with direct DB access            |
+| `AUTH_WEBHOOK_SECRET` | `auth-webhook`                             |
+| `CRON_SECRET`         | `process-recurring`                        |
 | `WEBAUTHN_RP_*`       | `passkey-register`, `passkey-authenticate` |
-| `ALLOWED_ORIGINS`     | CORS configuration                     |
+| `ALLOWED_ORIGINS`     | CORS configuration                         |
 
 ---
 
@@ -557,11 +557,11 @@ The web app uses a service worker for offline support and cache management:
 
 ### 7.1 Required DNS Records
 
-| Record Type | Host                            | Value            | TTL   |
-| ----------- | ------------------------------- | ---------------- | ----- |
-| A           | `finance.example.com`           | `<VPS_IP>`       | 300   |
-| A           | `staging.finance.example.com`   | `<VPS_IP>`       | 300   |
-| CNAME       | `www.finance.example.com`       | `finance.example.com` | 3600 |
+| Record Type | Host                          | Value                 | TTL  |
+| ----------- | ----------------------------- | --------------------- | ---- |
+| A           | `finance.example.com`         | `<VPS_IP>`            | 300  |
+| A           | `staging.finance.example.com` | `<VPS_IP>`            | 300  |
+| CNAME       | `www.finance.example.com`     | `finance.example.com` | 3600 |
 
 ### 7.2 DNS Propagation Verification
 

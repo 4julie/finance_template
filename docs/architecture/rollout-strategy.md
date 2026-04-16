@@ -29,12 +29,12 @@ This document defines the phased rollout strategy for the Finance app across all
 Internal Testing → Closed Beta → Open Beta → Production (Staged Rollout)
 ```
 
-| Phase              | Audience             | Duration  | Entry Criteria                                          | Exit Criteria                                        |
-| ------------------ | -------------------- | --------- | ------------------------------------------------------- | ---------------------------------------------------- |
-| **Internal Testing** | Project owner + 5    | 1–3 days  | APK builds, basic smoke test passes                     | No P0/P1 crashes, core flows work                    |
-| **Closed Beta**    | ~20 invited testers   | 1–2 weeks | Internal testing signed off                              | Crash-free rate ≥ 99.5%, sync works, feedback addressed |
-| **Open Beta**      | Anyone who opts in    | 2–4 weeks | Closed beta metrics met                                 | Crash-free rate ≥ 99.8%, no data loss reports        |
-| **Production**     | Staged: 1% → 5% → 25% → 100% | 1–2 weeks | Open beta signed off                           | Each stage: no anomalies in crash/ANR rate for 24h   |
+| Phase                | Audience                     | Duration  | Entry Criteria                      | Exit Criteria                                           |
+| -------------------- | ---------------------------- | --------- | ----------------------------------- | ------------------------------------------------------- |
+| **Internal Testing** | Project owner + 5            | 1–3 days  | APK builds, basic smoke test passes | No P0/P1 crashes, core flows work                       |
+| **Closed Beta**      | ~20 invited testers          | 1–2 weeks | Internal testing signed off         | Crash-free rate ≥ 99.5%, sync works, feedback addressed |
+| **Open Beta**        | Anyone who opts in           | 2–4 weeks | Closed beta metrics met             | Crash-free rate ≥ 99.8%, no data loss reports           |
+| **Production**       | Staged: 1% → 5% → 25% → 100% | 1–2 weeks | Open beta signed off                | Each stage: no anomalies in crash/ANR rate for 24h      |
 
 **Release workflow:**
 
@@ -59,11 +59,11 @@ Tag: android/v1.0.0
 Internal TestFlight → External TestFlight → App Store (Phased Release)
 ```
 
-| Phase                    | Audience                 | Duration  | Entry Criteria                                      | Exit Criteria                                          |
-| ------------------------ | ------------------------ | --------- | --------------------------------------------------- | ------------------------------------------------------ |
-| **Internal TestFlight**  | Project owner + 5 (Apple ID invited) | 1–3 days | IPA builds, basic smoke test passes              | No P0/P1 crashes, core flows work                      |
-| **External TestFlight**  | Up to 10,000 beta testers | 2–4 weeks | Internal signed off, TestFlight review passed       | Crash-free ≥ 99.5%, no data loss, privacy review OK    |
-| **App Store (Phased)**   | 1% → 2% → 5% → 10% → 20% → 50% → 100% | 7 days auto | External beta signed off, App Store review passed | Each day: no anomalies in crash rate                    |
+| Phase                   | Audience                              | Duration    | Entry Criteria                                    | Exit Criteria                                       |
+| ----------------------- | ------------------------------------- | ----------- | ------------------------------------------------- | --------------------------------------------------- |
+| **Internal TestFlight** | Project owner + 5 (Apple ID invited)  | 1–3 days    | IPA builds, basic smoke test passes               | No P0/P1 crashes, core flows work                   |
+| **External TestFlight** | Up to 10,000 beta testers             | 2–4 weeks   | Internal signed off, TestFlight review passed     | Crash-free ≥ 99.5%, no data loss, privacy review OK |
+| **App Store (Phased)**  | 1% → 2% → 5% → 10% → 20% → 50% → 100% | 7 days auto | External beta signed off, App Store review passed | Each day: no anomalies in crash rate                |
 
 **Release workflow:**
 
@@ -91,11 +91,11 @@ Tag: ios/v1.0.0
 Staging → Canary (Shadow) → Production CDN
 ```
 
-| Phase              | Audience               | Duration    | Entry Criteria                           | Exit Criteria                                    |
-| ------------------ | ---------------------- | ----------- | ---------------------------------------- | ------------------------------------------------ |
-| **Staging**        | Project owner + testers | Automatic   | Merge to main, CI passes                 | Manual smoke test passes                         |
-| **Canary**         | 5% of production traffic | 1–2 hours | Staging signed off, manual promotion      | Error rate ≤ baseline, no P0/P1, performance OK  |
-| **Production**     | 100% of traffic         | Instant     | Canary signed off                        | Monitoring confirms stability                     |
+| Phase          | Audience                 | Duration  | Entry Criteria                       | Exit Criteria                                   |
+| -------------- | ------------------------ | --------- | ------------------------------------ | ----------------------------------------------- |
+| **Staging**    | Project owner + testers  | Automatic | Merge to main, CI passes             | Manual smoke test passes                        |
+| **Canary**     | 5% of production traffic | 1–2 hours | Staging signed off, manual promotion | Error rate ≤ baseline, no P0/P1, performance OK |
+| **Production** | 100% of traffic          | Instant   | Canary signed off                    | Monitoring confirms stability                   |
 
 **Release workflow:**
 
@@ -122,11 +122,11 @@ Tag: web/v1.0.0 (or merge to main for continuous deployment)
 Sideload (Dev) → Windows Insider / Flight Ring → Microsoft Store
 ```
 
-| Phase                     | Audience                | Duration  | Entry Criteria                            | Exit Criteria                                    |
-| ------------------------- | ----------------------- | --------- | ----------------------------------------- | ------------------------------------------------ |
-| **Sideload**              | Project owner           | 1–3 days  | MSIX package builds, basic smoke test     | No P0/P1 crashes, core flows work                |
-| **Flight Ring (Package Flight)** | ~20 invited testers | 1–2 weeks | Sideload signed off                       | Crash-free ≥ 99.5%, sync works                    |
-| **Microsoft Store**       | General availability    | Immediate | Flight ring signed off, Store review passed | Monitoring confirms stability                     |
+| Phase                            | Audience             | Duration  | Entry Criteria                              | Exit Criteria                     |
+| -------------------------------- | -------------------- | --------- | ------------------------------------------- | --------------------------------- |
+| **Sideload**                     | Project owner        | 1–3 days  | MSIX package builds, basic smoke test       | No P0/P1 crashes, core flows work |
+| **Flight Ring (Package Flight)** | ~20 invited testers  | 1–2 weeks | Sideload signed off                         | Crash-free ≥ 99.5%, sync works    |
+| **Microsoft Store**              | General availability | Immediate | Flight ring signed off, Store review passed | Monitoring confirms stability     |
 
 **Release workflow:**
 
@@ -190,13 +190,13 @@ data class FeatureFlag(
 
 ### 2.3 Flag Types
 
-| Type              | Example                           | Evaluation         | Lifetime           |
-| ----------------- | --------------------------------- | ------------------ | ------------------ |
-| **Release flag**  | `enable_csv_import`               | Boolean            | Remove after 100%  |
-| **Ops flag**      | `enable_powersync_v2`             | Boolean            | Keep permanently   |
-| **Experiment**    | `onboarding_flow_variant`         | String (A/B/C)     | Remove after test  |
-| **Permission**    | `enable_premium_features`         | Boolean (per-user) | Keep permanently   |
-| **Kill switch**   | `disable_bank_sync`               | Boolean            | Keep permanently   |
+| Type             | Example                   | Evaluation         | Lifetime          |
+| ---------------- | ------------------------- | ------------------ | ----------------- |
+| **Release flag** | `enable_csv_import`       | Boolean            | Remove after 100% |
+| **Ops flag**     | `enable_powersync_v2`     | Boolean            | Keep permanently  |
+| **Experiment**   | `onboarding_flow_variant` | String (A/B/C)     | Remove after test |
+| **Permission**   | `enable_premium_features` | Boolean (per-user) | Keep permanently  |
+| **Kill switch**  | `disable_bank_sync`       | Boolean            | Keep permanently  |
 
 ### 2.4 Flag Storage
 
@@ -268,12 +268,12 @@ Flag created (default: false, 0%)
 
 ### 3.1 Rollback Decision Matrix
 
-| Component       | Rollback Speed | Rollback Method                              | User Impact During Rollback           |
-| --------------- | -------------- | -------------------------------------------- | ------------------------------------- |
-| Web app         | Seconds        | Re-deploy previous build artifact            | Brief flash; service worker update    |
-| Edge Functions  | Seconds        | `docker compose` restart with previous image | Functions unavailable for ~5s         |
-| Database schema | Minutes–Hours  | Run reverse migration                        | Depends on migration (see §3.3)      |
-| PowerSync rules | Minutes        | Redeploy previous sync-rules.yaml            | Clients re-sync (may be slow)         |
+| Component       | Rollback Speed | Rollback Method                              | User Impact During Rollback             |
+| --------------- | -------------- | -------------------------------------------- | --------------------------------------- |
+| Web app         | Seconds        | Re-deploy previous build artifact            | Brief flash; service worker update      |
+| Edge Functions  | Seconds        | `docker compose` restart with previous image | Functions unavailable for ~5s           |
+| Database schema | Minutes–Hours  | Run reverse migration                        | Depends on migration (see §3.3)         |
+| PowerSync rules | Minutes        | Redeploy previous sync-rules.yaml            | Clients re-sync (may be slow)           |
 | Android app     | Days           | Halt rollout + ship hotfix                   | Users on bad version stuck until update |
 | iOS app         | Days           | Pause phased release + ship hotfix           | Users on bad version stuck until update |
 | Windows app     | Days           | Ship new flight + hotfix                     | Users on bad version stuck until update |
@@ -307,11 +307,11 @@ services/api/supabase/migrations/
 
 **Rollback safety categories:**
 
-| Category           | Example                        | Rollback Risk | Strategy                             |
-| ------------------ | ------------------------------ | ------------- | ------------------------------------ |
-| Additive (safe)    | Add column, add table, add index | None        | Drop column/table/index              |
-| Destructive (risky)| Drop column, change type       | Data loss     | Never do in one step — use expand/contract |
-| Data migration     | Backfill column, merge tables  | Data loss     | Keep old column readable during transition |
+| Category            | Example                          | Rollback Risk | Strategy                                   |
+| ------------------- | -------------------------------- | ------------- | ------------------------------------------ |
+| Additive (safe)     | Add column, add table, add index | None          | Drop column/table/index                    |
+| Destructive (risky) | Drop column, change type         | Data loss     | Never do in one step — use expand/contract |
+| Data migration      | Backfill column, merge tables    | Data loss     | Keep old column readable during transition |
 
 **Expand/Contract pattern for risky migrations:**
 
@@ -448,22 +448,22 @@ Design experiment → Create flag → Assign variants → Run (2–4 weeks)
 
 Per ADR-0006, platform-prefixed tags trigger platform-specific release workflows:
 
-| Tag Pattern          | Triggers                | Example           |
-| -------------------- | ----------------------- | ----------------- |
-| `ios/v{semver}`      | `release-ios.yml`       | `ios/v1.3.0`      |
-| `android/v{semver}`  | `release-android.yml`   | `android/v1.3.0`  |
-| `web/v{semver}`      | `release-web.yml`       | `web/v2.1.0`      |
-| `windows/v{semver}`  | `release-windows.yml`   | `windows/v1.3.0`  |
-| `v{semver}`          | `release.yml` (GitHub Release) | `v1.0.0`    |
+| Tag Pattern         | Triggers                       | Example          |
+| ------------------- | ------------------------------ | ---------------- |
+| `ios/v{semver}`     | `release-ios.yml`              | `ios/v1.3.0`     |
+| `android/v{semver}` | `release-android.yml`          | `android/v1.3.0` |
+| `web/v{semver}`     | `release-web.yml`              | `web/v2.1.0`     |
+| `windows/v{semver}` | `release-windows.yml`          | `windows/v1.3.0` |
+| `v{semver}`         | `release.yml` (GitHub Release) | `v1.0.0`         |
 
 **Pre-release tags:**
 
-| Suffix     | Meaning                  | Example                |
-| ---------- | ------------------------ | ---------------------- |
-| `-alpha.N` | Internal testing only    | `android/v1.3.0-alpha.1` |
-| `-beta.N`  | External beta testing    | `ios/v1.3.0-beta.3`   |
-| `-rc.N`    | Release candidate        | `web/v2.1.0-rc.1`     |
-| (none)     | Production release       | `android/v1.3.0`      |
+| Suffix     | Meaning               | Example                  |
+| ---------- | --------------------- | ------------------------ |
+| `-alpha.N` | Internal testing only | `android/v1.3.0-alpha.1` |
+| `-beta.N`  | External beta testing | `ios/v1.3.0-beta.3`      |
+| `-rc.N`    | Release candidate     | `web/v2.1.0-rc.1`        |
+| (none)     | Production release    | `android/v1.3.0`         |
 
 ---
 
