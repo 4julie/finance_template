@@ -1,0 +1,164 @@
+{
+  "$description": "Semantic tokens for cognitive accessibility mode. Remaps the type scale, spacing, and layout tokens to larger, more readable, and less complex values. These tokens are applied when the user enables cognitive accessibility mode via [data-a11y-cognitive='true']. All font sizes are stepped up to improve readability; line heights use the relaxed scale; component spacing is increased for clearer visual separation.",
+  "cognitiveTypeScale": {
+    "display": {
+      "fontSize": {
+        "$value": "{fontSize.4xl}",
+        "$type": "dimension",
+        "$description": "Display text in cognitive mode — stepped down from 48px to 36px for less visual overwhelm while remaining prominent."
+      },
+      "fontWeight": {
+        "$value": "{fontWeight.bold}",
+        "$type": "fontWeight"
+      },
+      "lineHeight": {
+        "$value": "{lineHeight.normal}",
+        "$type": "number",
+        "$description": "Relaxed from tight (1.25) to normal (1.5) for improved readability."
+      }
+    },
+    "headline": {
+      "fontSize": {
+        "$value": "{fontSize.2xl}",
+        "$type": "dimension",
+        "$description": "Headline in cognitive mode — 24px, clearer hierarchy without overwhelming."
+      },
+      "fontWeight": {
+        "$value": "{fontWeight.semibold}",
+        "$type": "fontWeight"
+      },
+      "lineHeight": {
+        "$value": "{lineHeight.normal}",
+        "$type": "number",
+        "$description": "Relaxed from tight (1.25) to normal (1.5)."
+      }
+    },
+    "title": {
+      "fontSize": {
+        "$value": "{fontSize.xl}",
+        "$type": "dimension",
+        "$description": "Title in cognitive mode — remains 20px but with relaxed line height."
+      },
+      "fontWeight": {
+        "$value": "{fontWeight.semibold}",
+        "$type": "fontWeight"
+      },
+      "lineHeight": {
+        "$value": "{lineHeight.relaxed}",
+        "$type": "number",
+        "$description": "Relaxed from normal (1.5) to relaxed (1.75)."
+      }
+    },
+    "body": {
+      "fontSize": {
+        "$value": "{fontSize.lg}",
+        "$type": "dimension",
+        "$description": "Body text in cognitive mode — stepped up from 16px to 18px for improved readability."
+      },
+      "fontWeight": {
+        "$value": "{fontWeight.regular}",
+        "$type": "fontWeight"
+      },
+      "lineHeight": {
+        "$value": "{lineHeight.relaxed}",
+        "$type": "number",
+        "$description": "Relaxed from normal (1.5) to relaxed (1.75) for improved reading flow."
+      }
+    },
+    "label": {
+      "fontSize": {
+        "$value": "{fontSize.base}",
+        "$type": "dimension",
+        "$description": "Label text in cognitive mode — stepped up from 14px to 16px for readability."
+      },
+      "fontWeight": {
+        "$value": "{fontWeight.medium}",
+        "$type": "fontWeight"
+      },
+      "lineHeight": {
+        "$value": "{lineHeight.relaxed}",
+        "$type": "number",
+        "$description": "Relaxed from normal (1.5) to relaxed (1.75)."
+      }
+    },
+    "caption": {
+      "fontSize": {
+        "$value": "{fontSize.sm}",
+        "$type": "dimension",
+        "$description": "Caption text in cognitive mode — stepped up from 12px to 14px. 12px is too small for users with cognitive needs."
+      },
+      "fontWeight": {
+        "$value": "{fontWeight.regular}",
+        "$type": "fontWeight"
+      },
+      "lineHeight": {
+        "$value": "{lineHeight.relaxed}",
+        "$type": "number",
+        "$description": "Relaxed from normal (1.5) to relaxed (1.75)."
+      }
+    }
+  },
+  "cognitiveSpacing": {
+    "$description": "Enhanced spacing values for cognitive mode — increased white space between elements reduces visual clutter and improves scanability.",
+    "sectionGap": {
+      "$value": "{spacing.8}",
+      "$type": "dimension",
+      "$description": "Gap between major page sections — 32px (up from typical 24px)."
+    },
+    "cardGap": {
+      "$value": "{spacing.6}",
+      "$type": "dimension",
+      "$description": "Gap between cards in a list or grid — 24px (up from typical 16px)."
+    },
+    "elementGap": {
+      "$value": "{spacing.4}",
+      "$type": "dimension",
+      "$description": "Gap between elements within a section — 16px (up from typical 8-12px)."
+    },
+    "inlinePadding": {
+      "$value": "{spacing.6}",
+      "$type": "dimension",
+      "$description": "Horizontal padding inside containers — 24px (up from typical 16px)."
+    },
+    "blockPadding": {
+      "$value": "{spacing.5}",
+      "$type": "dimension",
+      "$description": "Vertical padding inside containers — 20px (up from typical 16px)."
+    }
+  },
+  "cognitiveFocus": {
+    "$description": "Enhanced focus indicator tokens for cognitive mode — thicker, more visible focus rings.",
+    "ringWidth": {
+      "$value": "{cognitive.focusRingWidth}",
+      "$type": "dimension",
+      "$description": "3px focus ring width (up from default 2px)."
+    },
+    "ringOffset": {
+      "$value": "{cognitive.focusRingOffset}",
+      "$type": "dimension",
+      "$description": "3px focus ring offset (up from default 2px)."
+    }
+  },
+  "cognitiveElevation": {
+    "$description": "Simplified elevation tokens for cognitive mode — flatter UI reduces visual noise.",
+    "none": {
+      "$value": "{shadow.none}",
+      "$type": "shadow"
+    },
+    "low": {
+      "$value": "{shadow.sm}",
+      "$type": "shadow",
+      "$description": "Cognitive mode uses minimal shadow to reduce visual noise."
+    },
+    "medium": {
+      "$value": "{shadow.sm}",
+      "$type": "shadow",
+      "$description": "Flattened — cognitive mode uses sm shadow instead of md for reduced visual complexity."
+    },
+    "high": {
+      "$value": "{shadow.md}",
+      "$type": "shadow",
+      "$description": "Flattened — cognitive mode uses md shadow instead of lg for reduced visual complexity."
+    }
+  }
+}

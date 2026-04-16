@@ -25,6 +25,9 @@
 /* OLED dark theme override — true black backgrounds for AMOLED battery savings */
 @import '../../../../packages/design-tokens/build/web/tokens-dark-oled.css';
 
+/* Cognitive accessibility mode — simplified UI, larger targets, no motion */
+@import '../styles/cognitive.css';
+
 /*
  * System preference: auto-apply dark theme when the OS prefers dark mode.
  * Users can still override by toggling [data-theme] on <html>.

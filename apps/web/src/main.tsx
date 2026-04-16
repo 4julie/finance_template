@@ -42,14 +42,26 @@ const authConfig = {
 // storage) into the critical startup path.  This prevents the app from
 // hanging in environments where those modules' transitive dependencies
 // cause issues (e.g. E2E tests under Playwright).
+// NOTE: configureSyncEndpoint is only available on branches with #535 sync wiring.
+// Skip sync configuration when the function doesn't exist.
 const supabaseUrl = authConfig.supabaseUrl;
 if (supabaseUrl && !supabaseUrl.includes('placeholder')) {
-  void import('./db/sync/replayMutations').then(({ configureSyncEndpoint }) => {
-    configureSyncEndpoint({
-      baseUrl: `${supabaseUrl}/functions/v1`,
-      pushEndpoint: '/sync-push',
-      apiKey: authConfig.supabaseAnonKey,
-    });
+  void import('./db/sync/replayMutations').then((mod) => {
+    if ('configureSyncEndpoint' in mod) {
+      (
+        mod as {
+          configureSyncEndpoint: (cfg: {
+            baseUrl: string;
+            pushEndpoint: string;
+            apiKey: string;
+          }) => void;
+        }
+      ).configureSyncEndpoint({
+        baseUrl: `${supabaseUrl}/functions/v1`,
+        pushEndpoint: '/sync-push',
+        apiKey: authConfig.supabaseAnonKey,
+      });
+    }
   });
 }
 
