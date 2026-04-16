@@ -17,7 +17,7 @@
 #   80   — HTTP  (redirects to HTTPS)
 #   443  — HTTPS (automatic Let's Encrypt via Caddy)
 #
-# Issue: #268
+# Issues: #268, #897
 # =============================================================================
 
 services:
@@ -268,6 +268,7 @@ services:
       TLS_EMAIL: ${TLS_EMAIL}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${WEB_DIST_PATH:-../apps/web/dist}:/srv/web:ro
       - caddy_data:/data
       - caddy_config:/config
     healthcheck:
