@@ -180,6 +180,74 @@ export function rateLimitResponse(
 }
 
 // ---------------------------------------------------------------------------
+// Success response headers
+// ---------------------------------------------------------------------------
+
+/**
+ * Build `X-RateLimit-*` headers for **successful** (non-429) responses.
+ *
+ * Best-practice: include rate-limit metadata on every response so clients
+ * can proactively back off before hitting the limit. This avoids surprise
+ * 429s and enables client-side adaptive polling.
+ *
+ * Returns a plain object suitable for spreading into a Response's headers:
+ * ```ts
+ * return new Response(body, {
+ *   headers: { ...otherHeaders, ...rateLimitHeaders(result, config) },
+ * });
+ * ```
+ *
+ * @param result  The rate limit check result from {@link checkRateLimit}.
+ * @param config  The rate limit configuration for this endpoint.
+ */
+export function rateLimitHeaders(
+  result: RateLimitResult,
+  config: RateLimitConfig,
+): Record<string, string> {
+  return {
+    'X-RateLimit-Limit': String(config.maxRequests),
+    'X-RateLimit-Remaining': String(result.remaining),
+    'X-RateLimit-Reset': result.resetAt.toISOString(),
+  };
+}
+
+/**
+ * Append rate-limit headers to an existing Response without mutating it.
+ *
+ * Creates a new Response with the same body and status, merging in
+ * `X-RateLimit-*` headers. Use this to annotate any response after a
+ * successful rate-limit check:
+ *
+ * ```ts
+ * const rl = await checkRateLimit(client, id, RATE_LIMITS['my-fn']);
+ * if (!rl.allowed) return rateLimitResponse(req, rl, RATE_LIMITS['my-fn']);
+ * const response = jsonResponse(req, data);
+ * return appendRateLimitHeaders(response, rl, RATE_LIMITS['my-fn']);
+ * ```
+ *
+ * @param response  The original response to augment.
+ * @param result    The rate limit check result.
+ * @param config    The rate limit configuration for this endpoint.
+ * @returns A new Response with rate-limit headers appended.
+ */
+export function appendRateLimitHeaders(
+  response: Response,
+  result: RateLimitResult,
+  config: RateLimitConfig,
+): Response {
+  const headers = new Headers(response.headers);
+  const rlHeaders = rateLimitHeaders(result, config);
+  for (const [key, value] of Object.entries(rlHeaders)) {
+    headers.set(key, value);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+// ---------------------------------------------------------------------------
 // IP extraction helper
 // ---------------------------------------------------------------------------
 
