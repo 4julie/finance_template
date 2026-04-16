@@ -1,0 +1,269 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/**
+ * Dashboard widget and customization panel styles.
+ *
+ * Uses CSS custom properties from the design-tokens package.
+ * Mobile-first with responsive breakpoints.
+ *
+ * References: issue #315
+ */
+
+/* ---------------------------------------------------------------------------
+ * Widget grid container (applied to the parent section)
+ * ------------------------------------------------------------------------- */
+
+.widget-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--layout-card-gap, var(--spacing-4));
+  width: 100%;
+}
+
+/* Tablet: 2-column grid */
+@media (min-width: 640px) {
+  .widget-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .widget--large {
+    grid-column: span 2;
+  }
+}
+
+/* Desktop: 3-column grid */
+@media (min-width: 1024px) {
+  .widget-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .widget--small {
+    grid-column: span 1;
+  }
+
+  .widget--medium {
+    grid-column: span 1;
+  }
+
+  .widget--large {
+    grid-column: span 2;
+  }
+}
+
+/* Wide desktop: large spans 3 if enough room */
+@media (min-width: 1280px) {
+  .widget-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .widget--large {
+    grid-column: span 2;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Individual widget card
+ * ------------------------------------------------------------------------- */
+
+.widget {
+  background: var(--semantic-background-primary);
+  border: 1px solid var(--semantic-border-default);
+  border-radius: var(--card-border-radius, var(--border-radius-md));
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.widget__header {
+  padding: var(--spacing-4) var(--spacing-4) var(--spacing-2);
+}
+
+.widget__title {
+  font-size: var(--type-scale-body-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--semantic-text-secondary);
+  margin: 0;
+}
+
+.widget__body {
+  padding: var(--spacing-2) var(--spacing-4) var(--spacing-4);
+  flex: 1;
+}
+
+/* ---------------------------------------------------------------------------
+ * Customize dashboard button
+ * ------------------------------------------------------------------------- */
+
+.dashboard-customize-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--semantic-border-default);
+  border-radius: var(--border-radius-md);
+  background: var(--semantic-background-primary);
+  color: var(--semantic-text-secondary);
+  font: inherit;
+  font-size: var(--type-scale-caption-font-size);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color var(--duration-fast, 100ms) ease;
+}
+
+.dashboard-customize-btn:hover {
+  background: var(--semantic-background-secondary);
+}
+
+.dashboard-customize-btn:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Customization panel
+ * ------------------------------------------------------------------------- */
+
+.customize-panel {
+  max-width: 560px;
+}
+
+.customize-panel__description {
+  color: var(--semantic-text-secondary);
+  font-size: var(--type-scale-body-font-size);
+  margin: 0 0 var(--spacing-4);
+  line-height: var(--line-height-relaxed, 1.5);
+}
+
+.customize-panel__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.customize-panel__item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border: 1px solid var(--semantic-border-default);
+  border-radius: var(--border-radius-md);
+  background: var(--semantic-background-primary);
+}
+
+.customize-panel__toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  flex: 1;
+  cursor: pointer;
+}
+
+.customize-panel__toggle input[type='checkbox'] {
+  margin-top: 2px;
+  accent-color: var(--semantic-interactive-default);
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.customize-panel__label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customize-panel__name {
+  font-size: var(--type-scale-body-font-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--semantic-text-primary);
+}
+
+.customize-panel__desc {
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+}
+
+.customize-panel__reorder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.customize-panel__move-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--semantic-border-default);
+  border-radius: var(--border-radius-sm, 4px);
+  background: var(--semantic-background-primary);
+  color: var(--semantic-text-primary);
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.customize-panel__move-btn:hover:not(:disabled) {
+  background: var(--semantic-background-secondary);
+}
+
+.customize-panel__move-btn:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: 1px;
+}
+
+.customize-panel__move-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------------------
+ * Dark mode
+ * ------------------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .customize-panel__item {
+    background: var(--semantic-background-secondary);
+  }
+}
+
+[data-theme='dark'] .customize-panel__item {
+  background: var(--semantic-background-secondary);
+}
+
+/* ---------------------------------------------------------------------------
+ * Reduced motion
+ * ------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-customize-btn {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * High contrast
+ * ------------------------------------------------------------------------- */
+
+@media (prefers-contrast: more) {
+  .widget {
+    border-width: 2px;
+  }
+
+  .customize-panel__item {
+    border-width: 2px;
+  }
+
+  .customize-panel__move-btn {
+    border-width: 2px;
+  }
+}
