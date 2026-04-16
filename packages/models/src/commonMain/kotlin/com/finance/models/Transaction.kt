@@ -19,6 +19,7 @@ enum class TransactionStatus { PENDING, CLEARED, RECONCILED, VOID }
 data class Transaction(
     val id: SyncId,
     val householdId: SyncId,
+    val ownerId: SyncId,
     val accountId: SyncId,
     val categoryId: SyncId? = null,
     val type: TransactionType,

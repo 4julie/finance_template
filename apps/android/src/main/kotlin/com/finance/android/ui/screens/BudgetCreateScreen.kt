@@ -357,12 +357,12 @@ private fun BudgetCreateFormPreview() {
         BudgetCreateForm(
             state = BudgetCreateUiState(
                 categories = listOf(
-                    Category(SyncId("cat-1"), SyncId("h-1"), "Groceries", createdAt = now, updatedAt = now),
-                    Category(SyncId("cat-2"), SyncId("h-1"), "Dining Out", createdAt = now, updatedAt = now),
-                    Category(SyncId("cat-3"), SyncId("h-1"), "Transportation", createdAt = now, updatedAt = now),
-                    Category(SyncId("cat-4"), SyncId("h-1"), "Entertainment", createdAt = now, updatedAt = now),
+                    Category(SyncId("cat-1"), SyncId("h-1"), SyncId("owner-1"), "Groceries", createdAt = now, updatedAt = now),
+                    Category(SyncId("cat-2"), SyncId("h-1"), SyncId("owner-1"), "Dining Out", createdAt = now, updatedAt = now),
+                    Category(SyncId("cat-3"), SyncId("h-1"), SyncId("owner-1"), "Transportation", createdAt = now, updatedAt = now),
+                    Category(SyncId("cat-4"), SyncId("h-1"), SyncId("owner-1"), "Entertainment", createdAt = now, updatedAt = now),
                 ),
-                selectedCategory = Category(SyncId("cat-1"), SyncId("h-1"), "Groceries", createdAt = now, updatedAt = now),
+                selectedCategory = Category(SyncId("cat-1"), SyncId("h-1"), SyncId("owner-1"), "Groceries", createdAt = now, updatedAt = now),
                 amount = "600.00",
                 period = BudgetPeriod.MONTHLY,
             ),
@@ -397,7 +397,7 @@ private fun BudgetCreateSavingPreview() {
     FinanceTheme(dynamicColor = false) {
         BudgetCreateForm(
             state = BudgetCreateUiState(
-                selectedCategory = Category(SyncId("cat-1"), SyncId("h-1"), "Groceries", createdAt = now, updatedAt = now),
+                selectedCategory = Category(SyncId("cat-1"), SyncId("h-1"), SyncId("owner-1"), "Groceries", createdAt = now, updatedAt = now),
                 amount = "300.00",
                 period = BudgetPeriod.WEEKLY,
                 isSaving = true,

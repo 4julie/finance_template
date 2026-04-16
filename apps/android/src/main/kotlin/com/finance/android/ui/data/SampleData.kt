@@ -158,17 +158,17 @@ object SampleData {
     // -- Factory helpers ------------------------------------------------------
 
     private fun category(id: String, name: String, icon: String, isIncome: Boolean = false) =
-        Category(id = SyncId(id), householdId = SyncId("household-1"), name = name, icon = icon,
+        Category(id = SyncId(id), householdId = SyncId("household-1"), ownerId = SyncId("owner-1"), name = name, icon = icon,
             color = null, parentId = null, isIncome = isIncome, isSystem = false, sortOrder = 0,
             createdAt = now, updatedAt = now)
 
     private fun account(id: String, name: String, type: AccountType, balanceCents: Long) =
-        Account(id = SyncId(id), householdId = SyncId("household-1"), name = name, type = type,
+        Account(id = SyncId(id), householdId = SyncId("household-1"), ownerId = SyncId("owner-1"), name = name, type = type,
             currency = Currency.USD, currentBalance = Cents(balanceCents), isArchived = false,
             sortOrder = 0, icon = null, color = null, createdAt = now, updatedAt = now)
 
     private fun budget(id: String, categoryId: String, name: String, amountCents: Long, period: BudgetPeriod) =
-        Budget(id = SyncId(id), householdId = SyncId("household-1"), categoryId = SyncId(categoryId),
+        Budget(id = SyncId(id), householdId = SyncId("household-1"), ownerId = SyncId("owner-1"), categoryId = SyncId(categoryId),
             name = name, amount = Cents(amountCents), currency = Currency.USD, period = period,
             startDate = LocalDate(today.year, today.month, 1), isRollover = false,
             createdAt = now, updatedAt = now)
@@ -178,7 +178,7 @@ object SampleData {
         targetDate: LocalDate?, status: GoalStatus = GoalStatus.ACTIVE,
         icon: String? = null, accountId: String? = null,
     ) = Goal(
-        id = SyncId(id), householdId = SyncId("household-1"), name = name,
+        id = SyncId(id), householdId = SyncId("household-1"), ownerId = SyncId("owner-1"), name = name,
         targetAmount = Cents(targetCents), currentAmount = Cents(currentCents),
         currency = Currency.USD, targetDate = targetDate, status = status,
         icon = icon, color = null, accountId = accountId?.let { SyncId(it) },
@@ -187,7 +187,7 @@ object SampleData {
 
     private fun expense(id: String, payee: String, amountCents: Long, categoryId: String,
         accountId: String, date: LocalDate, note: String? = null) =
-        Transaction(id = SyncId(id), householdId = SyncId("household-1"),
+        Transaction(id = SyncId(id), householdId = SyncId("household-1"), ownerId = SyncId("owner-1"),
             accountId = SyncId(accountId), categoryId = SyncId(categoryId),
             type = TransactionType.EXPENSE, status = TransactionStatus.CLEARED,
             amount = Cents(-amountCents), currency = Currency.USD, payee = payee,
@@ -195,7 +195,7 @@ object SampleData {
 
     private fun income(id: String, payee: String, amountCents: Long, categoryId: String,
         accountId: String, date: LocalDate) =
-        Transaction(id = SyncId(id), householdId = SyncId("household-1"),
+        Transaction(id = SyncId(id), householdId = SyncId("household-1"), ownerId = SyncId("owner-1"),
             accountId = SyncId(accountId), categoryId = SyncId(categoryId),
             type = TransactionType.INCOME, status = TransactionStatus.CLEARED,
             amount = Cents(amountCents), currency = Currency.USD, payee = payee,

@@ -156,6 +156,7 @@ class GoalCreateViewModel(
                 val goal = Goal(
                     id = SyncId(UUID.randomUUID().toString()),
                     householdId = householdId,
+                    ownerId = householdId,
                     name = s.name.trim(),
                     targetAmount = targetCents,
                     currentAmount = Cents.ZERO,

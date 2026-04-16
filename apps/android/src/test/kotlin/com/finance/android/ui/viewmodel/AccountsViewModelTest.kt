@@ -80,6 +80,7 @@ class AccountsViewModelTest {
     ) = Account(
         id = SyncId(id),
         householdId = householdId,
+        ownerId = householdId,
         name = name,
         type = type,
         currency = Currency.USD,
@@ -101,6 +102,7 @@ class AccountsViewModelTest {
         return Transaction(
             id = SyncId(id),
             householdId = householdId,
+            ownerId = householdId,
             accountId = SyncId(accountId),
             type = type,
             status = TransactionStatus.CLEARED,

@@ -133,6 +133,7 @@ class AccountCreateViewModel(
                 val account = Account(
                     id = SyncId(UUID.randomUUID().toString()),
                     householdId = householdId,
+                    ownerId = householdId,
                     name = s.name.trim(),
                     type = s.accountType,
                     currency = Currency(s.currency),

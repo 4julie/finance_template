@@ -61,6 +61,7 @@ class DataExportServiceTest {
                 com.finance.models.Category(
                     id = TestFixtures.nextId(),
                     householdId = SyncId("household-1"),
+                    ownerId = SyncId("owner-1"),
                     name = "Food",
                     createdAt = TestFixtures.fixedInstant,
                     updatedAt = TestFixtures.fixedInstant,
@@ -73,6 +74,7 @@ class DataExportServiceTest {
                 com.finance.models.Goal(
                     id = TestFixtures.nextId(),
                     householdId = SyncId("household-1"),
+                    ownerId = SyncId("owner-1"),
                     name = "Emergency Fund",
                     targetAmount = com.finance.models.types.Cents(100000),
                     currency = com.finance.models.types.Currency.USD,

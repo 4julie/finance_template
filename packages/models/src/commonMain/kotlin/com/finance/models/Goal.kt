@@ -16,6 +16,7 @@ enum class GoalStatus { ACTIVE, PAUSED, COMPLETED, CANCELLED }
 data class Goal(
     val id: SyncId,
     val householdId: SyncId,
+    val ownerId: SyncId,
     val name: String,
     val targetAmount: Cents,
     val currentAmount: Cents = Cents.ZERO,

@@ -62,6 +62,7 @@ class SqlDelightBudgetRepository(
             queries.insert(
                 id = entity.id.value,
                 household_id = entity.householdId.value,
+                owner_id = entity.ownerId.value,
                 category_id = entity.categoryId.value,
                 name = entity.name,
                 amount = entity.amount.amount,
@@ -153,6 +154,7 @@ class SqlDelightBudgetRepository(
     private fun BudgetRow.toDomain(): Budget = Budget(
         id = SyncId(id),
         householdId = SyncId(household_id),
+        ownerId = SyncId(owner_id),
         categoryId = SyncId(category_id),
         name = name,
         amount = Cents(amount),

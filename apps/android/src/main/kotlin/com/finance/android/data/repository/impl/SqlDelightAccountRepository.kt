@@ -60,6 +60,7 @@ class SqlDelightAccountRepository(
             queries.insert(
                 id = entity.id.value,
                 household_id = entity.householdId.value,
+                owner_id = entity.ownerId.value,
                 name = entity.name,
                 type = entity.type.name,
                 currency = entity.currency.code,
@@ -161,6 +162,7 @@ class SqlDelightAccountRepository(
     private fun AccountRow.toDomain(): Account = Account(
         id = SyncId(id),
         householdId = SyncId(household_id),
+        ownerId = SyncId(owner_id),
         name = name,
         type = AccountType.valueOf(type),
         currency = Currency(currency),

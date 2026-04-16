@@ -30,6 +30,7 @@ class ExportImportRoundTripTest {
                 Account(
                     id = SyncId("acc-1"),
                     householdId = testHouseholdId,
+                    ownerId = SyncId("owner-1"),
                     name = "Checking",
                     type = AccountType.CHECKING,
                     currency = Currency.USD,
@@ -42,6 +43,7 @@ class ExportImportRoundTripTest {
                 Account(
                     id = SyncId("acc-2"),
                     householdId = testHouseholdId,
+                    ownerId = SyncId("owner-1"),
                     name = "Savings",
                     type = AccountType.SAVINGS,
                     currency = Currency.USD,
@@ -56,6 +58,7 @@ class ExportImportRoundTripTest {
                 Transaction(
                     id = SyncId("txn-1"),
                     householdId = testHouseholdId,
+                    ownerId = SyncId("owner-1"),
                     accountId = SyncId("acc-1"),
                     categoryId = SyncId("cat-1"),
                     type = TransactionType.EXPENSE,
@@ -74,6 +77,7 @@ class ExportImportRoundTripTest {
                 Category(
                     id = SyncId("cat-1"),
                     householdId = testHouseholdId,
+                    ownerId = SyncId("owner-1"),
                     name = "Food",
                     icon = "🍕",
                     isIncome = false,
@@ -87,6 +91,7 @@ class ExportImportRoundTripTest {
                 Budget(
                     id = SyncId("bud-1"),
                     householdId = testHouseholdId,
+                    ownerId = SyncId("owner-1"),
                     categoryId = SyncId("cat-1"),
                     name = "Food Budget",
                     amount = Cents(50000),
@@ -102,6 +107,7 @@ class ExportImportRoundTripTest {
                 Goal(
                     id = SyncId("goal-1"),
                     householdId = testHouseholdId,
+                    ownerId = SyncId("owner-1"),
                     name = "Emergency Fund",
                     targetAmount = Cents(100000),
                     currentAmount = Cents(25000),
@@ -334,6 +340,7 @@ class ExportImportRoundTripTest {
                 Account(
                     id = SyncId("acc-1"),
                     householdId = testHouseholdId,
+                    ownerId = SyncId("owner-1"),
                     name = "Checking",
                     type = AccountType.CHECKING,
                     currency = Currency.USD,

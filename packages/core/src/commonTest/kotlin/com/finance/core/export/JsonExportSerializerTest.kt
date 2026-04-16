@@ -51,6 +51,7 @@ class JsonExportSerializerTest {
                 Category(
                     id = TestFixtures.nextId(),
                     householdId = SyncId("household-1"),
+                    ownerId = SyncId("owner-1"),
                     name = "Groceries",
                     createdAt = fixedInstant,
                     updatedAt = fixedInstant,
@@ -63,6 +64,7 @@ class JsonExportSerializerTest {
                 Goal(
                     id = TestFixtures.nextId(),
                     householdId = SyncId("household-1"),
+                    ownerId = SyncId("owner-1"),
                     name = "Emergency Fund",
                     targetAmount = Cents(100000),
                     currentAmount = Cents(25000),
@@ -460,6 +462,7 @@ class JsonExportSerializerTest {
                 Transaction(
                     id = TestFixtures.nextId(),
                     householdId = SyncId("household-1"),
+                    ownerId = SyncId("owner-1"),
                     accountId = SyncId("account-1"),
                     type = TransactionType.EXPENSE,
                     amount = Cents(500),

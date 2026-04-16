@@ -73,6 +73,7 @@ class GoalsViewModelTest {
     ) = Goal(
         id = SyncId(id),
         householdId = householdId,
+        ownerId = householdId,
         name = name,
         targetAmount = Cents(targetCents),
         currentAmount = Cents(currentCents),

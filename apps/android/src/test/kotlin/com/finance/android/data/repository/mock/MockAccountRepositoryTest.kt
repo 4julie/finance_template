@@ -39,6 +39,7 @@ class MockAccountRepositoryTest {
     ) = Account(
         id = SyncId(id),
         householdId = SyncId("household-1"),
+        ownerId = SyncId("owner-1"),
         name = name,
         type = type,
         currency = Currency.USD,

@@ -73,7 +73,7 @@ class CsvExportSerializer : ExportSerializer {
     private fun appendAccountsSection(sb: StringBuilder, accounts: List<Account>) {
         sb.appendLine("# ACCOUNTS")
         val headers = listOf(
-            "id", "household_id", "name", "type", "currency",
+            "id", "household_id", "owner_id", "name", "type", "currency",
             "current_balance", "is_archived", "sort_order",
             "icon", "color", "created_at", "updated_at", "deleted_at",
         )
@@ -82,6 +82,7 @@ class CsvExportSerializer : ExportSerializer {
             sb.appendRow(
                 account.id.value,
                 account.householdId.value,
+                account.ownerId.value,
                 account.name,
                 account.type.name,
                 account.currency.code,
@@ -101,7 +102,7 @@ class CsvExportSerializer : ExportSerializer {
     private fun appendTransactionsSection(sb: StringBuilder, transactions: List<Transaction>) {
         sb.appendLine("# TRANSACTIONS")
         val headers = listOf(
-            "id", "household_id", "account_id", "category_id",
+            "id", "household_id", "owner_id", "account_id", "category_id",
             "type", "status", "amount", "currency",
             "payee", "note", "date",
             "transfer_account_id", "transfer_transaction_id",
@@ -113,6 +114,7 @@ class CsvExportSerializer : ExportSerializer {
             sb.appendRow(
                 txn.id.value,
                 txn.householdId.value,
+                txn.ownerId.value,
                 txn.accountId.value,
                 txn.categoryId?.value ?: "",
                 txn.type.name,
@@ -138,7 +140,7 @@ class CsvExportSerializer : ExportSerializer {
     private fun appendCategoriesSection(sb: StringBuilder, categories: List<Category>) {
         sb.appendLine("# CATEGORIES")
         val headers = listOf(
-            "id", "household_id", "name", "icon", "color",
+            "id", "household_id", "owner_id", "name", "icon", "color",
             "parent_id", "is_income", "is_system", "sort_order",
             "created_at", "updated_at", "deleted_at",
         )
@@ -147,6 +149,7 @@ class CsvExportSerializer : ExportSerializer {
             sb.appendRow(
                 category.id.value,
                 category.householdId.value,
+                category.ownerId.value,
                 category.name,
                 category.icon ?: "",
                 category.color ?: "",
@@ -165,7 +168,7 @@ class CsvExportSerializer : ExportSerializer {
     private fun appendBudgetsSection(sb: StringBuilder, budgets: List<Budget>) {
         sb.appendLine("# BUDGETS")
         val headers = listOf(
-            "id", "household_id", "category_id", "name",
+            "id", "household_id", "owner_id", "category_id", "name",
             "amount", "currency", "period",
             "start_date", "end_date", "is_rollover",
             "created_at", "updated_at", "deleted_at",
@@ -175,6 +178,7 @@ class CsvExportSerializer : ExportSerializer {
             sb.appendRow(
                 budget.id.value,
                 budget.householdId.value,
+                budget.ownerId.value,
                 budget.categoryId.value,
                 budget.name,
                 formatCentsDisplay(budget.amount, budget.currency),
@@ -194,7 +198,7 @@ class CsvExportSerializer : ExportSerializer {
     private fun appendGoalsSection(sb: StringBuilder, goals: List<Goal>) {
         sb.appendLine("# GOALS")
         val headers = listOf(
-            "id", "household_id", "name",
+            "id", "household_id", "owner_id", "name",
             "target_amount", "current_amount", "currency",
             "target_date", "status", "icon", "color", "account_id",
             "created_at", "updated_at", "deleted_at",
@@ -204,6 +208,7 @@ class CsvExportSerializer : ExportSerializer {
             sb.appendRow(
                 goal.id.value,
                 goal.householdId.value,
+                goal.ownerId.value,
                 goal.name,
                 formatCentsDisplay(goal.targetAmount, goal.currency),
                 formatCentsDisplay(goal.currentAmount, goal.currency),

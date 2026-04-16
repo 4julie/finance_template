@@ -60,6 +60,7 @@ class SqlDelightGoalRepository(
             queries.insert(
                 id = entity.id.value,
                 household_id = entity.householdId.value,
+                owner_id = entity.ownerId.value,
                 name = entity.name,
                 target_amount = entity.targetAmount.amount,
                 current_amount = entity.currentAmount.amount,
@@ -155,6 +156,7 @@ class SqlDelightGoalRepository(
     private fun GoalRow.toDomain(): Goal = Goal(
         id = SyncId(id),
         householdId = SyncId(household_id),
+        ownerId = SyncId(owner_id),
         name = name,
         targetAmount = Cents(target_amount),
         currentAmount = Cents(current_amount),

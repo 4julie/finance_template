@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS budget (
     id TEXT NOT NULL PRIMARY KEY,
     household_id TEXT NOT NULL,
+    owner_id TEXT NOT NULL,
     category_id TEXT NOT NULL,
     name TEXT NOT NULL,
     amount INTEGER NOT NULL,
@@ -18,10 +19,12 @@ CREATE TABLE IF NOT EXISTS budget (
     sync_version INTEGER NOT NULL DEFAULT 0,
     is_synced INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (household_id) REFERENCES household(id),
+    FOREIGN KEY (owner_id) REFERENCES user(id),
     FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_budget_household ON budget (household_id);
+CREATE INDEX IF NOT EXISTS idx_budget_owner ON budget (owner_id);
 CREATE INDEX IF NOT EXISTS idx_budget_category ON budget (category_id);
 CREATE INDEX IF NOT EXISTS idx_budget_period ON budget (period);
 CREATE INDEX IF NOT EXISTS idx_budget_sync ON budget (is_synced);
@@ -37,6 +40,9 @@ SELECT * FROM budget WHERE id = ? AND deleted_at IS NULL;
 selectByHousehold:
 SELECT * FROM budget WHERE household_id = ? AND deleted_at IS NULL ORDER BY name ASC;
 
+selectByOwner:
+SELECT * FROM budget WHERE owner_id = ? AND deleted_at IS NULL ORDER BY name ASC;
+
 selectByCategory:
 SELECT * FROM budget WHERE category_id = ? AND deleted_at IS NULL;
 
@@ -49,8 +55,8 @@ WHERE household_id = ? AND (end_date IS NULL OR end_date >= ?) AND deleted_at IS
 ORDER BY name ASC;
 
 insert:
-INSERT INTO budget (id, household_id, category_id, name, amount, currency, period, start_date, end_date, is_rollover, created_at, updated_at, sync_version, is_synced)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO budget (id, household_id, owner_id, category_id, name, amount, currency, period, start_date, end_date, is_rollover, created_at, updated_at, sync_version, is_synced)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE budget SET

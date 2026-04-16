@@ -31,6 +31,7 @@ object TestFixtures {
     fun createAccount(
         id: SyncId = nextId(),
         householdId: SyncId = SyncId("household-1"),
+        ownerId: SyncId = SyncId("owner-1"),
         name: String = "Test Account",
         type: AccountType = AccountType.CHECKING,
         currency: Currency = Currency.USD,
@@ -42,6 +43,7 @@ object TestFixtures {
     ): Account = Account(
         id = id,
         householdId = householdId,
+        ownerId = ownerId,
         name = name,
         type = type,
         currency = currency,
@@ -57,6 +59,7 @@ object TestFixtures {
     fun createTransaction(
         id: SyncId = nextId(),
         householdId: SyncId = SyncId("household-1"),
+        ownerId: SyncId = SyncId("owner-1"),
         accountId: SyncId = SyncId("account-1"),
         categoryId: SyncId? = SyncId("category-1"),
         type: TransactionType = TransactionType.EXPENSE,
@@ -73,6 +76,7 @@ object TestFixtures {
     ): Transaction = Transaction(
         id = id,
         householdId = householdId,
+        ownerId = ownerId,
         accountId = accountId,
         categoryId = categoryId,
         type = type,
@@ -127,6 +131,7 @@ object TestFixtures {
     fun createBudget(
         id: SyncId = nextId(),
         householdId: SyncId = SyncId("household-1"),
+        ownerId: SyncId = SyncId("owner-1"),
         categoryId: SyncId = SyncId("category-1"),
         name: String = "Test Budget",
         amount: Cents = Cents(50000), // $500.00
@@ -138,6 +143,7 @@ object TestFixtures {
     ): Budget = Budget(
         id = id,
         householdId = householdId,
+        ownerId = ownerId,
         categoryId = categoryId,
         name = name,
         amount = amount,

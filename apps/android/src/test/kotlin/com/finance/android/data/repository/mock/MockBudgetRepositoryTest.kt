@@ -46,6 +46,7 @@ class MockBudgetRepositoryTest {
     ) = Budget(
         id = SyncId(id),
         householdId = SyncId("household-1"),
+        ownerId = SyncId("owner-1"),
         categoryId = SyncId(categoryId),
         name = name,
         amount = Cents(amountCents),

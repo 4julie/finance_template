@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 data class Category(
     val id: SyncId,
     val householdId: SyncId,
+    val ownerId: SyncId,
     val name: String,
     val icon: String? = null,
     val color: String? = null,
