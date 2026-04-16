@@ -5,6 +5,7 @@
 //
 // ViewModel for the budgets screen. Loads budget categories from a
 // repository, supports month navigation, and computes aggregate totals.
+// Uses Swift Export bridge for currency formatting. Refs #289
 
 import Observation
 import Foundation
@@ -13,6 +14,7 @@ import os
 @Observable
 final class BudgetsViewModel {
     let repository: BudgetRepository
+    private let formatter: any SwiftExportFormatterModule
 
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "com.finance",
@@ -47,8 +49,21 @@ final class BudgetsViewModel {
         Self.monthFormatter.string(from: selectedMonth)
     }
 
-    init(repository: BudgetRepository) {
+    /// Formats a monetary amount using the Swift Export formatter module.
+    func formatCurrency(_ amountMinorUnits: Int64, currencyCode: String = "USD", showSign: Bool = false) -> String {
+        formatter.format(
+            amountMinorUnits: amountMinorUnits,
+            currencyCode: currencyCode,
+            showSign: showSign
+        )
+    }
+
+    init(
+        repository: BudgetRepository,
+        formatter: any SwiftExportFormatterModule = SwiftExportBridgeProvider.shared.formatter
+    ) {
         self.repository = repository
+        self.formatter = formatter
     }
 
     func previousMonth() {
