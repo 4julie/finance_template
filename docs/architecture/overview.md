@@ -130,4 +130,4 @@ graph TD
 
 ---
 
-For detailed ADRs and platform-specific diagrams, see the [architecture directory](./).
+For detailed ADRs and platform-specific diagrams, see the [architecture directory](./) and the [Architecture Diagrams](diagrams.md) document for comprehensive Mermaid diagrams of all system components.

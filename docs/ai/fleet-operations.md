@@ -105,8 +105,8 @@ Each agent is responsible for its own PR lifecycle (see [CI Monitoring and Self-
 
 Work is complete when:
 
-- All PRs have passing CI (`gh pr checks` all green)
-- No merge conflicts exist
+- All PRs have passing CI — verify with `gh run list --branch <branch> --limit 1` (see [CI Monitoring](ci-monitoring.md) for the correct pattern; do NOT use `gh pr checks`)
+- No merge conflicts exist — verify with `gh pr view <number> --json mergeable`
 - All PRs are marked as ready for review
 - The human reviewer has been notified
 
@@ -404,7 +404,7 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 
 ### Post-push
 
-1. Monitor CI with `gh pr checks <number>`
+1. Monitor CI using `gh run list --branch <branch> --limit 5` then `gh run watch <run-id>` (see [CI Monitoring](ci-monitoring.md))
 2. Self-heal failures (see [CI Monitoring and Self-Healing](#ci-monitoring-and-self-healing))
 3. Resolve merge conflicts if they arise
 4. Mark work as complete only when **all remote CI checks are green**

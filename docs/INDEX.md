@@ -8,17 +8,18 @@ Central table of contents for the Finance monorepo documentation. Use this page 
 
 ## Quick Navigation
 
-| I want to…                     | Start here                                                                                                     |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| Use Finance (end user)         | [User Guide](guides/user-guide.md) · [Getting Started](guides/getting-started.md)                              |
-| Set up my dev environment      | [Getting Started](guides/getting-started.md) · [Workflow Cheat Sheet](guides/workflow-cheatsheet.md)           |
-| Set up Android / iOS / Windows | [Android](guides/android-setup.md) · [iOS](guides/ios-setup.md) · [Windows](guides/windows-setup.md)           |
-| Understand the architecture    | [Roadmap](architecture/roadmap.md) · [Cross-Platform Framework](architecture/0001-cross-platform-framework.md) |
-| Work with AI agents            | [AI Workflow](ai/workflow.md) · [Agent Usage Guide](guides/ai-agents.md) · [Agents](ai/agents.md)              |
-| Ship a release                 | [Release Process](guides/release-process.md) · [Launch Checklist](guides/launch-checklist.md)                  |
-| Review security posture        | [Security Audit v1](architecture/security-audit-v1.md) · [Security Checklist](audits/security-checklist.md)    |
-| Check compliance status        | [Compliance README](compliance/README.md) · [Privacy Audit](architecture/privacy-audit-v1.md)                  |
-| Understand the data model      | [Data Model](design/data-model.md) · [Feature Specs](design/features.md)                                       |
+| I want to…                     | Start here                                                                                                         |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Use Finance (end user)         | [User Guide](guides/user-guide.md) · [Getting Started](guides/getting-started.md)                                  |
+| Set up my dev environment      | [Getting Started](guides/getting-started.md) · [Workflow Cheat Sheet](guides/workflow-cheatsheet.md)               |
+| Set up Android / iOS / Windows | [Android](guides/android-setup.md) · [iOS](guides/ios-setup.md) · [Windows](guides/windows-setup.md)               |
+| Understand the architecture    | [Roadmap](architecture/roadmap.md) · [Diagrams](architecture/diagrams.md) · [Overview](architecture/overview.md)   |
+| Work with AI agents            | [AI Workflow](ai/workflow.md) · [Agent Cookbook](ai/agent-cookbook.md) · [Agents](ai/agents.md)                    |
+| Troubleshoot agent issues      | [Troubleshooting](ai/troubleshooting.md) · [CI Monitoring](ai/ci-monitoring.md) · [Pain Points](ai/pain-points.md) |
+| Ship a release                 | [Release Process](guides/release-process.md) · [Launch Checklist](guides/launch-checklist.md)                      |
+| Review security posture        | [Security Audit v1](architecture/security-audit-v1.md) · [Security Checklist](audits/security-checklist.md)        |
+| Check compliance status        | [Compliance README](compliance/README.md) · [Privacy Audit](architecture/privacy-audit-v1.md)                      |
+| Understand the data model      | [Data Model](design/data-model.md) · [Feature Specs](design/features.md)                                           |
 
 ---
 
@@ -106,6 +107,7 @@ ADRs document significant architectural decisions with context, alternatives, an
 | [Roadmap](architecture/roadmap.md)                           | System architecture roadmap — Phases 0–8 complete, 9–12 in planning |
 | [SDLC](architecture/sdlc.md)                                 | Agentic Kanban methodology — how work flows through the project     |
 | [Android Architecture](architecture/android-architecture.md) | Android app architecture — screens, navigation, state management    |
+| [Architecture Diagrams](architecture/diagrams.md)            | Mermaid diagrams — system overview, data flow, sync, CI/CD, fleet   |
 | [Branch Protection](architecture/branch-protection.md)       | `main` branch rules — required checks, review policy                |
 | [Labels](architecture/labels.md)                             | GitHub label taxonomy — type, platform, priority, and status labels |
 | [Project Board](architecture/project-board.md)               | GitHub Projects V2 board structure, custom fields, and views        |
@@ -216,17 +218,24 @@ Legal documents — terms of service, privacy policy, and app store data declara
 
 AI-first development workflow documentation. See the [AI README](ai/README.md) for an overview of the AI development philosophy.
 
-| Document                               | Description                                                                  |
-| -------------------------------------- | ---------------------------------------------------------------------------- |
-| [AI README](ai/README.md)              | Overview — why AI-first development, documentation index                     |
-| [Workflow](ai/workflow.md)             | Day-to-day AI development workflow — Copilot, Chat, Agent Mode               |
-| [Agents](ai/agents.md)                 | Custom Copilot agent definitions — roles, tools, and boundaries              |
-| [Skills](ai/skills.md)                 | Reusable domain knowledge bundles for AI agents                              |
-| [Instructions](ai/instructions.md)     | Copilot instruction files — coding standards and architectural constraints   |
-| [MCP Configuration](ai/mcp.md)         | Model Context Protocol (MCP) server setup — external tool integration        |
-| [Responsible AI](ai/responsible-ai.md) | Responsible AI framework — ethics, transparency, and commitments             |
-| [Restrictions](ai/restrictions.md)     | Human-gated operations — what AI agents must not do without approval         |
-| [AI Code Policy](ai/ai-code-policy.md) | Ownership, copyright, and contributor responsibilities for AI-generated code |
+| Document                                   | Description                                                                  |
+| ------------------------------------------ | ---------------------------------------------------------------------------- |
+| [AI README](ai/README.md)                  | Overview — why AI-first development, documentation index                     |
+| [Workflow](ai/workflow.md)                 | Day-to-day AI development workflow — Copilot, Chat, Agent Mode               |
+| [Agent Cookbook](ai/agent-cookbook.md)     | Step-by-step recipes for common agent tasks                                  |
+| [Troubleshooting](ai/troubleshooting.md)   | Common issues and solutions for agent workflows                              |
+| [Agents](ai/agents.md)                     | Custom Copilot agent definitions — roles, tools, and boundaries              |
+| [Skills](ai/skills.md)                     | Reusable domain knowledge bundles for AI agents                              |
+| [Instructions](ai/instructions.md)         | Copilot instruction files — coding standards and architectural constraints   |
+| [MCP Configuration](ai/mcp.md)             | Model Context Protocol (MCP) server setup — external tool integration        |
+| [CI Monitoring](ai/ci-monitoring.md)       | Correct CI monitoring pattern for agents (replaces `gh pr checks`)           |
+| [Fleet Operations](ai/fleet-operations.md) | Fleet dispatch, CI self-healing, and parallel agent coordination             |
+| [Worktrees](ai/worktrees.md)               | Git worktree setup, naming conventions, and lifecycle management             |
+| [Pain Points](ai/pain-points.md)           | Tracked workflow friction, inefficiencies, and known issues                  |
+| [Workflow Metrics](ai/workflow-metrics.md) | Metrics for measuring agent workflow efficiency and quality                  |
+| [Responsible AI](ai/responsible-ai.md)     | Responsible AI framework — ethics, transparency, and commitments             |
+| [Restrictions](ai/restrictions.md)         | Human-gated operations — what AI agents must not do without approval         |
+| [AI Code Policy](ai/ai-code-policy.md)     | Ownership, copyright, and contributor responsibilities for AI-generated code |
 
 ---
 
