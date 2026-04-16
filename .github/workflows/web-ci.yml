@@ -130,6 +130,71 @@ jobs:
       - name: Run E2E tests (shard ${{ matrix.shard }})
         run: npx -w apps/web playwright test --shard=${{ matrix.shard }}
 
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-blob-report-${{ strategy.job-index }}
+          path: apps/web/blob-report/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # Merge all shard reports into a single HTML report
+  e2e-report:
+    name: Merge E2E Reports
+    needs: e2e-tests
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Download all blob reports
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: e2e-blob-report-*
+          merge-multiple: true
+          path: all-blob-reports
+
+      - name: Merge reports
+        run: |
+          npx -w apps/web playwright merge-reports \
+            --reporter=html \
+            "${{ github.workspace }}/all-blob-reports" \
+            || echo "::warning::No blob reports found to merge"
+
+      - name: Upload merged HTML report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-html-report
+          path: playwright-report/
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: E2E Summary
+        if: always()
+        run: |
+          echo "### 🎭 E2E Test Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Sharded across 4 parallel runners with 2 retries for flaky tests." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "📊 **Download the full HTML report** from the \`e2e-html-report\` artifact above." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          # Check if any shards failed
+          if [ "${{ needs.e2e-tests.result }}" = "failure" ]; then
+            echo "⚠️ Some E2E shards failed — check individual shard logs for details." >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ needs.e2e-tests.result }}" = "success" ]; then
+            echo "✅ All E2E shards passed." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   lighthouse:
     name: Lighthouse Audit
     needs: build
