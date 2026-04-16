@@ -13,8 +13,10 @@
 
 import { assertEquals } from 'https://deno.land/std@0.208.0/testing/asserts.ts';
 import {
+  appendRateLimitHeaders,
   checkRateLimit,
   getClientIp,
+  rateLimitHeaders,
   rateLimitResponse,
   RATE_LIMITS,
   type RateLimitConfig,
@@ -383,11 +385,21 @@ Deno.test('RATE_LIMITS — has entries for all expected functions', () => {
     'account-deletion',
     'sync-health-report',
     'process-recurring',
+    'manage-webhooks',
+    'admin-dashboard',
+    'send-notification',
   ];
 
   for (const fn of expectedFunctions) {
     assertEquals(fn in RATE_LIMITS, true, `RATE_LIMITS should have entry for '${fn}'`);
   }
+
+  // Verify count matches: every function should be covered, no extras unaccounted
+  assertEquals(
+    Object.keys(RATE_LIMITS).length,
+    expectedFunctions.length,
+    'RATE_LIMITS should have exactly one entry per Edge Function',
+  );
 });
 
 Deno.test('RATE_LIMITS — all configs have positive maxRequests', () => {
@@ -426,4 +438,103 @@ Deno.test('RATE_LIMITS — health-check has per-minute limit', () => {
 Deno.test('RATE_LIMITS — passkey-authenticate is per-minute (pre-auth)', () => {
   assertEquals(RATE_LIMITS['passkey-authenticate'].windowSeconds, 60);
   assertEquals(RATE_LIMITS['passkey-authenticate'].maxRequests, 20);
+});
+
+// ---------------------------------------------------------------------------
+// rateLimitHeaders tests (success response headers)
+// ---------------------------------------------------------------------------
+
+Deno.test('rateLimitHeaders — returns X-RateLimit-* headers', () => {
+  const result: RateLimitResult = {
+    allowed: true,
+    remaining: 7,
+    resetAt: new Date('2026-03-23T12:00:00Z'),
+  };
+  const config: RateLimitConfig = { maxRequests: 10, windowSeconds: 60, keyPrefix: 'test' };
+
+  const headers = rateLimitHeaders(result, config);
+
+  assertEquals(headers['X-RateLimit-Limit'], '10');
+  assertEquals(headers['X-RateLimit-Remaining'], '7');
+  assertEquals(headers['X-RateLimit-Reset'], '2026-03-23T12:00:00.000Z');
+});
+
+Deno.test('rateLimitHeaders — does not include Retry-After for allowed requests', () => {
+  const result: RateLimitResult = {
+    allowed: true,
+    remaining: 5,
+    resetAt: new Date('2026-03-23T12:00:00Z'),
+  };
+  const config: RateLimitConfig = { maxRequests: 10, windowSeconds: 60, keyPrefix: 'test' };
+
+  const headers = rateLimitHeaders(result, config);
+
+  assertEquals('Retry-After' in headers, false);
+});
+
+// ---------------------------------------------------------------------------
+// appendRateLimitHeaders tests
+// ---------------------------------------------------------------------------
+
+Deno.test('appendRateLimitHeaders — appends headers to an existing response', async () => {
+  const originalResponse = new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const result: RateLimitResult = {
+    allowed: true,
+    remaining: 9,
+    resetAt: new Date('2026-03-23T12:30:00Z'),
+  };
+  const config: RateLimitConfig = { maxRequests: 30, windowSeconds: 60, keyPrefix: 'test' };
+
+  const augmented = appendRateLimitHeaders(originalResponse, result, config);
+
+  assertEquals(augmented.status, 200);
+  assertEquals(augmented.headers.get('Content-Type'), 'application/json');
+  assertEquals(augmented.headers.get('X-RateLimit-Limit'), '30');
+  assertEquals(augmented.headers.get('X-RateLimit-Remaining'), '9');
+  assertEquals(augmented.headers.get('X-RateLimit-Reset'), '2026-03-23T12:30:00.000Z');
+
+  const body = await augmented.json();
+  assertEquals(body.ok, true);
+});
+
+Deno.test('appendRateLimitHeaders — preserves original status code', () => {
+  const originalResponse = new Response(JSON.stringify({ id: '123' }), {
+    status: 201,
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const result: RateLimitResult = {
+    allowed: true,
+    remaining: 4,
+    resetAt: new Date(),
+  };
+  const config: RateLimitConfig = { maxRequests: 10, windowSeconds: 60, keyPrefix: 'test' };
+
+  const augmented = appendRateLimitHeaders(originalResponse, result, config);
+
+  assertEquals(augmented.status, 201);
+});
+
+Deno.test('appendRateLimitHeaders — does not overwrite existing non-rate-limit headers', () => {
+  const originalResponse = new Response(null, {
+    status: 204,
+    headers: {
+      'X-Custom-Header': 'custom-value',
+      'Cache-Control': 'no-cache',
+    },
+  });
+  const result: RateLimitResult = {
+    allowed: true,
+    remaining: 10,
+    resetAt: new Date(),
+  };
+  const config: RateLimitConfig = { maxRequests: 10, windowSeconds: 60, keyPrefix: 'test' };
+
+  const augmented = appendRateLimitHeaders(originalResponse, result, config);
+
+  assertEquals(augmented.headers.get('X-Custom-Header'), 'custom-value');
+  assertEquals(augmented.headers.get('Cache-Control'), 'no-cache');
+  assertEquals(augmented.headers.get('X-RateLimit-Limit'), '10');
 });
