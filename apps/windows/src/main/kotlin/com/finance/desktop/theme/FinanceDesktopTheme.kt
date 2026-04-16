@@ -229,9 +229,15 @@ val LocalSpacing = staticCompositionLocalOf { Spacing() }
 @Composable
 fun FinanceDesktopTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    highContrast: Boolean = isHighContrastEnabled(),
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = resolveColorScheme(
+        isDarkTheme = darkTheme,
+        isHighContrast = highContrast,
+        standardLight = LightColorScheme,
+        standardDark = DarkColorScheme,
+    )
 
     CompositionLocalProvider(LocalSpacing provides Spacing()) {
         MaterialTheme(

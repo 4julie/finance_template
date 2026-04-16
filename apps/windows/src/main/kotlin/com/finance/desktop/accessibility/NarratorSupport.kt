@@ -2,12 +2,18 @@
 
 package com.finance.desktop.accessibility
 
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.testTag
 
 // =============================================================================
 // Compose Desktop accessibility utilities for Windows Narrator
@@ -76,6 +82,75 @@ fun Modifier.narratorHeading(): Modifier = this.semantics {
  */
 fun Modifier.narratorLiveRegion(): Modifier = this.semantics {
     liveRegion = LiveRegionMode.Polite
+}
+
+/**
+ * Marks the composable as an **assertive live region** that interrupts
+ * Narrator immediately to announce the change.
+ *
+ * Use sparingly — only for critical alerts like:
+ * - Authentication errors
+ * - Budget exceeded warnings
+ * - Sync failures requiring user action
+ */
+fun Modifier.narratorAssertiveLiveRegion(): Modifier = this.semantics {
+    liveRegion = LiveRegionMode.Assertive
+}
+
+/**
+ * Sets a [stateDescription] on the composable for dynamic state.
+ *
+ * Use for elements whose state changes and should be announced:
+ * - Toggle switches ("enabled" / "disabled")
+ * - Expandable sections ("expanded" / "collapsed")
+ * - Selection states ("selected" / "not selected")
+ *
+ * @param state Human-readable state description.
+ */
+fun Modifier.narratorState(state: String): Modifier = this.semantics {
+    stateDescription = state
+}
+
+/**
+ * Sets the [Role] for the composable in the accessibility tree.
+ *
+ * Helps Narrator announce the element type correctly:
+ * - [Role.Button] for clickable actions
+ * - [Role.Tab] for navigation tabs
+ * - [Role.Switch] for toggles
+ * - [Role.Checkbox] for multi-select options
+ * - [Role.Image] for decorative or informational images
+ *
+ * @param role The semantic role for this element.
+ */
+fun Modifier.narratorRole(role: Role): Modifier = this.semantics {
+    this.role = role
+}
+
+/**
+ * Replaces all semantics on the composable with a single content description.
+ *
+ * Use for composite elements where child semantics would be confusing — for
+ * example, a card containing an icon + label + amount that should be read
+ * as a single unit by Narrator.
+ *
+ * @param description The unified description for the entire element.
+ */
+fun Modifier.narratorMerged(description: String): Modifier =
+    this.clearAndSetSemantics {
+        contentDescription = description
+    }
+
+/**
+ * Adds a test tag for UI Automation / accessibility testing tools.
+ *
+ * This does NOT affect Narrator announcements but enables automated
+ * accessibility testing with tools like Accessibility Insights.
+ *
+ * @param tag Unique identifier for the element.
+ */
+fun Modifier.narratorTestTag(tag: String): Modifier = this.semantics {
+    testTag = tag
 }
 
 // =============================================================================
@@ -207,4 +282,21 @@ object AccessibilityConstants {
 
     const val noAccounts: String =
         "No accounts added. Add an account to begin tracking finances."
+
+    // -- Authentication --------------------------------------------------------
+
+    const val lockScreen: String =
+        "Lock screen. Authenticate to access Finance."
+
+    const val authenticating: String =
+        "Authenticating with Windows Hello"
+
+    const val authSuccess: String =
+        "Authentication successful"
+
+    const val authFailed: String =
+        "Authentication failed. Please try again."
+
+    const val windowsHelloUnavailable: String =
+        "Windows Hello is not configured on this device"
 }
