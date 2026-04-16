@@ -13,6 +13,11 @@ import com.finance.android.data.repository.impl.InMemoryCategoryRepository
 import com.finance.android.data.repository.impl.InMemoryGoalRepository
 import com.finance.android.data.repository.impl.InMemoryTransactionRepository
 import com.finance.android.logging.TimberCrashReporter
+import com.finance.android.notifications.NotificationContentBuilder
+import com.finance.android.notifications.NotificationDispatcher
+import com.finance.android.notifications.NotificationPreferences
+import com.finance.android.notifications.NotificationScheduler
+import com.finance.android.notifications.NotificationSettingsViewModel
 import com.finance.android.ui.screens.BiometricAvailabilityChecker
 import com.finance.android.ui.screens.DefaultBiometricAvailabilityChecker
 import com.finance.android.ui.screens.SettingsViewModel
@@ -96,6 +101,20 @@ val appModule = module {
     /** Streak repository — derives logging dates from the transaction repository. */
     single<StreakRepository> { TransactionBackedStreakRepository(get()) }
 
+    // ── Notifications ───────────────────────────────────────────────
+
+    /** Notification preferences — opt-in toggles backed by SharedPreferences. */
+    single { NotificationPreferences(get()) }
+
+    /** Notification content builder — generates safe, lock-screen-friendly text. */
+    single { NotificationContentBuilder() }
+
+    /** Notification dispatcher — shows Android system notifications. */
+    single { NotificationDispatcher(androidContext()) }
+
+    /** Notification scheduler — syncs WorkManager jobs with user preferences. */
+    single { NotificationScheduler(androidContext(), get()) }
+
     // ── ViewModels ──────────────────────────────────────────────────
 
     viewModelOf(::DashboardViewModel)
@@ -114,4 +133,5 @@ val appModule = module {
     viewModelOf(::GoalEditViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::StreakViewModel)
+    viewModelOf(::NotificationSettingsViewModel)
 }
