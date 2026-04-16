@@ -36,6 +36,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -102,6 +104,8 @@ fun OnboardingScreen(
             TopAppBar(
                 title = {},
                 navigationIcon = {
+                    // Show back arrow on steps 2+ (path selection and beyond),
+                    // but not on step 1 (welcome).
                     if (state.currentStep > 1) {
                         IconButton(
                             onClick = { viewModel.previousStep() },
@@ -117,7 +121,11 @@ fun OnboardingScreen(
                     }
                 },
                 actions = {
-                    if (state.currentStep > 1 && state.currentStep < OnboardingUiState.TOTAL_STEPS) {
+                    // Show skip only on personalized-path customization steps (3-5).
+                    val isPersonalizedCustomizationStep =
+                        state.selectedPath == OnboardingPath.PERSONALIZED &&
+                            state.currentStep in 3..5
+                    if (isPersonalizedCustomizationStep) {
                         TextButton(
                             onClick = { viewModel.skip() },
                             modifier = Modifier.semantics {
@@ -136,8 +144,8 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            // Step indicator
-            if (state.currentStep in 2..4) {
+            // Step indicator shown only on personalized customization steps (3-5)
+            if (state.selectedPath == OnboardingPath.PERSONALIZED && state.currentStep in 3..5) {
                 StepIndicator(
                     currentStep = state.currentStep,
                     totalSteps = state.totalSteps,
@@ -167,13 +175,17 @@ fun OnboardingScreen(
             ) { step ->
                 when (step) {
                     1 -> WelcomeStep(onGetStarted = { viewModel.nextStep() })
-                    2 -> CurrencyStep(
+                    2 -> PathSelectionStep(
+                        onQuickStart = { viewModel.selectPath(OnboardingPath.QUICK_START) },
+                        onPersonalized = { viewModel.selectPath(OnboardingPath.PERSONALIZED) },
+                    )
+                    3 -> CurrencyStep(
                         currencies = CurrencyOption.defaults,
                         selectedCurrency = state.selectedCurrency,
                         onCurrencySelected = { viewModel.selectCurrency(it) },
                         onNext = { viewModel.nextStep() },
                     )
-                    3 -> FirstAccountStep(
+                    4 -> FirstAccountStep(
                         accountName = state.accountName,
                         onAccountNameChange = { viewModel.setAccountName(it) },
                         accountType = state.accountType,
@@ -183,14 +195,14 @@ fun OnboardingScreen(
                         currencySymbol = state.selectedCurrency.symbol,
                         onNext = { viewModel.nextStep() },
                     )
-                    4 -> FirstBudgetStep(
+                    5 -> FirstBudgetStep(
                         budgetCategory = state.budgetCategory,
                         budgetAmount = state.budgetAmount,
                         onBudgetAmountChange = { viewModel.setBudgetAmount(it) },
                         currencySymbol = state.selectedCurrency.symbol,
                         onNext = { viewModel.nextStep() },
                     )
-                    5 -> DoneStep(
+                    6 -> DoneStep(
                         state = state,
                         onDone = { viewModel.finishOnboarding() },
                     )
@@ -303,7 +315,139 @@ fun WelcomeStep(
     }
 }
 
-// ── Step 2: Currency ─────────────────────────────────────────────────────────
+// ── Step 2: Path Selection ────────────────────────────────────────────────────
+
+/**
+ * Path selection step — the user chooses between quick-start and personalized setup.
+ *
+ * Presented as two visually distinct cards:
+ * - **"Just let me in"** — applies sensible defaults and enters the app instantly.
+ * - **"Set things up my way"** — walks through currency, account, and budget steps.
+ *
+ * Both options are presented without pressure or dark patterns — neither path is
+ * labeled "recommended" or visually pushed.
+ */
+@Composable
+fun PathSelectionStep(
+    onQuickStart: () -> Unit,
+    onPersonalized: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+    ) {
+        Text(
+            text = "How would you like to start?",
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.semantics { heading() },
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "You can always change everything later in settings.",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.semantics {
+                contentDescription = "You can always change everything later in settings."
+            },
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // ── Quick Start card ─────────────────────────────────────────
+        PathOptionCard(
+            title = "Just let me in",
+            description = "Start with sensible defaults. You can customize currency, accounts, and budgets any time.",
+            icon = "⚡",
+            iconDescription = "Lightning bolt icon",
+            onClick = onQuickStart,
+            contentDescription = "Quick start. Start with sensible defaults and enter the app immediately.",
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ── Personalized Setup card ──────────────────────────────────
+        PathOptionCard(
+            title = "Set things up my way",
+            description = "Pick your currency, create your first account, and set a budget — takes about a minute.",
+            icon = "🎯",
+            iconDescription = "Target icon",
+            onClick = onPersonalized,
+            contentDescription = "Personalized setup. Pick your currency, create your first account, and set a budget.",
+        )
+    }
+}
+
+/**
+ * A tappable card representing one of the two onboarding paths.
+ */
+@Composable
+private fun PathOptionCard(
+    title: String,
+    description: String,
+    icon: String,
+    iconDescription: String,
+    onClick: () -> Unit,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+) {
+    val shape = RoundedCornerShape(16.dp)
+    Card(
+        onClick = onClick,
+        shape = shape,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { this.contentDescription = contentDescription },
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(20.dp),
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .semantics { this.contentDescription = iconDescription },
+            ) {
+                Text(
+                    text = icon,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+// ── Step 3: Currency ─────────────────────────────────────────────────────────
 
 /**
  * Currency selection step showing a grid of common currencies.
@@ -806,7 +950,18 @@ private fun WelcomeStepPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Step 2 — Currency")
+@Preview(showBackground = true, name = "Step 2 — Path Selection")
+@Composable
+private fun PathSelectionStepPreview() {
+    MaterialTheme {
+        PathSelectionStep(
+            onQuickStart = {},
+            onPersonalized = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Step 3 — Currency")
 @Composable
 private fun CurrencyStepPreview() {
     MaterialTheme {
@@ -819,7 +974,7 @@ private fun CurrencyStepPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Step 3 — First Account")
+@Preview(showBackground = true, name = "Step 4 — First Account")
 @Composable
 private fun FirstAccountStepPreview() {
     MaterialTheme {
@@ -836,7 +991,7 @@ private fun FirstAccountStepPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Step 4 — First Budget")
+@Preview(showBackground = true, name = "Step 5 — First Budget")
 @Composable
 private fun FirstBudgetStepPreview() {
     MaterialTheme {
@@ -850,13 +1005,14 @@ private fun FirstBudgetStepPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Step 5 — Done")
+@Preview(showBackground = true, name = "Step 6 — Done")
 @Composable
 private fun DoneStepPreview() {
     MaterialTheme {
         DoneStep(
             state = OnboardingUiState(
-                currentStep = 5,
+                currentStep = 6,
+                selectedPath = OnboardingPath.PERSONALIZED,
                 selectedCurrency = CurrencyOption.defaults.first(),
                 accountName = "My Checking",
                 accountType = OnboardingAccountType.CHECKING,
