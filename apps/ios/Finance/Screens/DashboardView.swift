@@ -199,9 +199,9 @@ struct DashboardView: View {
 
 #Preview {
     DashboardView(viewModel: DashboardViewModel(
-        accountRepository: MockAccountRepository(),
-        transactionRepository: MockTransactionRepository(),
-        budgetRepository: MockBudgetRepository()
+        accountRepository: RepositoryProvider.shared.accounts,
+        transactionRepository: RepositoryProvider.shared.transactions,
+        budgetRepository: RepositoryProvider.shared.budgets
     ))
     .environment(BiometricAuthManager())
 }

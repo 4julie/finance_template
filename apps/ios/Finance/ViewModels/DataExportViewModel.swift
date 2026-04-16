@@ -167,11 +167,15 @@ final class DataExportViewModel {
     ///   - budgetRepository: Data source for budgets.
     ///   - goalRepository: Data source for goals.
     ///   - exportService: Service used to serialise data for export.
+    ///
+    /// Default repositories now delegate through the Swift Export bridge
+    /// via `RepositoryProvider.shared`, ensuring consistent data access
+    /// across all ViewModels. Refs #289
     init(
-        accountRepository: AccountRepository = MockAccountRepository(),
-        transactionRepository: TransactionRepository = MockTransactionRepository(),
-        budgetRepository: BudgetRepository = MockBudgetRepository(),
-        goalRepository: GoalRepository = MockGoalRepository(),
+        accountRepository: AccountRepository = RepositoryProvider.shared.accounts,
+        transactionRepository: TransactionRepository = RepositoryProvider.shared.transactions,
+        budgetRepository: BudgetRepository = RepositoryProvider.shared.budgets,
+        goalRepository: GoalRepository = RepositoryProvider.shared.goals,
         exportService: DataExportService = DataExportService()
     ) {
         self.accountRepository = accountRepository

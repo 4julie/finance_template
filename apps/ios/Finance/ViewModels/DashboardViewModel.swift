@@ -7,8 +7,11 @@
 // transaction, and budget repositories to present net worth, monthly
 // spending, budget health, and recent transactions.
 //
-// KMP bridge services (FinancialAggregator, BudgetCalculator,
-// CurrencyFormatter) are injected for business-logic computations.
+// Business logic (aggregation, formatting) is sourced from the Swift Export
+// bridge modules. ViewModels never import KMP types directly — they use
+// the bridge's Swift-native protocols.
+//
+// References: #414, #289
 
 import Observation
 import os
@@ -19,9 +22,8 @@ final class DashboardViewModel {
     private let accountRepository: AccountRepository
     private let transactionRepository: TransactionRepository
     private let budgetRepository: BudgetRepository
-    private let financialAggregator: KMPFinancialAggregatorProtocol
-    private let budgetCalculator: KMPBudgetCalculatorProtocol
-    private let currencyFormatter: KMPCurrencyFormatterProtocol
+    private let aggregator: any SwiftExportAggregatorModule
+    private let formatter: any SwiftExportFormatterModule
 
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "com.finance",
@@ -41,17 +43,17 @@ final class DashboardViewModel {
     /// Clears the current error message, dismissing the alert.
     func dismissError() { errorMessage = nil }
 
-    /// Computed from the sum of all account balances.
-    var netWorth: Int64 { accounts.reduce(0) { $0 + $1.balanceMinorUnits } }
+    /// Net worth computed via the Swift Export aggregator module.
+    var netWorth: Int64 { aggregator.netWorth(accounts: accounts) }
 
     // MARK: - Cached Aggregations
     //
     // These values are pre-computed when data loads rather than being
     // recalculated as computed properties on every SwiftUI body evaluation.
     // `monthlyIncome` / `monthlyExpenses` iterate the full transaction list,
-    // and `savingsRate` / `spendingByCategory` cross the KMP bridge and
+    // and `savingsRate` / `spendingByCategory` cross the bridge and
     // map the entire list — doing this on every render caused redundant
-    // O(n) + KMP-interop work during scrolling and animation frames.
+    // O(n) + bridge-interop work during scrolling and animation frames.
 
     /// Sum of income transactions in the current dataset.
     private(set) var monthlyIncome: Int64 = 0
@@ -59,42 +61,51 @@ final class DashboardViewModel {
     /// Sum of expense transactions in the current dataset (as a positive value).
     private(set) var monthlyExpenses: Int64 = 0
 
-    /// Savings rate for the current month, computed via the KMP FinancialAggregator.
+    /// Savings rate for the current month, computed via the Swift Export aggregator.
     /// Returns a percentage (0–100). Available only when monthly transaction data is loaded.
     private(set) var savingsRate: Double = 0
 
-    /// Spending grouped by category for the current month, via KMP FinancialAggregator.
+    /// Spending grouped by category for the current month, via Swift Export aggregator.
     private(set) var spendingByCategory: [String: Int64] = [:]
 
     /// Recomputes cached aggregation values from the current `recentTransactions`.
     ///
     /// Called once after data loads instead of on every view body evaluation.
+    /// Uses Swift-native Date types — the bridge handles KMP type mapping internally.
     private func recomputeAggregations() {
-        monthlyIncome = recentTransactions
-            .filter { $0.type == .income }
-            .reduce(0) { $0 + $1.amountMinorUnits }
+        let cal = Calendar.current
+        let now = Date.now
+        let startOfMonth = cal.date(from: cal.dateComponents([.year, .month], from: now)) ?? now
+        let endOfMonth = cal.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth) ?? now
 
-        monthlyExpenses = recentTransactions
-            .filter { $0.isExpense }
-            .reduce(0) { $0 + abs($1.amountMinorUnits) }
-
-        let kmpTransactions = recentTransactions.map { txn in
-            txn.toKMP(householdId: "default", accountId: "", categoryId: nil)
-        }
-        let from = DateComponents.startOfCurrentMonth()
-        let to = DateComponents.endOfCurrentMonth()
-
-        savingsRate = financialAggregator.savingsRate(
-            transactions: kmpTransactions, from: from, to: to
+        monthlyIncome = aggregator.totalIncome(
+            transactions: recentTransactions,
+            from: startOfMonth,
+            to: endOfMonth
         )
-        spendingByCategory = financialAggregator.spendingByCategory(
-            transactions: kmpTransactions, from: from, to: to
+
+        monthlyExpenses = aggregator.totalSpending(
+            transactions: recentTransactions,
+            from: startOfMonth,
+            to: endOfMonth
+        )
+
+        savingsRate = aggregator.savingsRate(
+            transactions: recentTransactions,
+            from: startOfMonth,
+            to: endOfMonth
+        )
+
+        spendingByCategory = aggregator.spendingByCategory(
+            transactions: recentTransactions,
+            from: startOfMonth,
+            to: endOfMonth
         )
     }
 
-    /// Formats a monetary amount using the injected KMP CurrencyFormatter.
+    /// Formats a monetary amount using the Swift Export formatter module.
     func formatCurrency(_ amountMinorUnits: Int64, showSign: Bool = false) -> String {
-        currencyFormatter.format(
+        formatter.format(
             amountMinorUnits: amountMinorUnits,
             currencyCode: currencyCode,
             showSign: showSign
@@ -105,16 +116,14 @@ final class DashboardViewModel {
         accountRepository: AccountRepository,
         transactionRepository: TransactionRepository,
         budgetRepository: BudgetRepository,
-        financialAggregator: KMPFinancialAggregatorProtocol = KMPBridge.shared.financialAggregator,
-        budgetCalculator: KMPBudgetCalculatorProtocol = KMPBridge.shared.budgetCalculator,
-        currencyFormatter: KMPCurrencyFormatterProtocol = KMPBridge.shared.currencyFormatter
+        aggregator: any SwiftExportAggregatorModule = SwiftExportBridgeProvider.shared.aggregator,
+        formatter: any SwiftExportFormatterModule = SwiftExportBridgeProvider.shared.formatter
     ) {
         self.accountRepository = accountRepository
         self.transactionRepository = transactionRepository
         self.budgetRepository = budgetRepository
-        self.financialAggregator = financialAggregator
-        self.budgetCalculator = budgetCalculator
-        self.currencyFormatter = currencyFormatter
+        self.aggregator = aggregator
+        self.formatter = formatter
     }
 
     func loadDashboard() async {
