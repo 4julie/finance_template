@@ -21,21 +21,21 @@ locations, API contracts, and integration points.
 
 ### KMP Expect/Actual Pattern
 
-| Source Set     | File                                  | Role                                |
-| -------------- | ------------------------------------- | ----------------------------------- |
-| `commonMain` | `CertificatePinningConfig.kt`       | Expect object + shared pin constants |
-| `androidMain`| `CertificatePinningConfig.android.kt`| Validates network_security_config   |
-| `iosMain`    | `CertificatePinningConfig.ios.kt`   | Validates NSPinnedDomains           |
-| `jvmMain`    | `CertificatePinningConfig.jvm.kt`   | OkHttp CertificatePinner helper     |
-| `jsMain`     | `CertificatePinningConfig.js.kt`    | No-op (browser CT enforcement)      |
+| Source Set    | File                                  | Role                                 |
+| ------------- | ------------------------------------- | ------------------------------------ |
+| `commonMain`  | `CertificatePinningConfig.kt`         | Expect object + shared pin constants |
+| `androidMain` | `CertificatePinningConfig.android.kt` | Validates network_security_config    |
+| `iosMain`     | `CertificatePinningConfig.ios.kt`     | Validates NSPinnedDomains            |
+| `jvmMain`     | `CertificatePinningConfig.jvm.kt`     | OkHttp CertificatePinner helper      |
+| `jsMain`      | `CertificatePinningConfig.js.kt`      | No-op (browser CT enforcement)       |
 
 ### Platform-Native Enforcement
 
-| Platform | Mechanism                          | Config Location                    |
-| -------- | ---------------------------------- | ---------------------------------- |
-| Android  | `network_security_config.xml`    | `apps/android/src/main/res/xml/` |
-| iOS      | `NSPinnedDomains` in Info.plist  | `apps/ios/Finance/Info.plist`     |
-| Windows  | OkHttp `CertificatePinner`       | `packages/core/src/jvmMain/`     |
+| Platform | Mechanism                          | Config Location                  |
+| -------- | ---------------------------------- | -------------------------------- |
+| Android  | `network_security_config.xml`      | `apps/android/src/main/res/xml/` |
+| iOS      | `NSPinnedDomains` in Info.plist    | `apps/ios/Finance/Info.plist`    |
+| Windows  | OkHttp `CertificatePinner`         | `packages/core/src/jvmMain/`     |
 | Web      | Certificate Transparency (browser) | `Expect-CT` response header      |
 
 ## Pin Configuration
@@ -46,10 +46,10 @@ production deployment.
 
 ### Pinned Domains
 
-| Domain                           | Service      |
-| -------------------------------- | ------------ |
-| `*.supabase.co`                | Supabase API |
-| `*.powersync.journeyapps.com`  | PowerSync    |
+| Domain                        | Service      |
+| ----------------------------- | ------------ |
+| `*.supabase.co`               | Supabase API |
+| `*.powersync.journeyapps.com` | PowerSync    |
 
 ## Failure Handling
 
