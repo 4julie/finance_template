@@ -16,6 +16,9 @@ import com.finance.android.logging.TimberCrashReporter
 import com.finance.android.ui.screens.BiometricAvailabilityChecker
 import com.finance.android.ui.screens.DefaultBiometricAvailabilityChecker
 import com.finance.android.ui.screens.SettingsViewModel
+import com.finance.android.ui.streak.StreakRepository
+import com.finance.android.ui.streak.StreakViewModel
+import com.finance.android.ui.streak.TransactionBackedStreakRepository
 import com.finance.android.ui.theme.ThemePreferenceManager
 import com.finance.android.ui.viewmodel.AccountCreateViewModel
 import com.finance.android.ui.viewmodel.AccountEditViewModel
@@ -88,6 +91,11 @@ val appModule = module {
     /** Theme preference manager — provides reactive theme state for the whole app. */
     single { ThemePreferenceManager(get()) }
 
+    // ── Streak tracking ───────────────────────────────────────────────
+
+    /** Streak repository — derives logging dates from the transaction repository. */
+    single<StreakRepository> { TransactionBackedStreakRepository(get()) }
+
     // ── ViewModels ──────────────────────────────────────────────────
 
     viewModelOf(::DashboardViewModel)
@@ -105,4 +113,5 @@ val appModule = module {
     viewModelOf(::GoalCreateViewModel)
     viewModelOf(::GoalEditViewModel)
     viewModelOf(::SettingsViewModel)
+    viewModelOf(::StreakViewModel)
 }
