@@ -41,6 +41,7 @@ import com.finance.android.ui.screens.TransactionDetailScreen
 import com.finance.android.ui.screens.TransactionsScreen
 import com.finance.android.ui.screens.affordability.AffordabilityScreen
 import com.finance.android.ui.education.FinancialGlossaryScreen
+import com.finance.android.ui.expertise.ExpertiseTierScreen
 import timber.log.Timber
 
 /** Base URI for all deep link patterns declared in AndroidManifest.xml. */
@@ -126,6 +127,9 @@ sealed class Route(val route: String) {
 
     /** Financial Glossary screen - contextual education tooltips (#378). */
     data object FinancialGlossary : Route("glossary")
+
+    /** Expertise tier selection screen (#379). */
+    data object ExpertiseTier : Route("expertise-tier")
 
     /**
      * Transaction detail deep link destination.
@@ -289,6 +293,12 @@ fun FinanceNavHost(
 
         composable(Route.FinancialGlossary.route) {
             FinancialGlossaryScreen(
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Route.ExpertiseTier.route) {
+            ExpertiseTierScreen(
                 onBack = { navController.popBackStack() },
             )
         }
