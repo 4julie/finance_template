@@ -6,6 +6,7 @@ import android.app.Application
 import com.finance.android.di.appModule
 import com.finance.android.di.authModule
 import com.finance.android.di.dataModule
+import com.finance.android.notifications.NotificationChannelManager
 import com.finance.android.sync.SyncWorker
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -25,6 +26,7 @@ class FinanceApplication : Application() {
         super.onCreate()
         initLogging()
         initDependencyInjection()
+        initNotificationChannels()
         initBackgroundSync()
     }
 
@@ -42,6 +44,11 @@ class FinanceApplication : Application() {
             modules(appModule, authModule, dataModule)
         }
         Timber.i("Koin DI initialized")
+    }
+
+    private fun initNotificationChannels() {
+        NotificationChannelManager.createChannels(this)
+        Timber.i("Notification channels created")
     }
 
     private fun initBackgroundSync() {
