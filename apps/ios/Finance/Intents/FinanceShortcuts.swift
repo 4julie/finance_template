@@ -55,5 +55,44 @@ struct FinanceShortcuts: AppShortcutsProvider {
             shortTitle: "Budget Status",
             systemImageName: "chart.pie"
         )
+
+        AppShortcut(
+            intent: RecentTransactionsIntent(),
+            phrases: [
+                "Recent transactions in \(.applicationName)",
+                "Show recent transactions in \(.applicationName)",
+                "What did I spend recently in \(.applicationName)",
+                "Last transactions in \(.applicationName)",
+                "Show last \(\.$count) transactions in \(.applicationName)",
+            ],
+            shortTitle: "Recent Transactions",
+            systemImageName: "list.bullet.rectangle"
+        )
+
+        AppShortcut(
+            intent: GoalProgressIntent(),
+            phrases: [
+                "Goal progress in \(.applicationName)",
+                "How are my goals in \(.applicationName)",
+                "Check goals in \(.applicationName)",
+                "Show goal progress in \(.applicationName)",
+                "\(\.$goalName) goal progress in \(.applicationName)",
+            ],
+            shortTitle: "Goal Progress",
+            systemImageName: "target"
+        )
+
+        AppShortcut(
+            intent: SpendingSummaryIntent(),
+            phrases: [
+                "Spending summary in \(.applicationName)",
+                "How much did I spend in \(.applicationName)",
+                "Show spending in \(.applicationName)",
+                "What did I spend \(\.$period) in \(.applicationName)",
+                "Spending report in \(.applicationName)",
+            ],
+            shortTitle: "Spending Summary",
+            systemImageName: "chart.bar"
+        )
     }
 }
