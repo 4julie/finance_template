@@ -16,7 +16,8 @@
       "account-deletion/**/*.test.ts",
       "launch-readiness/**/*.test.ts",
       "spending-forecast/**/*.test.ts",
-      "bank-connection/**/*.test.ts"
+      "bank-connection/**/*.test.ts",
+      "anomaly-detection/**/*.test.ts"
     ],
     "exclude": ["node_modules"]
   },
