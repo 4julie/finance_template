@@ -10,13 +10,13 @@
 
 Finance V1 delivers a fully functional offline-first financial tracker with manual transaction entry, CSV import, household sharing, and multi-platform support (iOS, Android, Web, Windows). As the product matures toward V2, three major capability areas demand architectural planning:
 
-1. **Bank connections** — Automated transaction ingestion via Plaid, GoCardless, or similar aggregators.
-2. **AI-powered features** — Intelligent categorization, spending anomaly detection, natural-language search, and personalized financial insights (premium tier differentiators per ADR-0009).
-3. **Multi-currency first-class support** — Real-time exchange rates, multi-currency portfolio views, cross-currency budget tracking, and automatic conversion for multi-country households.
+1. **Bank connections** — Automated transaction ingestion via Plaid, GoCardless, or similar aggregators. This is the #1 user-requested feature for reducing friction in daily tracking.
+2. **AI-powered features** — Intelligent categorization, spending anomaly detection, natural-language transaction search, and personalized financial insights. These are the premium tier differentiators (see ADR-0009 freemium model).
+3. **Multi-currency first-class support** — Real-time exchange rates, multi-currency portfolio views, cross-currency budget tracking, and automatic conversion for households spanning multiple countries.
 
 ### Architectural Tension
 
-V2 features create tension with the V1 edge-first principle. The server must expand, but only for capabilities that physically cannot run on the client:
+V2 features introduce a fundamental tension with the V1 edge-first principle:
 
 | Capability                 | Edge-viable? | Why                                                                           |
 | -------------------------- | ------------ | ----------------------------------------------------------------------------- |
@@ -24,55 +24,142 @@ V2 features create tension with the V1 edge-first principle. The server must exp
 | Transaction ingestion      | ❌ Server    | Webhooks from aggregators arrive at a server endpoint                         |
 | AI categorization          | ✅ On-device | Small models (< 50 MB) run efficiently on modern mobile hardware              |
 | Anomaly detection          | ✅ On-device | Statistical analysis over local transaction history                           |
-| NLP search                 | ⚠️ Hybrid    | Simple search on-device; semantic search requires embedding models            |
+| NLP search                 | ⚠️ Hybrid    | Simple search on-device; advanced semantic search requires embedding models   |
 | Exchange rate fetching     | ❌ Server    | API calls to rate providers (ECB, Fixer, Open Exchange Rates)                 |
 | Currency conversion        | ✅ On-device | Computation over cached rates                                                 |
 | Multi-currency aggregation | ✅ On-device | Local computation once rates are available                                    |
 
+The server must expand beyond a "thin sync layer" for V2, but the expansion must be **surgical** — only capabilities that physically cannot run on the client should move server-side.
+
 ### Constraints
 
-- V2 must not break V1 offline functionality
-- Bank connections involve regulated data (PSD2, PCI DSS awareness)
-- AI models must be < 100 MB per model with < 50 ms inference latency
+- V2 must not break V1 offline functionality — all existing features must continue to work without a network connection
+- Bank connections involve regulated financial data (PSD2, PCI DSS awareness) and must not weaken the privacy posture
+- AI models must be small enough for on-device inference (< 100 MB per model, < 50 ms inference latency)
 - Multi-currency must handle 150+ ISO 4217 currencies with sub-second conversion
-- Self-hosted VPS ($10–20/mo, ADR-0007) must absorb V2 workloads
+- The self-hosted VPS ($10–20/mo, see ADR-0007) must absorb V2 workloads without requiring a 10x cost increase
 
 ## Decision
 
-Adopt a **capability-layered V2 architecture** with well-defined edge/server boundaries per feature area.
+Adopt a **capability-layered V2 architecture** where each new feature area operates through a well-defined boundary between edge and server responsibilities.
 
 ### 1. Bank Connection Architecture
 
-- **Staging table pattern** — Bank-ingested transactions land in `bank_transactions`, not in `transactions` directly. Client pulls staged data for review/approval, preserving user agency.
-- **Aggregator abstraction** — `BankingProvider` interface abstracts Plaid, GoCardless, TrueLayer. Server translates to canonical `BankTransaction` format.
-- **Credential isolation** — API keys and access tokens server-side only, encrypted with per-household KEK (ADR-0004).
-- **Webhook-driven ingestion** — Server receives aggregator webhooks, writes to staging table. PowerSync syncs to clients.
-- **Regional providers** — Plaid (North America), GoCardless/TrueLayer (Europe PSD2).
+```
+┌─────────────────────────────────────┐
+│              Client                  │
+│  ┌──────────────────────────────┐   │
+│  │  Bank Connection Manager      │   │
+│  │  (packages/core/banking/)     │   │
+│  │  • Launch Link/Connect widget │   │
+│  │  • Display account list       │   │
+│  │  • Match ingested → local txn │   │
+│  │  • Deduplicate transactions   │   │
+│  └───────────┬──────────────────┘   │
+└──────────────┼───────────────────────┘
+               │ HTTPS (OAuth redirect)
+┌──────────────▼───────────────────────┐
+│         Server — Banking Edge Fn      │
+│  ┌─────────────────────────────────┐ │
+│  │  Plaid / GoCardless Adapter     │ │
+│  │  • /api/banking/link-token       │ │
+│  │  • /api/banking/exchange-token   │ │
+│  │  • /api/banking/webhook          │ │
+│  │  • /api/banking/sync             │ │
+│  └──────────────┬──────────────────┘ │
+│  ┌──────────────▼──────────────────┐ │
+│  │  Transaction Staging Table       │ │
+│  │  (bank_transactions)             │ │
+│  │  • Raw ingested data             │ │
+│  │  • NOT in main transactions tbl  │ │
+│  │  • Household-scoped via RLS      │ │
+│  └──────────────────────────────────┘ │
+└───────────────────────────────────────┘
+```
+
+**Key design decisions:**
+
+- **Staging table pattern** — Bank-ingested transactions land in a `bank_transactions` staging table, not directly in the user's `transactions` table. The client pulls staged transactions via sync and presents them for review/approval. This preserves user agency and prevents phantom transactions.
+- **Aggregator abstraction** — A `BankingProvider` interface abstracts Plaid, GoCardless, TrueLayer, and future providers. The server adapter translates provider-specific responses into a canonical `BankTransaction` format.
+- **Credential isolation** — Aggregator API keys and access tokens are stored server-side only, never transmitted to clients. Bank account tokens are encrypted at rest with a per-household KEK (see ADR-0004 key hierarchy).
+- **Webhook-driven ingestion** — The server receives webhooks from aggregators when new transactions are available, fetches them, and writes to the staging table. PowerSync then syncs the staged transactions to clients.
+- **Regional provider strategy** — Plaid for North America, GoCardless/TrueLayer for Europe (PSD2-compliant), with a provider selection layer based on user's region.
 
 ### 2. AI Feature Architecture
 
-- **On-device inference** — Platform-native runtimes: TFLite (Android), CoreML (iOS), ONNX (Windows), WASM (Web).
-- **Model registry** — CDN-hosted versioned artifacts with background download and SHA-256 integrity.
-- **Rule-based fallback** — Every ML feature degrades gracefully to keyword/merchant rules when models are unavailable.
-- **Privacy guarantee** — Transaction data never leaves the device for inference. Models download; data stays local.
+```
+┌──────────────────────────────────────────────────────────┐
+│                          Client                           │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │  AI Engine (packages/core/ai/)                       │ │
+│  │  ┌───────────────┐  ┌────────────────────────────┐  │ │
+│  │  │ On-Device      │  │ Insight Generator           │  │ │
+│  │  │ Model Runtime  │  │ • Spending anomaly detection │  │ │
+│  │  │ • TFLite (And) │  │ • Budget pacing alerts       │  │ │
+│  │  │ • CoreML (iOS) │  │ • Savings goal projections   │  │ │
+│  │  │ • ONNX (Win)   │  │ • Category suggestions       │  │ │
+│  │  │ • WASM (Web)   │  │                              │  │ │
+│  │  └───────┬───────┘  └──────────────────────────────┘  │ │
+│  │  ┌───────▼─────────────────────────────────────────┐  │ │
+│  │  │ Model Registry                                   │  │ │
+│  │  │ • Version management + Background download       │  │ │
+│  │  │ • A/B model switching                            │  │ │
+│  │  │ • Fallback to rule-based when model unavailable  │  │ │
+│  │  └─────────────────────────────────────────────────┘  │ │
+│  └─────────────────────────────────────────────────────┘ │
+│  Privacy: NO transaction data leaves device for inference │
+└──────────────────────────────────────────────────────────┘
+```
 
-| Feature                    | Tier                        | Model Size |
-| -------------------------- | --------------------------- | ---------- |
-| Auto-categorization        | Free (basic) / Premium (ML) | ~15 MB     |
-| Spending anomaly detection | Premium                     | ~5 MB      |
-| Natural-language search    | Premium                     | ~30 MB     |
-| Financial health score     | Free                        | No model   |
-| Predictive budgeting       | Premium                     | ~10 MB     |
-| Receipt OCR                | Premium                     | ~20 MB     |
+**AI feature tiers:**
+
+| Feature                    | Tier                        | Approach                          | Model Size |
+| -------------------------- | --------------------------- | --------------------------------- | ---------- |
+| Auto-categorization        | Free (basic) / Premium (ML) | Rule-based free; ML model premium | ~15 MB     |
+| Spending anomaly detection | Premium                     | Statistical + lightweight ML      | ~5 MB      |
+| Natural-language search    | Premium                     | On-device embedding model         | ~30 MB     |
+| Financial health score     | Free                        | Rule-based algorithm              | No model   |
+| Predictive budgeting       | Premium                     | Time-series forecasting           | ~10 MB     |
+| Receipt OCR                | Premium                     | On-device vision model            | ~20 MB     |
+
+**Privacy guarantee:** Transaction data never leaves the device for AI inference. Models are downloaded to the device; inference runs locally. This is the architectural equivalent of Signal's approach — the server never sees the content.
 
 ### 3. Multi-Currency Architecture
 
-- **Rate table in sync scope** — `exchange_rates` synced via new `global_data` PowerSync bucket. Offline conversion uses last-synced rates.
-- **Historical rates** — Preserved for accurate historical reporting (rate on transaction date).
-- **Display currency** — Per-user preference; all aggregation views convert to it.
-- **Multi-currency accounts** — Accounts have `currency_code`. Cross-currency transfers generate linked transactions.
+```
+┌──────────────────────────────────────────────┐
+│                    Client                     │
+│  ┌─────────────────────────────────────────┐ │
+│  │  Currency Engine                         │ │
+│  │  (packages/core/currency/ — enhanced)    │ │
+│  │  • CurrencyConverter (existing, enhanced)│ │
+│  │  • MultiCurrencyAggregator (new)         │ │
+│  │  • ExchangeRateCache (new)               │ │
+│  │  • HistoricalRateStore (new)             │ │
+│  └──────────────┬──────────────────────────┘ │
+│  Local rate cache: synced via PowerSync       │
+└─────────────────┼────────────────────────────┘
+                  │ Sync (PowerSync)
+┌─────────────────▼────────────────────────────┐
+│           Server — Rate Service                │
+│  ┌──────────────────────────────────────────┐ │
+│  │  Exchange Rate Worker (Edge Function)     │ │
+│  │  • Cron: fetch rates every 4h from ECB    │ │
+│  │  • Write to exchange_rates table           │ │
+│  │  • Historical rates for reporting          │ │
+│  │  • Fallback providers (Fixer, OER)         │ │
+│  └──────────────────────────────────────────┘ │
+└────────────────────────────────────────────────┘
+```
 
-### V2 Server Expansion
+**Key design decisions:**
+
+- **Rate table in sync scope** — Exchange rates sync to clients via PowerSync as a new `global_data` bucket (not household-scoped). Offline conversion uses last-synced rates.
+- **Historical rates** — Every rate update preserved for accurate historical reporting. Transaction conversion uses the rate effective on the transaction date.
+- **Display currency** — Per-user preference. All aggregation views convert to display currency.
+- **Multi-currency accounts** — Accounts have `currency_code`. Cross-currency transfers generate two linked transactions with conversion rate recorded.
+
+### V2 Server Expansion Model
 
 ```
 V1 Server (thin sync):
@@ -80,8 +167,8 @@ V1 Server (thin sync):
 
 V2 additions (compartmentalized):
 ├── Banking Edge Functions (link-token, webhook, staging)
-├── Rate Worker (ECB cron every 4h)
-├── Model CDN (static ML artifacts)
+├── Rate Worker (ECB cron job every 4h)
+├── Model CDN (static file hosting for ML artifacts)
 └── New sync bucket: global_data (exchange rates)
 
 Cost impact: ~$2–5/mo additional on self-hosted VPS
@@ -91,42 +178,42 @@ Cost impact: ~$2–5/mo additional on self-hosted VPS
 
 ### Alternative 1: Full Server-Side AI (Cloud ML)
 
-- **Pros:** Large models; centralized updates.
-- **Cons:** Breaks privacy-first; cannot work offline; API costs scale unpredictably.
+- **Pros:** Access to large models (GPT-4, Claude); no model size constraints; centralized updates.
+- **Cons:** Sends transaction data to third-party API, breaking privacy-first. Cannot work offline. API costs scale unpredictably.
 
 ### Alternative 2: Direct Bank API Integration (No Aggregator)
 
-- **Pros:** No aggregator fees.
-- **Cons:** PSD2 AISP registration (€20K+); each bank different API; multi-year effort.
+- **Pros:** No aggregator dependency or per-connection fees.
+- **Cons:** Each bank has different API. PSD2 AISP registration costs €20K+. Multi-year effort for a small team.
 
-### Alternative 3: Server-Side Currency Conversion
+### Alternative 3: Server-Side Multi-Currency Conversion
 
-- **Pros:** Always latest rates.
-- **Cons:** Every conversion requires network; breaks offline-first.
+- **Pros:** Always latest rates. Single source of truth.
+- **Cons:** Every conversion requires network call, breaking offline-first. Server becomes bottleneck for most common operation.
 
 ## Consequences
 
 ### Positive
 
-- Privacy preserved — AI on-device, bank credentials server-only, rates are public data
-- Offline-first intact — V2 degrades gracefully; V1 features unchanged
-- Modular — Each capability independent with clear boundaries
-- Cost-controlled — ~$2–5/mo additional
+- **Privacy preserved** — AI on-device, bank credentials server-only, exchange rates are public data
+- **Offline-first intact** — V1 features remain fully offline; V2 degrades gracefully
+- **Modular expansion** — Each capability independent with clear boundaries
+- **Cost-controlled** — ~$2–5/mo additional, not $50+/mo for cloud ML
 
 ### Negative
 
-- Server complexity increases (no longer pure sync layer)
-- Four platform-specific model formats per model version
-- Aggregator dependency for bank connections
+- **Server complexity increases** — No longer a pure sync layer
+- **Model management overhead** — 4 platform-specific formats per model version
+- **Aggregator dependency** — Bank connections depend on Plaid/GoCardless uptime
 
 ### Risks
 
-| Risk                   | Likelihood | Impact | Mitigation                                    |
-| ---------------------- | ---------- | ------ | --------------------------------------------- |
-| Plaid pricing changes  | Medium     | Medium | Aggregator abstraction; evaluate alternatives |
-| Model too large        | Medium     | Low    | Size budgets; quantization; rule fallback     |
-| Rate provider downtime | Low        | Low    | Multiple providers; cached rates              |
-| V2 load exceeds VPS    | Low        | Medium | Async webhooks; vertical scaling              |
+| Risk                            | Likelihood | Impact | Mitigation                                      |
+| ------------------------------- | ---------- | ------ | ----------------------------------------------- |
+| Plaid pricing changes           | Medium     | Medium | Aggregator abstraction; evaluate alternatives   |
+| On-device model too large       | Medium     | Low    | Size budgets; quantization; rule-based fallback |
+| Exchange rate provider downtime | Low        | Low    | Multiple fallback providers; cached rates       |
+| V2 server load exceeds VPS      | Low        | Medium | Async webhook processing; scale VPS vertically  |
 
 ## Implementation Notes
 
@@ -169,9 +256,12 @@ CREATE TABLE exchange_rates (
 
 ### New KMP Modules
 
-- `packages/core/banking/` — BankingProvider, TransactionMatcher, DeduplicationEngine
-- `packages/core/ai/` — ModelRuntime (expect/actual), ModelRegistry, Categorizer
-- `packages/core/currency/` (enhanced) — ExchangeRateCache, MultiCurrencyAggregator
+```
+packages/core/src/commonMain/kotlin/com/finance/core/
+├── banking/         ← NEW: BankingProvider, TransactionMatcher, DeduplicationEngine
+├── ai/              ← NEW: ModelRuntime (expect/actual), ModelRegistry, Categorizer
+├── currency/        ← ENHANCED: ExchangeRateCache, MultiCurrencyAggregator, HistoricalRateStore
+```
 
 ## References
 
@@ -179,5 +269,7 @@ CREATE TABLE exchange_rates (
 - [ADR-0004: Auth & Security Architecture](./0004-auth-security-architecture.md)
 - [ADR-0007: Hosting Strategy](./0007-hosting-strategy.md)
 - [ADR-0009: Legal & Monetization Analysis](./0009-legal-monetization-analysis.md)
-- [Plaid API](https://plaid.com/docs/), [GoCardless](https://gocardless.com/bank-account-data/), [ECB Rates](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/)
-- [TFLite](https://www.tensorflow.org/lite), [Core ML](https://developer.apple.com/documentation/coreml), [ONNX](https://onnxruntime.ai/)
+- [Plaid API Documentation](https://plaid.com/docs/)
+- [GoCardless Bank Account Data API](https://gocardless.com/bank-account-data/)
+- [ECB Exchange Rate API](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/)
+- [TensorFlow Lite](https://www.tensorflow.org/lite), [Core ML](https://developer.apple.com/documentation/coreml), [ONNX Runtime](https://onnxruntime.ai/)
