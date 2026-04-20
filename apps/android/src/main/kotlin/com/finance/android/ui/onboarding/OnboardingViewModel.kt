@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 /**
  * Account type options presented during onboarding step 3.
@@ -19,6 +20,23 @@ enum class OnboardingAccountType(val label: String) {
     CHECKING("Checking"),
     SAVINGS("Savings"),
     CREDIT("Credit Card"),
+}
+
+/**
+ * The two onboarding paths a user can choose from after the welcome step.
+ *
+ * - [QUICK_START] — "Just let me in": applies sensible defaults and skips
+ *   customization steps entirely, getting the user to the main app in
+ *   under 3 seconds.
+ * - [PERSONALIZED] — "Set things up my way": walks through currency,
+ *   first account, first budget, and a summary step.
+ */
+enum class OnboardingPath {
+    /** Skip customization, apply sensible defaults, enter the app immediately. */
+    QUICK_START,
+
+    /** Walk through currency → account → budget → summary customization steps. */
+    PERSONALIZED,
 }
 
 /**
@@ -50,42 +68,61 @@ data class CurrencyOption(
 
 /**
  * Full UI state for the onboarding flow.
+ *
+ * The flow consists of:
+ * - Step 1: Welcome (common to both paths)
+ * - Step 2: Path selection — "Just let me in" vs "Set things up"
+ * - Steps 3-5: Personalized path only (currency → account → budget)
+ * - Step 6: Done / summary (personalized path only; quick-start skips
+ *   directly to [isComplete]).
  */
 data class OnboardingUiState(
     /** Current step index (1-based). */
     val currentStep: Int = 1,
 
-    // Step 2 — Currency
+    /** The onboarding path chosen at step 2. `null` until the user decides. */
+    val selectedPath: OnboardingPath? = null,
+
+    // Step 3 — Currency (personalized path)
     val selectedCurrency: CurrencyOption = CurrencyOption.defaults.first(),
 
-    // Step 3 — First Account
+    // Step 4 — First Account (personalized path)
     val accountName: String = "",
     val accountType: OnboardingAccountType = OnboardingAccountType.CHECKING,
     val startingBalance: String = "",
 
-    // Step 4 — First Budget
+    // Step 5 — First Budget (personalized path)
     val budgetCategory: String = "Groceries",
     val budgetAmount: String = "",
 
     /** Whether the final save is in progress. */
     val isSaving: Boolean = false,
 
-    /** Set to true once onboarding is finished (step 5 "Done" tapped). */
+    /** Set to true once onboarding is finished. */
     val isComplete: Boolean = false,
 ) {
-    val totalSteps: Int get() = TOTAL_STEPS
+    /** Total visible steps for the personalized path (shown in step indicator). */
+    val totalSteps: Int get() = TOTAL_STEPS_PERSONALIZED
 
     companion object {
-        const val TOTAL_STEPS = 5
+        /** Steps: welcome(1) + path(2) + currency(3) + account(4) + budget(5) + done(6). */
+        const val TOTAL_STEPS_PERSONALIZED = 6
     }
 }
 
 /**
  * ViewModel for the multi-step onboarding welcome flow.
  *
- * Manages navigation between steps, data collection (currency, first account,
- * first budget), skip logic, and persistence of the `isOnboardingComplete` flag
- * via [android.content.SharedPreferences].
+ * After the welcome screen, the user chooses between two paths:
+ *
+ * - **Quick Start** ("Just let me in") — saves sensible defaults and
+ *   immediately marks onboarding complete. No extra screens.
+ * - **Personalized Setup** ("Set things up my way") — walks through
+ *   currency, first account, first budget, and a summary/done step.
+ *
+ * Manages navigation between steps, data collection, skip logic, and
+ * persistence of the `isOnboardingComplete` flag via
+ * [android.content.SharedPreferences].
  */
 class OnboardingViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -94,12 +131,61 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
     private val _uiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
 
+    // ── Path selection ──────────────────────────────────────────────────
+
+    /**
+     * Called when the user picks an onboarding path at step 2.
+     *
+     * - [OnboardingPath.QUICK_START]: saves defaults and completes immediately.
+     * - [OnboardingPath.PERSONALIZED]: advances to step 3 (currency picker).
+     */
+    fun selectPath(path: OnboardingPath) {
+        Timber.d("Onboarding path selected: %s", path.name)
+        _uiState.update { it.copy(selectedPath = path) }
+
+        when (path) {
+            OnboardingPath.QUICK_START -> quickStart()
+            OnboardingPath.PERSONALIZED -> {
+                _uiState.update { it.copy(currentStep = 3) }
+            }
+        }
+    }
+
+    /**
+     * Applies sensible defaults and completes onboarding immediately.
+     *
+     * Defaults:
+     * - Currency: USD
+     * - Account: "My Account", Checking, $0 balance
+     * - Budget: Groceries, $0 (user can set up later in-app)
+     */
+    private fun quickStart() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSaving = true) }
+
+            prefs.edit()
+                .putString(KEY_CURRENCY, "USD")
+                .putString(KEY_ACCOUNT_NAME, "My Account")
+                .putString(KEY_ACCOUNT_TYPE, OnboardingAccountType.CHECKING.name)
+                .putString(KEY_STARTING_BALANCE, "0")
+                .putString(KEY_BUDGET_CATEGORY, "Groceries")
+                .putString(KEY_BUDGET_AMOUNT, "0")
+                .putString(KEY_ONBOARDING_PATH, OnboardingPath.QUICK_START.name)
+                .apply()
+
+            markOnboardingComplete()
+            Timber.d("Quick-start onboarding complete — defaults applied")
+
+            _uiState.update { it.copy(isSaving = false, isComplete = true) }
+        }
+    }
+
     // ── Navigation ──────────────────────────────────────────────────────
 
     /** Advance to the next step. No-op if already on the last step. */
     fun nextStep() {
         _uiState.update {
-            if (it.currentStep < OnboardingUiState.TOTAL_STEPS) {
+            if (it.currentStep < OnboardingUiState.TOTAL_STEPS_PERSONALIZED) {
                 it.copy(currentStep = it.currentStep + 1)
             } else {
                 it
@@ -123,6 +209,7 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
      * set [OnboardingUiState.isComplete] so the host navigates away.
      */
     fun skip() {
+        Timber.d("Onboarding skipped at step %d", _uiState.value.currentStep)
         markOnboardingComplete()
         _uiState.update { it.copy(isComplete = true) }
     }
@@ -161,7 +248,7 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
     // ── Persistence ─────────────────────────────────────────────────────
 
     /**
-     * Called when the user taps "Done" on the final step.
+     * Called when the user taps "Done" on the final step (personalized path).
      * Persists collected data and marks onboarding complete.
      */
     fun finishOnboarding() {
@@ -177,9 +264,11 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
                 .putString(KEY_STARTING_BALANCE, state.startingBalance.ifBlank { "0" })
                 .putString(KEY_BUDGET_CATEGORY, state.budgetCategory)
                 .putString(KEY_BUDGET_AMOUNT, state.budgetAmount.ifBlank { "0" })
+                .putString(KEY_ONBOARDING_PATH, OnboardingPath.PERSONALIZED.name)
                 .apply()
 
             markOnboardingComplete()
+            Timber.d("Personalized onboarding complete")
 
             _uiState.update { it.copy(isSaving = false, isComplete = true) }
         }
@@ -190,14 +279,15 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     companion object {
-        private const val PREFS_NAME = "finance_onboarding"
-        private const val KEY_ONBOARDING_COMPLETE = "is_onboarding_complete"
-        private const val KEY_CURRENCY = "onboarding_currency"
-        private const val KEY_ACCOUNT_NAME = "onboarding_account_name"
-        private const val KEY_ACCOUNT_TYPE = "onboarding_account_type"
-        private const val KEY_STARTING_BALANCE = "onboarding_starting_balance"
-        private const val KEY_BUDGET_CATEGORY = "onboarding_budget_category"
-        private const val KEY_BUDGET_AMOUNT = "onboarding_budget_amount"
+        internal const val PREFS_NAME = "finance_onboarding"
+        internal const val KEY_ONBOARDING_COMPLETE = "is_onboarding_complete"
+        internal const val KEY_CURRENCY = "onboarding_currency"
+        internal const val KEY_ACCOUNT_NAME = "onboarding_account_name"
+        internal const val KEY_ACCOUNT_TYPE = "onboarding_account_type"
+        internal const val KEY_STARTING_BALANCE = "onboarding_starting_balance"
+        internal const val KEY_BUDGET_CATEGORY = "onboarding_budget_category"
+        internal const val KEY_BUDGET_AMOUNT = "onboarding_budget_amount"
+        internal const val KEY_ONBOARDING_PATH = "onboarding_path"
 
         /**
          * Check whether the user has already completed (or skipped) onboarding.
