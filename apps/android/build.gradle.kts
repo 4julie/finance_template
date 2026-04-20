@@ -121,6 +121,9 @@ dependencies {
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
 
+    // Material 3 Window Size Class (adaptive layouts)
+    implementation(libs.material3.window.size)
+
     // Activity & Navigation
     implementation(libs.activity.compose)
     implementation(libs.navigation.compose)
