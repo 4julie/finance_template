@@ -31,10 +31,17 @@ private fun titleForRoute(route: String?): String = when (route) {
     Route.Analytics.route -> "Analytics"
     Route.Settings.route -> "Settings"
     Route.AccountDetail.route -> "Account Details"
+    Route.AccountCreate.route -> "New Account"
+    Route.AccountEdit.route -> "Edit Account"
     Route.TransactionCreate.route -> "New Transaction"
+    Route.TransactionEdit.route -> "Edit Transaction"
+    Route.TransactionDetail.route -> "Transaction Details"
+    Route.BudgetCreate.route -> "New Budget"
+    Route.BudgetEdit.route -> "Edit Budget"
+    Route.GoalCreate.route -> "New Goal"
+    Route.GoalEdit.route -> "Edit Goal"
     Route.AuthCallback.route -> "Sign In"
     Route.Invite.route -> "Invitation"
-    Route.TransactionDetail.route -> "Transaction Details"
     else -> "Finance"
 }
 

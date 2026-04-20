@@ -147,9 +147,17 @@ fun FinanceNavHost(
         navController = navController,
         startDestination = Route.Dashboard.route,
         modifier = modifier,
+        enterTransition = NavTransitions.enterTransition,
+        exitTransition = NavTransitions.exitTransition,
+        popEnterTransition = NavTransitions.popEnterTransition,
+        popExitTransition = NavTransitions.popExitTransition,
     ) {
         // ── Top-level tabs ──────────────────────────────────────────
-        composable(Route.Dashboard.route) {
+        composable(
+            route = Route.Dashboard.route,
+            enterTransition = NavTransitions.tabEnterTransition,
+            exitTransition = NavTransitions.tabExitTransition,
+        ) {
             DashboardScreen(
                 onAddTransaction = {
                     navController.navigate(Route.TransactionCreate.createRoute()) {
@@ -174,7 +182,11 @@ fun FinanceNavHost(
             )
         }
 
-        composable(Route.Transactions.route) {
+        composable(
+            route = Route.Transactions.route,
+            enterTransition = NavTransitions.tabEnterTransition,
+            exitTransition = NavTransitions.tabExitTransition,
+        ) {
             TransactionsScreen(
                 onTransactionClick = { id ->
                     navController.navigate(Route.TransactionDetail.createRoute(id.value)) {
@@ -189,7 +201,11 @@ fun FinanceNavHost(
             )
         }
 
-        composable(Route.Planning.route) {
+        composable(
+            route = Route.Planning.route,
+            enterTransition = NavTransitions.tabEnterTransition,
+            exitTransition = NavTransitions.tabExitTransition,
+        ) {
             PlanningScreen(
                 onCreateBudget = {
                     navController.navigate(Route.BudgetCreate.route) {
@@ -214,7 +230,11 @@ fun FinanceNavHost(
             )
         }
 
-        composable(Route.Settings.route) {
+        composable(
+            route = Route.Settings.route,
+            enterTransition = NavTransitions.tabEnterTransition,
+            exitTransition = NavTransitions.tabExitTransition,
+        ) {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToLogin = {
