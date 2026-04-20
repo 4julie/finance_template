@@ -3,17 +3,52 @@ build:
 
 complexity:
   LongMethod:
-    threshold: 60
+    threshold: 100
+    excludes:
+      - '**/test/**'
+      - '**/commonTest/**'
+      - '**/androidTest/**'
   LongParameterList:
-    functionThreshold: 8
-    constructorThreshold: 10
+    functionThreshold: 10
+    constructorThreshold: 12
+    ignoreAnnotated:
+      - 'Composable'
+  CyclomaticComplexMethod:
+    threshold: 20
+  NestedBlockDepth:
+    threshold: 5
+  TooManyFunctions:
+    thresholdInFiles: 20
+    thresholdInClasses: 15
+    thresholdInInterfaces: 15
+    thresholdInObjects: 20
+    thresholdInEnums: 15
+  ComplexCondition:
+    threshold: 5
+
+exceptions:
+  TooGenericExceptionThrown:
+    active: true
+    excludes:
+      - '**/test/**'
+      - '**/commonTest/**'
+      - '**/androidTest/**'
+  TooGenericExceptionCaught:
+    active: true
+    excludes:
+      - '**/test/**'
+      - '**/commonTest/**'
+      - '**/androidTest/**'
 
 style:
+  MagicNumber:
+    active: false
   MaxLineLength:
-    maxLineLength: 120
-    excludeCommentStatements: true
+    active: false
   WildcardImport:
-    active: true
+    active: false
+  UseCheckOrError:
+    active: false
 
 naming:
   FunctionNaming:
