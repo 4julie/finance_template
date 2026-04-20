@@ -1,0 +1,95 @@
+{
+  "$description": "Component-level tokens for goal progress indicators. Used across budget progress bars, savings goal trackers, and financial milestone widgets. All progress states pair color with text labels and icons — never color alone.",
+  "progress": {
+    "bar": {
+      "track": {
+        "$value": "{semantic.background.secondary}",
+        "$type": "color",
+        "$description": "Unfilled track background"
+      },
+      "fill": {
+        "$value": "{semantic.interactive.default}",
+        "$type": "color",
+        "$description": "Default fill color — brand blue"
+      },
+      "height": {
+        "$value": "{spacing.2}",
+        "$type": "dimension",
+        "$description": "Standard progress bar height — 8px"
+      },
+      "heightLarge": {
+        "$value": "{spacing.3}",
+        "$type": "dimension",
+        "$description": "Large progress bar height — 12px (used in goal cards)"
+      },
+      "borderRadius": {
+        "$value": "{borderRadius.full}",
+        "$type": "dimension",
+        "$description": "Fully rounded ends"
+      }
+    },
+    "ring": {
+      "track": {
+        "$value": "{semantic.background.secondary}",
+        "$type": "color",
+        "$description": "Unfilled ring track"
+      },
+      "fill": {
+        "$value": "{semantic.interactive.default}",
+        "$type": "color",
+        "$description": "Ring fill color — brand blue"
+      },
+      "strokeWidth": {
+        "$value": "{spacing.2}",
+        "$type": "dimension",
+        "$description": "Ring stroke width — 8px"
+      }
+    },
+    "state": {
+      "onTrack": {
+        "$value": "{semantic.status.positive}",
+        "$type": "color",
+        "$description": "On track — green, paired with ✓ icon and 'On track' label"
+      },
+      "warning": {
+        "$value": "{semantic.status.warning}",
+        "$type": "color",
+        "$description": "Approaching limit — amber, paired with ⚠ icon and threshold label"
+      },
+      "overBudget": {
+        "$value": "{semantic.status.negative}",
+        "$type": "color",
+        "$description": "Over budget — red, paired with ↑ icon and 'Over by $X' label"
+      },
+      "complete": {
+        "$value": "{semantic.status.positive}",
+        "$type": "color",
+        "$description": "Goal complete — green, paired with ★ icon and 'Complete!' label"
+      }
+    },
+    "label": {
+      "primary": {
+        "$value": "{semantic.text.primary}",
+        "$type": "color",
+        "$description": "Progress label primary text (amount)"
+      },
+      "secondary": {
+        "$value": "{semantic.text.secondary}",
+        "$type": "color",
+        "$description": "Progress label secondary text (percentage, description)"
+      }
+    },
+    "animation": {
+      "fillDuration": {
+        "$value": "{animation.progress.duration}",
+        "$type": "duration",
+        "$description": "Progress bar fill animation — 400ms"
+      },
+      "fillEasing": {
+        "$value": "{animation.progress.easing}",
+        "$type": "cubicBezier",
+        "$description": "Progress fill easing curve"
+      }
+    }
+  }
+}

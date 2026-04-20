@@ -1,0 +1,262 @@
+{
+  "$description": "Component-level tokens for financial data visualization charts. Maps semantic and primitive tokens to chart-specific properties. All chart colors use the IBM CVD-safe palette from primitive/colors.json. Charts MUST never convey information through color alone — always pair with labels, patterns, or icons.",
+  "chart": {
+    "container": {
+      "background": {
+        "$value": "{semantic.background.primary}",
+        "$type": "color",
+        "$description": "Chart container background — inherits from page background"
+      },
+      "borderRadius": {
+        "$value": "{borderRadius.lg}",
+        "$type": "dimension",
+        "$description": "Chart container corner radius — matches card styling"
+      },
+      "padding": {
+        "$value": "{spacing.4}",
+        "$type": "dimension",
+        "$description": "Internal padding around the chart area"
+      },
+      "minHeight": {
+        "$value": "240px",
+        "$type": "dimension",
+        "$description": "Minimum chart height to ensure readability"
+      },
+      "defaultHeight": {
+        "$value": "320px",
+        "$type": "dimension",
+        "$description": "Default chart height for standard viewports"
+      },
+      "maxHeight": {
+        "$value": "480px",
+        "$type": "dimension",
+        "$description": "Maximum chart height to prevent oversized charts"
+      }
+    },
+    "axis": {
+      "lineColor": {
+        "$value": "{semantic.border.default}",
+        "$type": "color",
+        "$description": "Axis line color — subtle, not distracting"
+      },
+      "labelColor": {
+        "$value": "{semantic.text.secondary}",
+        "$type": "color",
+        "$description": "Axis label text color"
+      },
+      "gridColor": {
+        "$value": "{semantic.border.default}",
+        "$type": "color",
+        "$description": "Grid line color — lighter than axis for visual hierarchy"
+      }
+    },
+    "tooltip": {
+      "background": {
+        "$value": "{semantic.background.elevated}",
+        "$type": "color",
+        "$description": "Tooltip background — elevated surface"
+      },
+      "text": {
+        "$value": "{semantic.text.primary}",
+        "$type": "color",
+        "$description": "Tooltip text color"
+      },
+      "border": {
+        "$value": "{semantic.border.default}",
+        "$type": "color",
+        "$description": "Tooltip border color"
+      },
+      "borderRadius": {
+        "$value": "{borderRadius.md}",
+        "$type": "dimension",
+        "$description": "Tooltip corner radius"
+      },
+      "paddingX": {
+        "$value": "{spacing.3}",
+        "$type": "dimension",
+        "$description": "Tooltip horizontal padding"
+      },
+      "paddingY": {
+        "$value": "{spacing.2}",
+        "$type": "dimension",
+        "$description": "Tooltip vertical padding"
+      },
+      "shadow": {
+        "$value": "{elevation.medium}",
+        "$type": "shadow",
+        "$description": "Tooltip shadow — medium elevation for prominence"
+      }
+    },
+    "legend": {
+      "text": {
+        "$value": "{semantic.text.secondary}",
+        "$type": "color",
+        "$description": "Legend text color"
+      },
+      "gap": {
+        "$value": "{spacing.4}",
+        "$type": "dimension",
+        "$description": "Gap between legend items"
+      },
+      "swatchSize": {
+        "$value": "12px",
+        "$type": "dimension",
+        "$description": "Color swatch size in legend"
+      },
+      "swatchRadius": {
+        "$value": "{borderRadius.sm}",
+        "$type": "dimension",
+        "$description": "Color swatch corner radius"
+      }
+    },
+    "series": {
+      "1": {
+        "$value": "{color.chart.1}",
+        "$type": "color",
+        "$description": "Series 1 — IBM CVD-safe blue (#648FFF)"
+      },
+      "2": {
+        "$value": "{color.chart.2}",
+        "$type": "color",
+        "$description": "Series 2 — IBM CVD-safe purple (#785EF0)"
+      },
+      "3": {
+        "$value": "{color.chart.3}",
+        "$type": "color",
+        "$description": "Series 3 — IBM CVD-safe magenta (#DC267F)"
+      },
+      "4": {
+        "$value": "{color.chart.4}",
+        "$type": "color",
+        "$description": "Series 4 — IBM CVD-safe orange (#FE6100)"
+      },
+      "5": {
+        "$value": "{color.chart.5}",
+        "$type": "color",
+        "$description": "Series 5 — IBM CVD-safe gold (#FFB000)"
+      },
+      "6": {
+        "$value": "{color.chart.6}",
+        "$type": "color",
+        "$description": "Series 6 — CVD-safe teal (#009E73)"
+      },
+      "overflow": {
+        "$value": "{color.neutral.400}",
+        "$type": "color",
+        "$description": "Overflow/Other category — neutral gray for grouped tail items"
+      }
+    },
+    "bar": {
+      "borderRadius": {
+        "$value": "{borderRadius.sm}",
+        "$type": "dimension",
+        "$description": "Bar top corner radius — subtle rounding"
+      },
+      "gap": {
+        "$value": "{spacing.1}",
+        "$type": "dimension",
+        "$description": "Gap between adjacent bars"
+      }
+    },
+    "donut": {
+      "strokeWidth": {
+        "$value": "2px",
+        "$type": "dimension",
+        "$description": "Stroke between donut slices for visual separation"
+      },
+      "strokeColor": {
+        "$value": "{semantic.background.primary}",
+        "$type": "color",
+        "$description": "Stroke color between slices — matches background for clean gaps"
+      },
+      "innerRadiusRatio": {
+        "$value": "0.6",
+        "$type": "number",
+        "$description": "Inner radius as ratio of outer radius — 60% creates readable center"
+      }
+    },
+    "line": {
+      "strokeWidth": {
+        "$value": "2px",
+        "$type": "dimension",
+        "$description": "Line chart stroke width"
+      },
+      "dotRadius": {
+        "$value": "4px",
+        "$type": "dimension",
+        "$description": "Data point dot radius"
+      },
+      "dotRadiusActive": {
+        "$value": "6px",
+        "$type": "dimension",
+        "$description": "Active/focused data point dot radius"
+      }
+    },
+    "progressBar": {
+      "trackBackground": {
+        "$value": "{semantic.background.secondary}",
+        "$type": "color",
+        "$description": "Progress bar track (unfilled) background"
+      },
+      "fillPositive": {
+        "$value": "{semantic.status.positive}",
+        "$type": "color",
+        "$description": "Progress bar fill — on track / positive"
+      },
+      "fillWarning": {
+        "$value": "{semantic.status.warning}",
+        "$type": "color",
+        "$description": "Progress bar fill — approaching limit"
+      },
+      "fillNegative": {
+        "$value": "{semantic.status.negative}",
+        "$type": "color",
+        "$description": "Progress bar fill — over budget / negative"
+      },
+      "height": {
+        "$value": "{spacing.2}",
+        "$type": "dimension",
+        "$description": "Progress bar height — 8px"
+      },
+      "borderRadius": {
+        "$value": "{borderRadius.full}",
+        "$type": "dimension",
+        "$description": "Fully rounded progress bar ends"
+      }
+    },
+    "animation": {
+      "entranceDuration": {
+        "$value": "{animation.progress.duration}",
+        "$type": "duration",
+        "$description": "Chart entrance animation duration — 400ms"
+      },
+      "entranceEasing": {
+        "$value": "{animation.progress.easing}",
+        "$type": "cubicBezier",
+        "$description": "Chart entrance easing curve"
+      },
+      "transitionDuration": {
+        "$value": "{animation.fadeIn.duration}",
+        "$type": "duration",
+        "$description": "Data transition animation duration — 250ms"
+      },
+      "transitionEasing": {
+        "$value": "{animation.fadeIn.easing}",
+        "$type": "cubicBezier",
+        "$description": "Data transition easing curve"
+      }
+    },
+    "emptyState": {
+      "iconColor": {
+        "$value": "{semantic.text.disabled}",
+        "$type": "color",
+        "$description": "Empty state icon color — muted"
+      },
+      "textColor": {
+        "$value": "{semantic.text.secondary}",
+        "$type": "color",
+        "$description": "Empty state text color"
+      }
+    }
+  }
+}

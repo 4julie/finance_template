@@ -21,6 +21,10 @@ const semanticShared = [
   toGlob(join(root, 'tokens', 'semantic', 'animation.json')),
 ];
 
+// ---------------------------------------------------------------------------
+// Custom Formats
+// ---------------------------------------------------------------------------
+
 /**
  * Custom format: Kotlin object with breakpoint constants (Int, in px).
  * Generates a single Kotlin object that Android / KMP code can import.
@@ -57,6 +61,184 @@ StyleDictionary.registerFormat({
 });
 
 /**
+ * Custom format: XAML ResourceDictionary for WinUI / UWP.
+ * Generates color and dimension resources consumable by Windows platform.
+ */
+StyleDictionary.registerFormat({
+  name: 'xaml/resource-dictionary',
+  format: ({ dictionary, options: _options }) => {
+    const header = [
+      '<!-- Do not edit directly, this file was auto-generated. -->',
+      '<ResourceDictionary',
+      '    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"',
+      '    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">',
+      '',
+    ];
+    const footer = ['', '</ResourceDictionary>', ''];
+
+    const lines = dictionary.allTokens
+      .map((token) => {
+        const name = token.path.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+
+        if (token.$type === 'color') {
+          const hex = token.$value || token.value;
+          // Convert #RRGGBB to #FFRRGGBB for XAML
+          const xamlColor =
+            hex.startsWith('#') && hex.length === 7
+              ? `#FF${hex.slice(1).toUpperCase()}`
+              : hex.toUpperCase();
+          return `    <Color x:Key="${name}">${xamlColor}</Color>`;
+        }
+
+        if (token.$type === 'dimension') {
+          const val = parseFloat(token.$value || token.value);
+          return `    <x:Double x:Key="${name}">${val}</x:Double>`;
+        }
+
+        // Skip non-color/dimension tokens for XAML
+        return null;
+      })
+      .filter(Boolean);
+
+    return [...header, ...lines, ...footer].join('\n');
+  },
+});
+
+/**
+ * Custom format: XAML SolidColorBrush resources.
+ * Provides ready-to-use brush resources for WinUI controls.
+ */
+StyleDictionary.registerFormat({
+  name: 'xaml/brushes',
+  format: ({ dictionary }) => {
+    const header = [
+      '<!-- Do not edit directly, this file was auto-generated. -->',
+      '<ResourceDictionary',
+      '    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"',
+      '    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">',
+      '',
+    ];
+    const footer = ['', '</ResourceDictionary>', ''];
+
+    const lines = dictionary.allTokens
+      .filter((token) => token.$type === 'color')
+      .map((token) => {
+        const name = token.path.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+        const hex = token.$value || token.value;
+        const xamlColor =
+          hex.startsWith('#') && hex.length === 7
+            ? `#FF${hex.slice(1).toUpperCase()}`
+            : hex.toUpperCase();
+        return `    <SolidColorBrush x:Key="${name}Brush" Color="${xamlColor}" />`;
+      });
+
+    return [...header, ...lines, ...footer].join('\n');
+  },
+});
+
+// ---------------------------------------------------------------------------
+// Shared platform configs (DRY helpers)
+// ---------------------------------------------------------------------------
+
+/**
+ * Creates the standard set of platform outputs for a given theme.
+ * @param {object} opts - Theme options
+ * @param {string} opts.cssFile - CSS output filename
+ * @param {string} opts.cssSelector - CSS selector for the theme scope
+ * @param {string} opts.swiftFile - Swift output filename
+ * @param {string} opts.swiftClass - Swift enum class name
+ * @param {string} opts.androidColorsFile - Android colors XML filename
+ * @param {string} opts.xamlFile - XAML ResourceDictionary filename
+ * @param {string} opts.xamlBrushFile - XAML Brushes filename
+ * @param {boolean} [opts.includeDimens] - Whether to include dimens.xml
+ * @param {boolean} [opts.includeKotlin] - Whether to include Kotlin breakpoints
+ */
+function buildPlatforms(opts) {
+  const platforms = {
+    css: {
+      transformGroup: 'css',
+      buildPath: toGlob(join(root, 'build', 'web/')),
+      files: [
+        {
+          destination: opts.cssFile,
+          format: 'css/variables',
+          options: {
+            outputReferences: true,
+            ...(opts.cssSelector ? { selector: opts.cssSelector } : {}),
+          },
+        },
+      ],
+    },
+    swift: {
+      transformGroup: 'ios-swift',
+      buildPath: toGlob(join(root, 'build', 'ios/')),
+      files: [
+        {
+          destination: opts.swiftFile,
+          format: 'ios-swift/enum.swift',
+          className: opts.swiftClass,
+          options: { outputReferences: true },
+        },
+      ],
+    },
+    android: {
+      transformGroup: 'android',
+      buildPath: toGlob(join(root, 'build', 'android/')),
+      files: [
+        {
+          destination: opts.androidColorsFile,
+          format: 'android/colors',
+          filter: (token) => token.$type === 'color',
+        },
+        ...(opts.includeDimens
+          ? [
+              {
+                destination: 'dimens.xml',
+                format: 'android/dimens',
+                filter: (token) => token.$type === 'dimension',
+              },
+            ]
+          : []),
+      ],
+    },
+    windows: {
+      transformGroup: 'css',
+      buildPath: toGlob(join(root, 'build', 'windows/')),
+      files: [
+        {
+          destination: opts.xamlFile,
+          format: 'xaml/resource-dictionary',
+        },
+        {
+          destination: opts.xamlBrushFile,
+          format: 'xaml/brushes',
+        },
+      ],
+    },
+  };
+
+  if (opts.includeKotlin) {
+    platforms.kotlin = {
+      transformGroup: 'android',
+      buildPath: toGlob(join(root, 'build', 'kotlin/')),
+      files: [
+        {
+          destination: 'FinanceBreakpoints.kt',
+          format: 'kotlin/breakpoints-object',
+          filter: (token) => token.$type === 'dimension' && token.path[0] === 'breakpoint',
+        },
+      ],
+    };
+  }
+
+  return platforms;
+}
+
+// ---------------------------------------------------------------------------
+// Theme builds
+// ---------------------------------------------------------------------------
+
+/**
  * Build light theme — primitives + light semantic + shared semantic + components
  */
 const lightSd = new StyleDictionary({
@@ -67,58 +249,17 @@ const lightSd = new StyleDictionary({
     components,
   ],
   usesDtcg: true,
-  platforms: {
-    css: {
-      transformGroup: 'css',
-      buildPath: toGlob(join(root, 'build', 'web/')),
-      files: [
-        {
-          destination: 'tokens.css',
-          format: 'css/variables',
-          options: { outputReferences: true },
-        },
-      ],
-    },
-    swift: {
-      transformGroup: 'ios-swift',
-      buildPath: toGlob(join(root, 'build', 'ios/')),
-      files: [
-        {
-          destination: 'FinanceTokens.swift',
-          format: 'ios-swift/enum.swift',
-          className: 'FinanceTokens',
-          options: { outputReferences: true },
-        },
-      ],
-    },
-    android: {
-      transformGroup: 'android',
-      buildPath: toGlob(join(root, 'build', 'android/')),
-      files: [
-        {
-          destination: 'colors.xml',
-          format: 'android/colors',
-          filter: (token) => token.$type === 'color',
-        },
-        {
-          destination: 'dimens.xml',
-          format: 'android/dimens',
-          filter: (token) => token.$type === 'dimension',
-        },
-      ],
-    },
-    kotlin: {
-      transformGroup: 'android',
-      buildPath: toGlob(join(root, 'build', 'kotlin/')),
-      files: [
-        {
-          destination: 'FinanceBreakpoints.kt',
-          format: 'kotlin/breakpoints-object',
-          filter: (token) => token.$type === 'dimension' && token.path[0] === 'breakpoint',
-        },
-      ],
-    },
-  },
+  platforms: buildPlatforms({
+    cssFile: 'tokens.css',
+    cssSelector: null,
+    swiftFile: 'FinanceTokens.swift',
+    swiftClass: 'FinanceTokens',
+    androidColorsFile: 'colors.xml',
+    includeDimens: true,
+    includeKotlin: true,
+    xamlFile: 'FinanceTokens.xaml',
+    xamlBrushFile: 'FinanceTokensBrushes.xaml',
+  }),
 });
 
 /**
@@ -132,45 +273,15 @@ const darkSd = new StyleDictionary({
     components,
   ],
   usesDtcg: true,
-  platforms: {
-    css: {
-      transformGroup: 'css',
-      buildPath: toGlob(join(root, 'build', 'web/')),
-      files: [
-        {
-          destination: 'tokens-dark.css',
-          format: 'css/variables',
-          options: {
-            outputReferences: true,
-            selector: '[data-theme="dark"]',
-          },
-        },
-      ],
-    },
-    swift: {
-      transformGroup: 'ios-swift',
-      buildPath: toGlob(join(root, 'build', 'ios/')),
-      files: [
-        {
-          destination: 'FinanceTokensDark.swift',
-          format: 'ios-swift/enum.swift',
-          className: 'FinanceTokensDark',
-          options: { outputReferences: true },
-        },
-      ],
-    },
-    android: {
-      transformGroup: 'android',
-      buildPath: toGlob(join(root, 'build', 'android/')),
-      files: [
-        {
-          destination: 'colors-night.xml',
-          format: 'android/colors',
-          filter: (token) => token.$type === 'color',
-        },
-      ],
-    },
-  },
+  platforms: buildPlatforms({
+    cssFile: 'tokens-dark.css',
+    cssSelector: '[data-theme="dark"]',
+    swiftFile: 'FinanceTokensDark.swift',
+    swiftClass: 'FinanceTokensDark',
+    androidColorsFile: 'colors-night.xml',
+    xamlFile: 'FinanceTokensDark.xaml',
+    xamlBrushFile: 'FinanceTokensDarkBrushes.xaml',
+  }),
 });
 
 /**
@@ -188,52 +299,54 @@ const oledDarkSd = new StyleDictionary({
     components,
   ],
   usesDtcg: true,
-  platforms: {
-    css: {
-      transformGroup: 'css',
-      buildPath: toGlob(join(root, 'build', 'web/')),
-      files: [
-        {
-          destination: 'tokens-dark-oled.css',
-          format: 'css/variables',
-          options: {
-            outputReferences: true,
-            selector: '[data-theme="dark-oled"]',
-          },
-        },
-      ],
-    },
-    swift: {
-      transformGroup: 'ios-swift',
-      buildPath: toGlob(join(root, 'build', 'ios/')),
-      files: [
-        {
-          destination: 'FinanceTokensDarkOLED.swift',
-          format: 'ios-swift/enum.swift',
-          className: 'FinanceTokensDarkOLED',
-          options: { outputReferences: true },
-        },
-      ],
-    },
-    android: {
-      transformGroup: 'android',
-      buildPath: toGlob(join(root, 'build', 'android/')),
-      files: [
-        {
-          destination: 'colors-night-oled.xml',
-          format: 'android/colors',
-          filter: (token) => token.$type === 'color',
-        },
-      ],
-    },
-  },
+  platforms: buildPlatforms({
+    cssFile: 'tokens-dark-oled.css',
+    cssSelector: '[data-theme="dark-oled"]',
+    swiftFile: 'FinanceTokensDarkOLED.swift',
+    swiftClass: 'FinanceTokensDarkOLED',
+    androidColorsFile: 'colors-night-oled.xml',
+    xamlFile: 'FinanceTokensDarkOLED.xaml',
+    xamlBrushFile: 'FinanceTokensDarkOLEDBrushes.xaml',
+  }),
 });
+
+/**
+ * Build high-contrast theme — primitives + high-contrast semantic + shared semantic + components
+ *
+ * Maximizes contrast ratios for users with low vision.
+ * All text pairings exceed WCAG AAA (7:1) where possible.
+ * Works alongside Windows High Contrast, macOS Increase Contrast,
+ * and CSS prefers-contrast: more.
+ */
+const highContrastSd = new StyleDictionary({
+  source: [
+    primitives,
+    toGlob(join(root, 'tokens', 'semantic', 'colors.high-contrast.json')),
+    ...semanticShared,
+    components,
+  ],
+  usesDtcg: true,
+  platforms: buildPlatforms({
+    cssFile: 'tokens-high-contrast.css',
+    cssSelector: '[data-theme="high-contrast"]',
+    swiftFile: 'FinanceTokensHighContrast.swift',
+    swiftClass: 'FinanceTokensHighContrast',
+    androidColorsFile: 'colors-high-contrast.xml',
+    xamlFile: 'FinanceTokensHighContrast.xaml',
+    xamlBrushFile: 'FinanceTokensHighContrastBrushes.xaml',
+  }),
+});
+
+// ---------------------------------------------------------------------------
+// Build all themes
+// ---------------------------------------------------------------------------
 
 try {
   await lightSd.buildAllPlatforms();
   await darkSd.buildAllPlatforms();
   await oledDarkSd.buildAllPlatforms();
-  console.log('✅ Design tokens built successfully (light + dark + dark-oled)!');
+  await highContrastSd.buildAllPlatforms();
+  console.log('✅ Design tokens built successfully (light + dark + dark-oled + high-contrast)!');
 } catch (err) {
   console.error('Build failed:', err.message);
   process.exit(1);

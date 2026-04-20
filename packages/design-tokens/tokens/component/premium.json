@@ -1,0 +1,103 @@
+{
+  "$description": "Component-level tokens for premium tier UI elements. Includes paywall, premium badges, feature gates, and inline upsell patterns. All premium UI must work with cognitive accessibility mode and all theme variants.",
+  "premium": {
+    "badge": {
+      "background": {
+        "$value": "{semantic.interactive.default}",
+        "$type": "color",
+        "$description": "Premium badge pill background — brand blue"
+      },
+      "text": {
+        "$value": "{semantic.text.inverse}",
+        "$type": "color",
+        "$description": "Premium badge text — white on blue"
+      },
+      "borderRadius": {
+        "$value": "{borderRadius.full}",
+        "$type": "dimension",
+        "$description": "Pill-shaped badge — fully rounded"
+      },
+      "paddingX": {
+        "$value": "{spacing.2}",
+        "$type": "dimension",
+        "$description": "Badge horizontal padding — 8px"
+      },
+      "paddingY": {
+        "$value": "{spacing.1}",
+        "$type": "dimension",
+        "$description": "Badge vertical padding — 4px"
+      }
+    },
+    "gate": {
+      "overlayBackground": {
+        "$value": "{semantic.background.primary}",
+        "$type": "color",
+        "$description": "Feature gate overlay background (applied with opacity)"
+      },
+      "iconColor": {
+        "$value": "{semantic.text.disabled}",
+        "$type": "color",
+        "$description": "Lock icon color on gated features"
+      },
+      "iconSize": {
+        "$value": "{spacing.6}",
+        "$type": "dimension",
+        "$description": "Lock icon size — 24px"
+      }
+    },
+    "upsell": {
+      "background": {
+        "$value": "{semantic.background.secondary}",
+        "$type": "color",
+        "$description": "Inline upsell card background"
+      },
+      "border": {
+        "$value": "{semantic.border.default}",
+        "$type": "color",
+        "$description": "Inline upsell card border"
+      },
+      "borderRadius": {
+        "$value": "{borderRadius.lg}",
+        "$type": "dimension",
+        "$description": "Inline upsell card corner radius — 12px"
+      },
+      "padding": {
+        "$value": "{spacing.4}",
+        "$type": "dimension",
+        "$description": "Inline upsell card padding — 16px"
+      },
+      "iconColor": {
+        "$value": "{semantic.status.info}",
+        "$type": "color",
+        "$description": "Info icon color in upsell — blue"
+      }
+    },
+    "paywall": {
+      "previewBorderRadius": {
+        "$value": "{borderRadius.xl}",
+        "$type": "dimension",
+        "$description": "Blurred feature preview corner radius — 16px"
+      },
+      "featureCheckColor": {
+        "$value": "{semantic.status.positive}",
+        "$type": "color",
+        "$description": "Checkmark color in feature list — green"
+      },
+      "priceSelectorBorderRadius": {
+        "$value": "{borderRadius.lg}",
+        "$type": "dimension",
+        "$description": "Price selector card corner radius"
+      },
+      "ctaPaddingX": {
+        "$value": "{spacing.8}",
+        "$type": "dimension",
+        "$description": "CTA button horizontal padding — extra wide for prominence"
+      },
+      "ctaPaddingY": {
+        "$value": "{spacing.3}",
+        "$type": "dimension",
+        "$description": "CTA button vertical padding — 12px"
+      }
+    }
+  }
+}

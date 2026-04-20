@@ -326,6 +326,308 @@ When cognitive mode is active, platform engineers SHOULD follow these content ru
 
 ---
 
+## Error Prevention & Recovery
+
+Cognitive accessibility mode emphasizes **preventing** errors before they occur and making **recovery** simple and non-stressful when errors do happen. These patterns follow WCAG 2.2 SC 3.3 (Input Assistance) and the COGA guidance on error prevention.
+
+### Error Prevention Patterns
+
+#### 1. Confirmation Before Destructive Actions
+
+All destructive actions require explicit confirmation with clear language:
+
+```
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│  Delete this account?                            │
+│                                                  │
+│  This will permanently remove "Chase Checking"   │
+│  and all 47 transactions inside it.              │
+│                                                  │
+│  This cannot be undone.                          │
+│                                                  │
+│  ┌──────────────────────────────────────────┐    │
+│  │       [ Cancel — Keep Account ]          │    │
+│  └──────────────────────────────────────────┘    │
+│  ┌──────────────────────────────────────────┐    │
+│  │       [ Delete Account ]                 │    │
+│  └──────────────────────────────────────────┘    │
+│                                                  │
+└──────────────────────────────────────────────────┘
+```
+
+**Rules:**
+
+- Safe action (Cancel) appears first and uses `button.primary`
+- Destructive action appears second and uses `button.destructive`
+- Both buttons are full-width in cognitive mode (no side-by-side confusion)
+- Description includes **specific** impact ("47 transactions") — not vague warnings
+- In cognitive mode, add 2-second delay before destructive button becomes active
+
+#### 2. Input Validation: Inline, Real-Time, Non-Blocking
+
+- Validate input as the user types (after a 500ms debounce)
+- Show validation messages inline below the field — never in modal dialogs
+- Use `semantic.status.negative` for errors + ⚠ icon + text label
+- Always explain **how to fix** the error, not just what's wrong
+
+| Instead of            | Use                                         |
+| --------------------- | ------------------------------------------- |
+| "Invalid amount"      | "Enter a number, like 25.00"                |
+| "Field required"      | "Please enter an account name"              |
+| "Invalid date"        | "Enter a date like 01/15/2025"              |
+| "Amount out of range" | "Amount must be between $0.01 and $999,999" |
+
+#### 3. Smart Defaults
+
+Pre-fill fields with sensible defaults to reduce decision fatigue:
+
+- **Date:** Default to today
+- **Currency:** Default to user's locale currency
+- **Category:** Suggest based on last used category for similar amounts
+- **Account:** Default to most recently used account
+
+#### 4. Undo Support
+
+All non-destructive actions support undo:
+
+```
+┌──────────────────────────────────────────────────┐
+│  ✓  Transaction deleted                          │
+│                                                  │
+│  [ Undo ]                    Disappears in 8s    │
+└──────────────────────────────────────────────────┘
+```
+
+- Toast notification with undo action persists for **8 seconds** in cognitive mode (vs 5s default)
+- Undo uses `button.secondary` styling
+- Toast uses `role="status"` + `aria-live="polite"`
+
+### Error Recovery Patterns
+
+#### 1. Clear Error Messages
+
+Every error message follows this structure:
+
+```
+[Icon] What happened + How to fix it
+```
+
+| Error Type    | Message Pattern                                                | Icon |
+| ------------- | -------------------------------------------------------------- | ---- |
+| Network       | "We couldn't save. Check your connection and tap Retry."       | ⚠    |
+| Validation    | "Enter a number, like 25.00"                                   | ⓘ    |
+| Sync conflict | "This was changed on another device. Keep this version?"       | ⟳    |
+| Permission    | "Finance needs camera access to scan receipts. Open Settings?" | 📷   |
+| Server        | "Something went wrong on our end. Try again in a moment."      | ⚠    |
+
+#### 2. Recovery Actions
+
+- Always provide a **clear next step** (Retry, Go Back, Open Settings)
+- Never show technical error details to users
+- Persist the user's input — never clear form fields on error
+- In cognitive mode, limit recovery options to **2 maximum** (primary + dismiss)
+
+#### 3. Graceful Offline Behavior
+
+- Queue operations when offline — sync when connection returns
+- Show `role="status"` banner: "You're offline. Changes will save when you reconnect."
+- Never show error dialogs for expected offline scenarios
+
+---
+
+## Plain Language Guidelines
+
+All UI text in Finance follows plain language principles. In cognitive mode, these guidelines are **strictly enforced** — no financial jargon without explanation.
+
+### Readability Targets
+
+| Context        | Standard Mode         | Cognitive Mode        |
+| -------------- | --------------------- | --------------------- |
+| Feature names  | Grade 8 reading level | Grade 6 reading level |
+| Descriptions   | Grade 8 reading level | Grade 5 reading level |
+| Error messages | Grade 6 reading level | Grade 4 reading level |
+| Button labels  | 1-3 words             | 1-3 words             |
+| Tooltip text   | 1-2 sentences         | 1 sentence max        |
+
+### Financial Terminology Dictionary
+
+When cognitive mode is active, all financial terms are replaced with plain language equivalents. If a financial term must appear (e.g., on bank statements), it is accompanied by a parenthetical explanation.
+
+| Financial Term             | Cognitive Mode Equivalent                      | Context Tip           |
+| -------------------------- | ---------------------------------------------- | --------------------- |
+| Net worth                  | Total money (what you have minus what you owe) | Shown on dashboard    |
+| Budget allocation          | How you plan to spend                          | Budget setup          |
+| Transaction                | Purchase or payment                            | Transaction list      |
+| Reconciliation             | Checking that your numbers match               | Account management    |
+| Amortization               | Payment plan over time                         | Loan accounts         |
+| Discretionary spending     | Spending you choose                            | Budget categories     |
+| Fixed expenses             | Bills you pay every month                      | Budget categories     |
+| Variable expenses          | Spending that changes                          | Budget categories     |
+| Liability                  | Money you owe                                  | Account types         |
+| Asset                      | Money you have                                 | Account types         |
+| Interest rate              | How much extra you pay (or earn) on money      | Loan/savings accounts |
+| Principal                  | The original amount borrowed                   | Loan accounts         |
+| Compound interest          | Interest on interest (it adds up!)             | Savings/education     |
+| ROI (Return on Investment) | How much money you made back                   | Investment accounts   |
+| Depreciation               | How much value something loses over time       | Assets                |
+| Cashflow                   | Money coming in and going out                  | Reports               |
+
+### Contextual Education
+
+In cognitive mode, every financial term that appears in the UI includes a tap-to-learn interaction:
+
+```
+┌──────────────────────────────────────────────────┐
+│  Your net worth ⓘ                                │
+│  $12,450                                         │
+│                                                  │
+│  ┌────────────────────────────────────────────┐  │
+│  │  Net worth = what you have − what you owe  │  │
+│  │  Right now, that's $12,450.                │  │
+│  └────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────┘
+```
+
+- ⓘ icon is always a minimum 48×48px tap target in cognitive mode
+- Education tooltip uses `typeScale.body` (not caption)
+- Dismiss on tap outside or pressing Escape
+- `aria-label="Learn about net worth"` on the info icon
+
+### Sentence Structure Rules
+
+1. **Active voice**: "You spent $450 on food" — not "Food expenses totalled $450"
+2. **Short sentences**: Maximum 15 words per sentence in cognitive mode
+3. **One idea per sentence**: Break complex concepts into multiple sentences
+4. **Positive framing**: "You have $200 left" — not "You've spent $800 of $1,000"
+5. **Concrete language**: Use specific amounts and dates — not "recently" or "approximately"
+
+---
+
+## Consistent Navigation Patterns
+
+Cognitive mode enforces predictable, consistent navigation patterns across all screens.
+
+### Navigation Structure
+
+```
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│  ┌──────────────────────────────────────────┐    │
+│  │  [Content Area]                          │    │
+│  │                                          │    │
+│  │  • Page content is always in the same    │    │
+│  │    position relative to navigation       │    │
+│  │  • Back button always top-left           │    │
+│  │  • Primary action always bottom or       │    │
+│  │    top-right                             │    │
+│  │                                          │    │
+│  └──────────────────────────────────────────┘    │
+│                                                  │
+│  ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐         │
+│  │ Home │  │ Txns │  │Budget│  │ More │         │
+│  └──────┘  └──────┘  └──────┘  └──────┘         │
+│  (Bottom tab bar — always visible)               │
+│                                                  │
+└──────────────────────────────────────────────────┘
+```
+
+### Navigation Rules
+
+| Rule                       | Standard Mode | Cognitive Mode           |
+| -------------------------- | ------------- | ------------------------ |
+| Maximum navigation depth   | 4 levels      | 2 levels                 |
+| Bottom tab bar visible     | Always        | Always (never hides)     |
+| Back button position       | Top-left      | Top-left (always)        |
+| Page transitions           | Animated      | Instant (no animation)   |
+| Tab bar items              | 5 max         | 4 max                    |
+| "More" overflow menu       | Optional      | Required (keep tabs ≤ 4) |
+| Breadcrumb trail           | Optional      | Required on level 2+     |
+| Current location indicator | Subtle        | Bold + high contrast     |
+
+### Consistent Action Placement
+
+Every screen follows the same action placement pattern:
+
+| Action Type         | Position           | Cognitive Mode             |
+| ------------------- | ------------------ | -------------------------- |
+| Back / Cancel       | Top-left           | Top-left, always visible   |
+| Primary action      | Bottom / top-right | Full-width bottom button   |
+| Secondary actions   | Below primary      | Clearly separated, labeled |
+| Destructive actions | Bottom of screen   | Separated by divider line  |
+
+### Page Layout Consistency
+
+Every screen follows this content order in cognitive mode:
+
+1. **Title** — what page am I on?
+2. **Summary** — key information at a glance
+3. **Content** — details, lists, or forms
+4. **Actions** — what can I do here?
+
+No screen deviates from this order. Users can predict where to look for information on every screen.
+
+### Wayfinding
+
+- Current tab is highlighted with `semantic.interactive.default` color + text label (not just an icon)
+- Breadcrumb shows path: `Home > Budget > Food Budget`
+- Screen titles use `typeScale.headline` in cognitive mode (larger, more prominent)
+- "Where am I?" is answerable within 1 second on any screen
+
+---
+
+## Information Hierarchy
+
+Cognitive mode enforces a clear, predictable information hierarchy on every screen.
+
+### Hierarchy Rules
+
+1. **One hero number per screen** — the most important metric is displayed prominently
+2. **Group related items** — max 5 items per visible group
+3. **Progressive disclosure** — summary → details → advanced (3 levels max)
+4. **Visual weight** — hierarchy communicated through size and weight, not color alone
+
+### Dashboard Example (Cognitive Mode)
+
+```
+┌──────────────────────────────────────────────────┐
+│  Good morning, Alex                              │  ← typeScale.title
+│                                                  │
+│  ┌──────────────────────────────────────────┐    │
+│  │                                          │    │  ← Hero card
+│  │     You have $2,450 to spend             │    │  ← typeScale.headline
+│  │     this month                           │    │
+│  │                                          │    │
+│  │     ████████████████░░░░░  75%            │    │  ← Progress bar
+│  │     $1,850 spent of $2,450               │    │  ← typeScale.body
+│  │                                          │    │
+│  └──────────────────────────────────────────┘    │
+│                                                  │
+│  Recent purchases                                │  ← typeScale.title
+│  ─────────────────                               │
+│  ┌──────────────────────────────────────────┐    │
+│  │  Coffee Shop      −$4.50      Today      │    │
+│  │  Grocery Store     −$67.23     Today      │    │
+│  │  Electric Bill     −$125.00    Yesterday  │    │
+│  └──────────────────────────────────────────┘    │
+│                                                  │
+│  [ See all purchases → ]                         │
+│                                                  │
+└──────────────────────────────────────────────────┘
+```
+
+### Visual Weight Scale (Cognitive Mode)
+
+| Level   | Type Scale | Weight   | Usage                         |
+| ------- | ---------- | -------- | ----------------------------- |
+| Hero    | headline   | bold     | Primary metric (1 per screen) |
+| Section | title      | semibold | Section headings              |
+| Content | body       | regular  | Body text, descriptions       |
+| Detail  | label      | medium   | Labels, metadata              |
+| Fine    | caption    | regular  | Timestamps, secondary info    |
+
+---
+
 ## High-Contrast Compound State
 
 When both cognitive mode and system high contrast are active:
