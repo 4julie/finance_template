@@ -1,24 +1,32 @@
 # =============================================================================
-# Finance App — Caddy Reverse Proxy Configuration
+# Finance App — Caddy Reverse Proxy & Static File Serving Configuration
 # =============================================================================
 #
 # Provides automatic HTTPS via Let's Encrypt and routes requests to the
-# appropriate backend service based on the URL path.
+# appropriate backend service based on the URL path.  Also serves the
+# Finance PWA static build with CDN-friendly cache headers.
 #
 # Route mapping:
 #   /rest/*          → PostgREST (API)
 #   /auth/*          → GoTrue (authentication)
 #   /functions/*     → Edge Functions (Deno)
 #   /health          → Edge Functions health check
+#   /assets/*        → Immutable hashed static assets (1-year cache)
+#   /sw.js           → Service worker (no-cache, always revalidate)
+#   /manifest.json   → PWA manifest (short cache, revalidate)
+#   /*               → SPA index.html fallback
 #
-# Issue: #268
+# Issues: #268, #897
 # =============================================================================
 
 {$DOMAIN} {
 	# TLS with Let's Encrypt
 	tls {$TLS_EMAIL}
 
-	# Security headers
+	# Enable compression for text-based assets
+	encode zstd gzip
+
+	# Security headers (applied to all responses)
 	header {
 		# HSTS — enforce HTTPS for 1 year, including subdomains
 		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
@@ -35,8 +43,11 @@
 		# Referrer policy
 		Referrer-Policy "strict-origin-when-cross-origin"
 
-		# Content Security Policy
-		Content-Security-Policy "default-src 'self'; connect-src 'self' https:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'"
+		# Permissions-Policy — restrict sensitive browser APIs
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(self)"
+
+		# Content Security Policy — strict, no inline scripts, no eval
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; worker-src 'self'"
 
 		# Remove server identification
 		-Server
@@ -92,10 +103,56 @@
 	}
 
 	# -------------------------------------------------------------------------
-	# Default — return 404 for unmatched routes
+	# Service Worker — must always be re-validated so updates propagate
+	# -------------------------------------------------------------------------
+	handle /sw.js {
+		header Cache-Control "no-cache, no-store, must-revalidate"
+		header Service-Worker-Allowed "/"
+		root * /srv/web
+		file_server
+	}
+
+	# -------------------------------------------------------------------------
+	# PWA Manifest — short cache with revalidation
+	# -------------------------------------------------------------------------
+	handle /manifest.json {
+		header Cache-Control "public, max-age=3600, must-revalidate"
+		root * /srv/web
+		file_server
+	}
+
+	# -------------------------------------------------------------------------
+	# Hashed static assets — immutable, aggressive 1-year cache
+	# Vite outputs to /assets/ with content-hash filenames.
+	# -------------------------------------------------------------------------
+	handle /assets/* {
+		header Cache-Control "public, max-age=31536000, immutable"
+		root * /srv/web
+		file_server
+	}
+
+	# -------------------------------------------------------------------------
+	# Other static files (robots.txt, 404.html, icons, etc.)
+	# Short cache with revalidation for non-hashed files.
+	# -------------------------------------------------------------------------
+	@staticFiles {
+		path *.ico *.png *.svg *.webp *.woff2 *.woff *.ttf *.xml *.txt
+	}
+	handle @staticFiles {
+		header Cache-Control "public, max-age=86400, must-revalidate"
+		root * /srv/web
+		file_server
+	}
+
+	# -------------------------------------------------------------------------
+	# SPA fallback — serve index.html for all unmatched routes
+	# The PWA handles client-side routing via react-router-dom.
 	# -------------------------------------------------------------------------
 	handle {
-		respond "Not Found" 404
+		root * /srv/web
+		try_files {path} /index.html
+		header Cache-Control "no-cache, must-revalidate"
+		file_server
 	}
 
 	# Access logging
