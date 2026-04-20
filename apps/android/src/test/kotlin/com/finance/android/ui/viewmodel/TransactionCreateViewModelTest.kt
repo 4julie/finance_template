@@ -80,6 +80,7 @@ class TransactionCreateViewModelTest {
     ) = Account(
         id = SyncId(id),
         householdId = householdId,
+        ownerId = householdId,
         name = name,
         type = type,
         currency = Currency.USD,
@@ -95,6 +96,7 @@ class TransactionCreateViewModelTest {
     ) = Category(
         id = SyncId(id),
         householdId = householdId,
+        ownerId = householdId,
         name = name,
         icon = icon,
         createdAt = now,
@@ -785,6 +787,7 @@ class TransactionCreateViewModelTest {
         val existingTxn = Transaction(
             id = SyncId("txn-existing"),
             householdId = householdId,
+            ownerId = householdId,
             accountId = SyncId("acc-1"),
             type = TransactionType.EXPENSE,
             status = TransactionStatus.CLEARED,
@@ -813,6 +816,7 @@ class TransactionCreateViewModelTest {
         val existingTxn = Transaction(
             id = SyncId("txn-existing"),
             householdId = householdId,
+            ownerId = householdId,
             accountId = SyncId("acc-1"),
             type = TransactionType.EXPENSE,
             status = TransactionStatus.CLEARED,

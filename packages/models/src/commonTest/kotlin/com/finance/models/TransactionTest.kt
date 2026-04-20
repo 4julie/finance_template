@@ -40,6 +40,7 @@ class TransactionTest {
     ) = Transaction(
         id = SyncId("txn-1"),
         householdId = householdId,
+        ownerId = SyncId("owner-1"),
         accountId = accountId,
         categoryId = categoryId,
         type = TransactionType.EXPENSE,
@@ -72,6 +73,7 @@ class TransactionTest {
         val txn = Transaction(
             id = SyncId("txn-2"),
             householdId = householdId,
+            ownerId = SyncId("owner-1"),
             accountId = accountId,
             type = TransactionType.INCOME,
             amount = Cents(500000L),
@@ -89,6 +91,7 @@ class TransactionTest {
         val txn = Transaction(
             id = SyncId("txn-3"),
             householdId = householdId,
+            ownerId = SyncId("owner-1"),
             accountId = accountId,
             type = TransactionType.TRANSFER,
             amount = Cents(10000L),
@@ -117,6 +120,7 @@ class TransactionTest {
             Transaction(
                 id = SyncId("txn-4"),
                 householdId = householdId,
+                ownerId = SyncId("owner-1"),
                 accountId = accountId,
                 type = TransactionType.TRANSFER,
                 amount = Cents(1000L),
@@ -160,6 +164,7 @@ class TransactionTest {
         val txn = Transaction(
             id = SyncId("txn-5"),
             householdId = householdId,
+            ownerId = SyncId("owner-1"),
             accountId = accountId,
             type = TransactionType.EXPENSE,
             amount = Cents(100L),

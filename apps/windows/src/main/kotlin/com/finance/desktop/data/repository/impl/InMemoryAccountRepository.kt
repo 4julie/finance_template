@@ -21,10 +21,10 @@ class InMemoryAccountRepository : AccountRepository {
 }
 
 private fun createSampleAccounts(): List<Account> {
-    val now = Clock.System.now(); val hid = SyncId("d1")
+    val now = Clock.System.now(); val hid = SyncId("d1"); val oid = SyncId("owner-1")
     return listOf(
-        Account(SyncId("a1"), hid, "Checking", AccountType.CHECKING, Currency.USD, Cents(524730), sortOrder = 0, createdAt = now, updatedAt = now),
-        Account(SyncId("a2"), hid, "Savings", AccountType.SAVINGS, Currency.USD, Cents(1867000), sortOrder = 1, createdAt = now, updatedAt = now),
-        Account(SyncId("a3"), hid, "Visa Card", AccountType.CREDIT_CARD, Currency.USD, Cents(128450), sortOrder = 2, createdAt = now, updatedAt = now),
+        Account(SyncId("a1"), hid, oid, "Checking", AccountType.CHECKING, Currency.USD, Cents(524730), sortOrder = 0, createdAt = now, updatedAt = now),
+        Account(SyncId("a2"), hid, oid, "Savings", AccountType.SAVINGS, Currency.USD, Cents(1867000), sortOrder = 1, createdAt = now, updatedAt = now),
+        Account(SyncId("a3"), hid, oid, "Visa Card", AccountType.CREDIT_CARD, Currency.USD, Cents(128450), sortOrder = 2, createdAt = now, updatedAt = now),
     )
 }

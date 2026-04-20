@@ -15,6 +15,7 @@ enum class AccountType { CHECKING, SAVINGS, CREDIT_CARD, CASH, INVESTMENT, LOAN,
 data class Account(
     val id: SyncId,
     val householdId: SyncId,
+    val ownerId: SyncId,
     val name: String,
     val type: AccountType,
     val currency: Currency,

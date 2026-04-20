@@ -34,6 +34,7 @@ class BudgetAndGoalTest {
     ) = Budget(
         id = SyncId("budget-1"),
         householdId = householdId,
+        ownerId = SyncId("owner-1"),
         categoryId = categoryId,
         name = name,
         amount = amount,
@@ -115,6 +116,7 @@ class BudgetAndGoalTest {
     ) = Goal(
         id = SyncId("goal-1"),
         householdId = householdId,
+        ownerId = SyncId("owner-1"),
         name = name,
         targetAmount = targetAmount,
         currentAmount = currentAmount,

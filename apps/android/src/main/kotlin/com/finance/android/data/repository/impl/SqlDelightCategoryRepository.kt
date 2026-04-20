@@ -56,6 +56,7 @@ class SqlDelightCategoryRepository(
             queries.insert(
                 id = entity.id.value,
                 household_id = entity.householdId.value,
+                owner_id = entity.ownerId.value,
                 name = entity.name,
                 icon = entity.icon,
                 color = entity.color,
@@ -159,6 +160,7 @@ class SqlDelightCategoryRepository(
     private fun CategoryRow.toDomain(): Category = Category(
         id = SyncId(id),
         householdId = SyncId(household_id),
+        ownerId = SyncId(owner_id),
         name = name,
         icon = icon,
         color = color,

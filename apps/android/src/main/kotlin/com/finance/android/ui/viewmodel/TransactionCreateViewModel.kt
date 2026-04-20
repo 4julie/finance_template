@@ -259,6 +259,7 @@ class TransactionCreateViewModel(
             ) ?: Transaction(
                 id = SyncId("txn-${now.toEpochMilliseconds()}"),
                 householdId = householdId,
+                ownerId = householdId,
                 accountId = s.selectedAccountId!!,
                 categoryId = s.selectedCategoryId,
                 type = s.transactionType,

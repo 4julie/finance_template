@@ -50,6 +50,7 @@ class MockTransactionRepositoryTest {
     ) = Transaction(
         id = SyncId(id),
         householdId = SyncId("household-1"),
+        ownerId = SyncId("owner-1"),
         accountId = SyncId(accountId),
         categoryId = SyncId(categoryId),
         type = type,

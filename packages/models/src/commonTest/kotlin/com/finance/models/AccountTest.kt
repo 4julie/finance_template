@@ -33,6 +33,7 @@ class AccountTest {
     ) = Account(
         id = SyncId("account-1"),
         householdId = householdId,
+        ownerId = SyncId("owner-1"),
         name = name,
         type = AccountType.CHECKING,
         currency = Currency.USD,
@@ -60,6 +61,7 @@ class AccountTest {
         val account = Account(
             id = SyncId("account-2"),
             householdId = householdId,
+            ownerId = SyncId("owner-1"),
             name = "Emergency Fund",
             type = AccountType.SAVINGS,
             currency = Currency.USD,
@@ -75,6 +77,7 @@ class AccountTest {
         val account = Account(
             id = SyncId("account-3"),
             householdId = householdId,
+            ownerId = SyncId("owner-1"),
             name = "Visa Platinum",
             type = AccountType.CREDIT_CARD,
             currency = Currency.USD,

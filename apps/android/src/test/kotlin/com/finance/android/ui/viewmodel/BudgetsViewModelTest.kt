@@ -79,6 +79,7 @@ class BudgetsViewModelTest {
     ) = Category(
         id = SyncId(id),
         householdId = householdId,
+        ownerId = householdId,
         name = name,
         icon = icon,
         createdAt = now,
@@ -94,6 +95,7 @@ class BudgetsViewModelTest {
     ) = Budget(
         id = SyncId(id),
         householdId = householdId,
+        ownerId = householdId,
         categoryId = SyncId(categoryId),
         name = name,
         amount = Cents(amountCents),
@@ -112,6 +114,7 @@ class BudgetsViewModelTest {
     ) = Transaction(
         id = SyncId(id),
         householdId = householdId,
+        ownerId = householdId,
         accountId = SyncId("acc-test"),
         categoryId = SyncId(categoryId),
         type = TransactionType.EXPENSE,

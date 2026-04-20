@@ -84,6 +84,7 @@ class TransactionsViewModelTest {
         return Transaction(
             id = SyncId(id),
             householdId = householdId,
+            ownerId = householdId,
             accountId = SyncId(accountId),
             categoryId = categoryId?.let { SyncId(it) },
             type = type,
@@ -106,6 +107,7 @@ class TransactionsViewModelTest {
     ) = Category(
         id = SyncId(id),
         householdId = householdId,
+        ownerId = householdId,
         name = name,
         icon = icon,
         createdAt = now,

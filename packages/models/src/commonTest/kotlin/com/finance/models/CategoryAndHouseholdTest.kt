@@ -28,6 +28,7 @@ class CategoryAndHouseholdTest {
     private fun category(name: String = "Groceries") = Category(
         id = SyncId("cat-1"),
         householdId = householdId,
+        ownerId = SyncId("owner-1"),
         name = name,
         createdAt = now,
         updatedAt = now,
@@ -84,6 +85,7 @@ class CategoryAndHouseholdTest {
         val sub = Category(
             id = SyncId("cat-2"),
             householdId = householdId,
+            ownerId = SyncId("owner-1"),
             name = "Produce",
             parentId = SyncId("cat-1"),
             createdAt = now,
@@ -97,6 +99,7 @@ class CategoryAndHouseholdTest {
         val income = Category(
             id = SyncId("cat-3"),
             householdId = householdId,
+            ownerId = SyncId("owner-1"),
             name = "Salary",
             isIncome = true,
             createdAt = now,

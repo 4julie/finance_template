@@ -41,6 +41,7 @@ class MockGoalRepositoryTest {
     ) = Goal(
         id = SyncId(id),
         householdId = SyncId("household-1"),
+        ownerId = SyncId("owner-1"),
         name = name,
         targetAmount = Cents(targetCents),
         currentAmount = Cents(currentCents),

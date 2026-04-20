@@ -173,6 +173,7 @@ class JsonExportSerializer : ExportSerializer {
     private data class AccountDto(
         val id: String,
         @SerialName("household_id") val householdId: String,
+        @SerialName("owner_id") val ownerId: String,
         val name: String,
         val type: String,
         val currency: String,
@@ -189,6 +190,7 @@ class JsonExportSerializer : ExportSerializer {
             fun from(account: Account): AccountDto = AccountDto(
                 id = account.id.value,
                 householdId = account.householdId.value,
+                ownerId = account.ownerId.value,
                 name = account.name,
                 type = account.type.name,
                 currency = account.currency.code,
@@ -208,6 +210,7 @@ class JsonExportSerializer : ExportSerializer {
     private data class TransactionDto(
         val id: String,
         @SerialName("household_id") val householdId: String,
+        @SerialName("owner_id") val ownerId: String,
         @SerialName("account_id") val accountId: String,
         @SerialName("category_id") val categoryId: String?,
         val type: String,
@@ -229,6 +232,7 @@ class JsonExportSerializer : ExportSerializer {
             fun from(transaction: Transaction): TransactionDto = TransactionDto(
                 id = transaction.id.value,
                 householdId = transaction.householdId.value,
+                ownerId = transaction.ownerId.value,
                 accountId = transaction.accountId.value,
                 categoryId = transaction.categoryId?.value,
                 type = transaction.type.name,
@@ -253,6 +257,7 @@ class JsonExportSerializer : ExportSerializer {
     private data class CategoryDto(
         val id: String,
         @SerialName("household_id") val householdId: String,
+        @SerialName("owner_id") val ownerId: String,
         val name: String,
         val icon: String?,
         val color: String?,
@@ -268,6 +273,7 @@ class JsonExportSerializer : ExportSerializer {
             fun from(category: Category): CategoryDto = CategoryDto(
                 id = category.id.value,
                 householdId = category.householdId.value,
+                ownerId = category.ownerId.value,
                 name = category.name,
                 icon = category.icon,
                 color = category.color,
@@ -286,6 +292,7 @@ class JsonExportSerializer : ExportSerializer {
     private data class BudgetDto(
         val id: String,
         @SerialName("household_id") val householdId: String,
+        @SerialName("owner_id") val ownerId: String,
         @SerialName("category_id") val categoryId: String,
         val name: String,
         val amount: MoneyDto,
@@ -301,6 +308,7 @@ class JsonExportSerializer : ExportSerializer {
             fun from(budget: Budget): BudgetDto = BudgetDto(
                 id = budget.id.value,
                 householdId = budget.householdId.value,
+                ownerId = budget.ownerId.value,
                 categoryId = budget.categoryId.value,
                 name = budget.name,
                 amount = MoneyDto.from(budget.amount, budget.currency),
@@ -319,6 +327,7 @@ class JsonExportSerializer : ExportSerializer {
     private data class GoalDto(
         val id: String,
         @SerialName("household_id") val householdId: String,
+        @SerialName("owner_id") val ownerId: String,
         val name: String,
         @SerialName("target_amount") val targetAmount: MoneyDto,
         @SerialName("current_amount") val currentAmount: MoneyDto,
@@ -335,6 +344,7 @@ class JsonExportSerializer : ExportSerializer {
             fun from(goal: Goal): GoalDto = GoalDto(
                 id = goal.id.value,
                 householdId = goal.householdId.value,
+                ownerId = goal.ownerId.value,
                 name = goal.name,
                 targetAmount = MoneyDto.from(goal.targetAmount, goal.currency),
                 currentAmount = MoneyDto.from(goal.currentAmount, goal.currency),

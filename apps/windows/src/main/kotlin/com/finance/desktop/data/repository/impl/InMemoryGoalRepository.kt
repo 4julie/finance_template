@@ -18,9 +18,9 @@ class InMemoryGoalRepository : GoalRepository {
 }
 
 private fun createSampleGoals(): List<Goal> {
-    val now = Clock.System.now(); val hid = SyncId("d1")
+    val now = Clock.System.now(); val hid = SyncId("d1"); val oid = SyncId("owner-1")
     return listOf(
-        Goal(SyncId("g1"), hid, "Emergency Fund", Cents(1000000), Cents(850000), Currency.USD, createdAt = now, updatedAt = now),
-        Goal(SyncId("g2"), hid, "Vacation", Cents(300000), Cents(120000), Currency.USD, createdAt = now, updatedAt = now),
+        Goal(SyncId("g1"), hid, oid, "Emergency Fund", Cents(1000000), Cents(850000), Currency.USD, createdAt = now, updatedAt = now),
+        Goal(SyncId("g2"), hid, oid, "Vacation", Cents(300000), Cents(120000), Currency.USD, createdAt = now, updatedAt = now),
     )
 }

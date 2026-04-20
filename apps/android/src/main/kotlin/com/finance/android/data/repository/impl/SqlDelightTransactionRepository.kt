@@ -67,6 +67,7 @@ class SqlDelightTransactionRepository(
             queries.insert(
                 id = entity.id.value,
                 household_id = entity.householdId.value,
+                owner_id = entity.ownerId.value,
                 account_id = entity.accountId.value,
                 category_id = entity.categoryId?.value,
                 type = entity.type.name,
@@ -197,6 +198,7 @@ class SqlDelightTransactionRepository(
     private fun TransactionRow.toDomain(): Transaction = Transaction(
         id = SyncId(id),
         householdId = SyncId(household_id),
+        ownerId = SyncId(owner_id),
         accountId = SyncId(account_id),
         categoryId = category_id?.let { SyncId(it) },
         type = TransactionType.valueOf(type),

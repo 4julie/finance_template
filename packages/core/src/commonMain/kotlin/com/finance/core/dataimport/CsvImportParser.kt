@@ -276,6 +276,7 @@ internal object CsvImportParser {
                 val account = Account(
                     id = SyncId(id),
                     householdId = SyncId(getField(row, columnIndex, "household_id") ?: defaultHouseholdId.value),
+                    ownerId = SyncId(getField(row, columnIndex, "owner_id") ?: defaultHouseholdId.value),
                     name = name,
                     type = parseEnum(getField(row, columnIndex, "type"), AccountType.entries) ?: AccountType.OTHER,
                     currency = parseCurrency(getField(row, columnIndex, "currency")) ?: defaultCurrency,
@@ -336,6 +337,7 @@ internal object CsvImportParser {
                 val transaction = Transaction(
                     id = SyncId(id),
                     householdId = SyncId(getField(row, columnIndex, "household_id") ?: defaultHouseholdId.value),
+                    ownerId = SyncId(getField(row, columnIndex, "owner_id") ?: defaultHouseholdId.value),
                     accountId = SyncId(accountId),
                     categoryId = getField(row, columnIndex, "category_id")?.ifEmpty { null }?.let { SyncId(it) },
                     type = type,
@@ -396,6 +398,7 @@ internal object CsvImportParser {
                 val category = Category(
                     id = SyncId(id),
                     householdId = SyncId(getField(row, columnIndex, "household_id") ?: defaultHouseholdId.value),
+                    ownerId = SyncId(getField(row, columnIndex, "owner_id") ?: defaultHouseholdId.value),
                     name = name,
                     icon = getField(row, columnIndex, "icon")?.ifEmpty { null },
                     color = getField(row, columnIndex, "color")?.ifEmpty { null },
@@ -449,6 +452,7 @@ internal object CsvImportParser {
                 val budget = Budget(
                     id = SyncId(id),
                     householdId = SyncId(getField(row, columnIndex, "household_id") ?: defaultHouseholdId.value),
+                    ownerId = SyncId(getField(row, columnIndex, "owner_id") ?: defaultHouseholdId.value),
                     categoryId = SyncId(categoryId),
                     name = name,
                     amount = parseCentsFromDisplay(amountStr, currency),
@@ -505,6 +509,7 @@ internal object CsvImportParser {
                 val goal = Goal(
                     id = SyncId(id),
                     householdId = SyncId(getField(row, columnIndex, "household_id") ?: defaultHouseholdId.value),
+                    ownerId = SyncId(getField(row, columnIndex, "owner_id") ?: defaultHouseholdId.value),
                     name = name,
                     targetAmount = parseCentsFromDisplay(targetStr, currency),
                     currentAmount = parseCentsFromDisplay(
@@ -604,6 +609,7 @@ internal object CsvImportParser {
             val transaction = Transaction(
                 id = SyncId("import-${rowNum}-${date}"),
                 householdId = defaultHouseholdId,
+                ownerId = defaultHouseholdId,
                 accountId = SyncId(
                     getFieldFlexible(row, columnIndex, listOf("account_id", "account")) ?: "import-default-account"
                 ),

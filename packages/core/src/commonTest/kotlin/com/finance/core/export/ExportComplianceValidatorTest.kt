@@ -29,6 +29,7 @@ class ExportComplianceValidatorTest {
                 Category(
                     id = TestFixtures.nextId(),
                     householdId = SyncId("household-1"),
+                    ownerId = SyncId("owner-1"),
                     name = "Food",
                     createdAt = fixedInstant,
                     updatedAt = fixedInstant,

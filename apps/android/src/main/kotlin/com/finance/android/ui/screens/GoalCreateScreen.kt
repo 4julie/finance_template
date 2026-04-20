@@ -487,18 +487,18 @@ private fun GoalCreateFormPreview() {
                 targetDate = LocalDate(2025, 12, 31),
                 accounts = listOf(
                     Account(
-                        SyncId("acc-1"), SyncId("h-1"), "Main Checking",
+                        SyncId("acc-1"), SyncId("h-1"), SyncId("owner-1"), "Main Checking",
                         AccountType.CHECKING, Currency.USD, Cents(52473L),
                         createdAt = now, updatedAt = now,
                     ),
                     Account(
-                        SyncId("acc-2"), SyncId("h-1"), "Savings",
+                        SyncId("acc-2"), SyncId("h-1"), SyncId("owner-1"), "Savings",
                         AccountType.SAVINGS, Currency.USD, Cents(1867000L),
                         createdAt = now, updatedAt = now,
                     ),
                 ),
                 selectedAccount = Account(
-                    SyncId("acc-2"), SyncId("h-1"), "Savings",
+                    SyncId("acc-2"), SyncId("h-1"), SyncId("owner-1"), "Savings",
                     AccountType.SAVINGS, Currency.USD, Cents(1867000L),
                     createdAt = now, updatedAt = now,
                 ),

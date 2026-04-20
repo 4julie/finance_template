@@ -16,6 +16,7 @@ enum class BudgetPeriod { WEEKLY, BIWEEKLY, MONTHLY, QUARTERLY, YEARLY }
 data class Budget(
     val id: SyncId,
     val householdId: SyncId,
+    val ownerId: SyncId,
     val categoryId: SyncId,
     val name: String,
     val amount: Cents,

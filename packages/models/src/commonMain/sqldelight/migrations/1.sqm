@@ -1,0 +1,27 @@
+-- Migration v1 → v2: Add owner_id to financial entity tables
+-- This standardizes ownership tracking across all entities, enabling
+-- per-user RLS policies in Supabase and local data isolation.
+--
+-- The owner_id defaults to '' (empty string) for existing rows.
+-- A post-migration data fix must populate owner_id from the
+-- household's owner_id for all existing records.
+
+-- Account
+ALTER TABLE account ADD COLUMN owner_id TEXT NOT NULL DEFAULT '';
+CREATE INDEX IF NOT EXISTS idx_account_owner ON account (owner_id);
+
+-- Transaction (quoted — reserved keyword)
+ALTER TABLE "transaction" ADD COLUMN owner_id TEXT NOT NULL DEFAULT '';
+CREATE INDEX IF NOT EXISTS idx_transaction_owner ON "transaction" (owner_id);
+
+-- Budget
+ALTER TABLE budget ADD COLUMN owner_id TEXT NOT NULL DEFAULT '';
+CREATE INDEX IF NOT EXISTS idx_budget_owner ON budget (owner_id);
+
+-- Goal
+ALTER TABLE goal ADD COLUMN owner_id TEXT NOT NULL DEFAULT '';
+CREATE INDEX IF NOT EXISTS idx_goal_owner ON goal (owner_id);
+
+-- Category
+ALTER TABLE category ADD COLUMN owner_id TEXT NOT NULL DEFAULT '';
+CREATE INDEX IF NOT EXISTS idx_category_owner ON category (owner_id);

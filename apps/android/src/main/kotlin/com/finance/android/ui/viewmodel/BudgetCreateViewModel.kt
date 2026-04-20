@@ -136,6 +136,7 @@ class BudgetCreateViewModel(
                 val budget = Budget(
                     id = SyncId(UUID.randomUUID().toString()),
                     householdId = householdId,
+                    ownerId = householdId,
                     categoryId = s.selectedCategory!!.id,
                     name = s.selectedCategory.name,
                     amount = amountCents,

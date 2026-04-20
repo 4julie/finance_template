@@ -17,11 +17,11 @@ class InMemoryBudgetRepository : BudgetRepository {
 }
 
 private fun createSampleBudgets(): List<Budget> {
-    val now = Clock.System.now(); val hid = SyncId("d1")
+    val now = Clock.System.now(); val hid = SyncId("d1"); val oid = SyncId("owner-1")
     val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
     val monthStart = LocalDate(today.year, today.month, 1)
     return listOf(
-        Budget(SyncId("b1"), hid, SyncId("c1"), "Groceries", Cents(60000), Currency.USD, BudgetPeriod.MONTHLY, monthStart, createdAt = now, updatedAt = now),
-        Budget(SyncId("b2"), hid, SyncId("c2"), "Dining", Cents(30000), Currency.USD, BudgetPeriod.MONTHLY, monthStart, createdAt = now, updatedAt = now),
+        Budget(SyncId("b1"), hid, oid, SyncId("c1"), "Groceries", Cents(60000), Currency.USD, BudgetPeriod.MONTHLY, monthStart, createdAt = now, updatedAt = now),
+        Budget(SyncId("b2"), hid, oid, SyncId("c2"), "Dining", Cents(30000), Currency.USD, BudgetPeriod.MONTHLY, monthStart, createdAt = now, updatedAt = now),
     )
 }

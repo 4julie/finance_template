@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS account (
     id TEXT NOT NULL PRIMARY KEY,
     household_id TEXT NOT NULL,
+    owner_id TEXT NOT NULL,
     name TEXT NOT NULL,
     type TEXT NOT NULL,
     currency TEXT NOT NULL DEFAULT 'USD',
@@ -17,10 +18,12 @@ CREATE TABLE IF NOT EXISTS account (
     deleted_at TEXT,
     sync_version INTEGER NOT NULL DEFAULT 0,
     is_synced INTEGER NOT NULL DEFAULT 0,
-    FOREIGN KEY (household_id) REFERENCES household(id)
+    FOREIGN KEY (household_id) REFERENCES household(id),
+    FOREIGN KEY (owner_id) REFERENCES user(id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_account_household ON account (household_id);
+CREATE INDEX IF NOT EXISTS idx_account_owner ON account (owner_id);
 CREATE INDEX IF NOT EXISTS idx_account_type ON account (type);
 CREATE INDEX IF NOT EXISTS idx_account_sync ON account (is_synced);
 
@@ -35,6 +38,9 @@ SELECT * FROM account WHERE id = ? AND deleted_at IS NULL;
 selectByHousehold:
 SELECT * FROM account WHERE household_id = ? AND deleted_at IS NULL ORDER BY sort_order ASC;
 
+selectByOwner:
+SELECT * FROM account WHERE owner_id = ? AND deleted_at IS NULL ORDER BY sort_order ASC;
+
 selectByHouseholdAndType:
 SELECT * FROM account WHERE household_id = ? AND type = ? AND deleted_at IS NULL ORDER BY sort_order ASC;
 
@@ -42,8 +48,8 @@ selectActive:
 SELECT * FROM account WHERE household_id = ? AND is_archived = 0 AND deleted_at IS NULL ORDER BY sort_order ASC;
 
 insert:
-INSERT INTO account (id, household_id, name, type, currency, current_balance, is_archived, sort_order, icon, color, created_at, updated_at, sync_version, is_synced)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO account (id, household_id, owner_id, name, type, currency, current_balance, is_archived, sort_order, icon, color, created_at, updated_at, sync_version, is_synced)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE account SET

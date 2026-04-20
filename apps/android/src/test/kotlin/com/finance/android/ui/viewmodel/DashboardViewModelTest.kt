@@ -86,6 +86,7 @@ class DashboardViewModelTest {
     ) = Account(
         id = SyncId(id),
         householdId = householdId,
+        ownerId = householdId,
         name = name,
         type = type,
         currency = Currency.USD,
@@ -108,6 +109,7 @@ class DashboardViewModelTest {
         return Transaction(
             id = SyncId(id),
             householdId = householdId,
+            ownerId = householdId,
             accountId = SyncId(accountId),
             categoryId = categoryId?.let { SyncId(it) },
             type = type,
@@ -129,6 +131,7 @@ class DashboardViewModelTest {
     ) = Category(
         id = SyncId(id),
         householdId = householdId,
+        ownerId = householdId,
         name = name,
         icon = icon,
         createdAt = now,
@@ -144,6 +147,7 @@ class DashboardViewModelTest {
     ) = Budget(
         id = SyncId(id),
         householdId = householdId,
+        ownerId = householdId,
         categoryId = SyncId(categoryId),
         name = name,
         amount = Cents(amountCents),

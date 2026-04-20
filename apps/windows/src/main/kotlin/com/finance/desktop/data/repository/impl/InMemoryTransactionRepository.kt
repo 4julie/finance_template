@@ -19,11 +19,11 @@ class InMemoryTransactionRepository : TransactionRepository {
 }
 
 private fun createSampleTransactions(): List<Transaction> {
-    val now = Clock.System.now(); val hid = SyncId("d1")
+    val now = Clock.System.now(); val hid = SyncId("d1"); val oid = SyncId("owner-1")
     val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
     return listOf(
-        Transaction(SyncId("t1"), hid, SyncId("a1"), null, TransactionType.EXPENSE, TransactionStatus.CLEARED, Cents(5230), Currency.USD, payee = "Whole Foods", date = today, createdAt = now, updatedAt = now),
-        Transaction(SyncId("t2"), hid, SyncId("a1"), null, TransactionType.INCOME, TransactionStatus.CLEARED, Cents(420000), Currency.USD, payee = "Salary", date = today, createdAt = now, updatedAt = now),
-        Transaction(SyncId("t3"), hid, SyncId("a3"), null, TransactionType.EXPENSE, TransactionStatus.CLEARED, Cents(1599), Currency.USD, payee = "Netflix", date = today.minus(1, DateTimeUnit.DAY), createdAt = now, updatedAt = now),
+        Transaction(SyncId("t1"), hid, oid, SyncId("a1"), null, TransactionType.EXPENSE, TransactionStatus.CLEARED, Cents(5230), Currency.USD, payee = "Whole Foods", date = today, createdAt = now, updatedAt = now),
+        Transaction(SyncId("t2"), hid, oid, SyncId("a1"), null, TransactionType.INCOME, TransactionStatus.CLEARED, Cents(420000), Currency.USD, payee = "Salary", date = today, createdAt = now, updatedAt = now),
+        Transaction(SyncId("t3"), hid, oid, SyncId("a3"), null, TransactionType.EXPENSE, TransactionStatus.CLEARED, Cents(1599), Currency.USD, payee = "Netflix", date = today.minus(1, DateTimeUnit.DAY), createdAt = now, updatedAt = now),
     )
 }
