@@ -27,3 +27,5 @@ export { useWebVitals } from './useWebVitals';
 export type { UseWebVitalsResult } from './useWebVitals';
 export { useQuickEntry } from './useQuickEntry';
 export type { UseQuickEntryResult } from './useQuickEntry';
+export { useWidgetLayout } from './useWidgetLayout';
+export type { UseWidgetLayoutResult } from './useWidgetLayout';
