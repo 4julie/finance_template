@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 // dispatch-issue.js
 // Usage: node dispatch-issue.js 123
-const { execSync } = require('child_process');
 const issue = process.argv[2];
 if (!issue) {
   console.error('Usage: dispatch-issue.js <issue-number>');
