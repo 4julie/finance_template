@@ -37,4 +37,5 @@ val viewModelModule = module {
     single { BudgetNegotiationViewModel(get(), get()) }
     single { EntitlementViewModel(get(), get(), get()) }
     single { TipsViewModel(get(), get(), get()) }
+    single { InsightsViewModel(get(), get(), get()) }
 }
