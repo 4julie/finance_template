@@ -23,7 +23,7 @@ const Import = lazy(() => import('./pages/ImportPage'));
 const Insights = lazy(() => import('./pages/InsightsPage'));
 const Achievements = lazy(() => import('./pages/AchievementsPage'));
 const Settings = lazy(() => import('./pages/SettingsPage'));
-const Household = lazy(() => import('./pages/HouseholdPage'));
+const Referral = lazy(() => import('./pages/ReferralPage'));
 const Login = lazy(() => import('./pages/LoginPage'));
 const Signup = lazy(() => import('./pages/SignupPage'));
 const NotFound = lazy(() => import('./pages/NotFoundPage'));
@@ -236,11 +236,11 @@ export const AppRoutes: FC = () => (
       }
     />
     <Route
-      path="/household"
+      path="/referral"
       element={
         <AuthenticatedRoute>
           <Suspense fallback={<PageLoader />}>
-            <Household />
+            <Referral />
           </Suspense>
         </AuthenticatedRoute>
       }
