@@ -1,0 +1,52 @@
+{
+  "flags": {
+    "dark_mode_oled": {
+      "description": "Enable OLED-optimized dark mode theme",
+      "enabled": true,
+      "owner": "web",
+      "platforms": ["web", "android", "ios"],
+      "rollout_percentage": 100,
+      "expires": ""
+    },
+    "sync_v2_protocol": {
+      "description": "Use v2 sync protocol with improved conflict resolution",
+      "enabled": false,
+      "owner": "core",
+      "platforms": ["android", "ios", "web"],
+      "rollout_percentage": 0,
+      "expires": "2025-09-01"
+    },
+    "ai_categorization": {
+      "description": "AI-powered transaction categorization engine",
+      "enabled": false,
+      "owner": "core",
+      "platforms": ["android", "ios", "web"],
+      "rollout_percentage": 0,
+      "expires": "2025-12-31"
+    },
+    "budget_recommendations": {
+      "description": "AI budget recommendation engine",
+      "enabled": false,
+      "owner": "core",
+      "platforms": ["android", "ios", "web"],
+      "rollout_percentage": 0,
+      "expires": "2025-12-31"
+    },
+    "household_sharing": {
+      "description": "Multi-user household account sharing",
+      "enabled": false,
+      "owner": "backend",
+      "platforms": ["android", "ios", "web"],
+      "rollout_percentage": 0,
+      "expires": ""
+    },
+    "widgets_v2": {
+      "description": "Enhanced home screen widgets with chart support",
+      "enabled": false,
+      "owner": "android",
+      "platforms": ["android"],
+      "rollout_percentage": 0,
+      "expires": ""
+    }
+  }
+}
