@@ -54,5 +54,9 @@ export type {
 } from './useSpendingWatchlists';
 export { useFinancialTips } from './useFinancialTips';
 export type { UseFinancialTipsResult } from './useFinancialTips';
-export { useReferral } from './useReferral';
-export type { UseReferralResult, Referral, ReferralReward, ReferralStatus } from './useReferral';
+export { useNaturalLanguageInput, parseTransactionText } from './useNaturalLanguageInput';
+export type {
+  UseNaturalLanguageInputResult,
+  ParsedTransaction,
+  NLSuggestion,
+} from './useNaturalLanguageInput';
