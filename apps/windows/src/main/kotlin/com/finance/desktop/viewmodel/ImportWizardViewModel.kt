@@ -203,6 +203,7 @@ class ImportWizardViewModel(
                     val txn = Transaction(
                         id = SyncId("import-${now.toEpochMilliseconds()}-$i"),
                         householdId = SyncId("d1"),
+                        ownerId = SyncId("d1"),
                         accountId = SyncId("a1"),
                         amount = Cents(kotlin.math.abs(amountCents)),
                         currency = Currency.USD,
@@ -212,7 +213,7 @@ class ImportWizardViewModel(
                         },
                         payee = row.getOrNull(1),
                         categoryId = null,
-                        notes = "Imported from ${_uiState.value.fileName}",
+                        note = "Imported from ${_uiState.value.fileName}",
                         createdAt = now,
                         updatedAt = now,
                     )

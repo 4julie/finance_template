@@ -150,6 +150,7 @@ class NaturalLanguageViewModel(
             val txn = Transaction(
                 id = SyncId("nl-${now.toEpochMilliseconds()}"),
                 householdId = hid,
+                ownerId = hid,
                 accountId = SyncId("a1"), // Default account
                 amount = parsed.amount,
                 currency = parsed.currency,
@@ -158,7 +159,7 @@ class NaturalLanguageViewModel(
                     .toLocalDateTime(TimeZone.currentSystemDefault()).date,
                 payee = parsed.payee,
                 categoryId = null, // Would map from category name
-                notes = "Created via natural language: ${parsed.rawInput}",
+                note = "Created via natural language: ${parsed.rawInput}",
                 createdAt = now,
                 updatedAt = now,
             )
