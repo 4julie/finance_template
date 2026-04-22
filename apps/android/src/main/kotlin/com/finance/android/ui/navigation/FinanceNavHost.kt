@@ -45,7 +45,7 @@ import com.finance.android.ui.expertise.ExpertiseTierScreen
 import com.finance.android.ui.learning.LearningPathsScreen
 import com.finance.android.ui.nlp.NlpTransactionScreen
 import com.finance.android.ui.insights.InsightsScreen
-import com.finance.android.ui.gamification.GamificationScreen
+import com.finance.android.ui.paywall.PaywallScreen
 import timber.log.Timber
 
 /** Base URI for all deep link patterns declared in AndroidManifest.xml. */
@@ -129,8 +129,8 @@ sealed class Route(val route: String) {
     /** Financial Insights Dashboard screen (#241). */
     data object Insights : Route("insights")
 
-    /** Gamification / Achievements screen (#242). */
-    data object Gamification : Route("gamification")
+    /** Paywall / Upgrade screen (#337). */
+    data object Paywall : Route("paywall")
 
     /** "Can I Afford This?" affordability check screen (#377). */
     data object Affordability : Route("affordability")
@@ -303,8 +303,10 @@ fun FinanceNavHost(
             InsightsScreen()
         }
 
-        composable(Route.Gamification.route) {
-            GamificationScreen()
+        composable(Route.Paywall.route) {
+            PaywallScreen(
+                onBack = { navController.popBackStack() },
+            )
         }
 
         composable(Route.Affordability.route) {
