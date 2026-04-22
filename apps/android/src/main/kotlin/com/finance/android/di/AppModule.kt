@@ -22,6 +22,8 @@ import com.finance.android.ui.screens.BiometricAvailabilityChecker
 import com.finance.android.ui.screens.DefaultBiometricAvailabilityChecker
 import com.finance.android.ui.screens.SettingsViewModel
 import com.finance.android.ui.screens.affordability.AffordabilityViewModel
+import com.finance.android.ui.expertise.ExpertiseTierManager
+import com.finance.android.ui.expertise.ExpertiseTierViewModel
 import com.finance.android.ui.streak.StreakRepository
 import com.finance.android.ui.streak.StreakViewModel
 import com.finance.android.ui.streak.TransactionBackedStreakRepository
@@ -97,6 +99,11 @@ val appModule = module {
     /** Theme preference manager — provides reactive theme state for the whole app. */
     single { ThemePreferenceManager(get()) }
 
+    // ── Expertise tier ──────────────────────────────────────────────────
+
+    /** Expertise tier manager — persists and provides the user's skill level (#379). */
+    single { ExpertiseTierManager(get()) }
+
     // ── Streak tracking ───────────────────────────────────────────────
 
     /** Streak repository — derives logging dates from the transaction repository. */
@@ -136,4 +143,5 @@ val appModule = module {
     viewModelOf(::StreakViewModel)
     viewModelOf(::NotificationSettingsViewModel)
     viewModelOf(::AffordabilityViewModel)
+    viewModelOf(::ExpertiseTierViewModel)
 }
