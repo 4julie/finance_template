@@ -3,6 +3,7 @@
 import type { FC } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AppLayout } from './components/layout';
+import { ConsentDialog } from './components/gdpr';
 import { AppRoutes } from './routes';
 
 /** Map path segments to human-readable page titles. */
@@ -42,10 +43,20 @@ export const App: FC = () => {
   const isStandalonePage = !AUTHENTICATED_ROUTES.has(activePath);
 
   return isStandalonePage ? (
-    <AppRoutes />
-  ) : (
-    <AppLayout activePath={activePath} onNavigate={(path) => navigate(path)} pageTitle={pageTitle}>
+    <>
+      <ConsentDialog />
       <AppRoutes />
-    </AppLayout>
+    </>
+  ) : (
+    <>
+      <ConsentDialog />
+      <AppLayout
+        activePath={activePath}
+        onNavigate={(path) => navigate(path)}
+        pageTitle={pageTitle}
+      >
+        <AppRoutes />
+      </AppLayout>
+    </>
   );
 };

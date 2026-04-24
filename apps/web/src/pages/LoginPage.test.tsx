@@ -9,6 +9,7 @@ const navigateMock = vi.hoisted(() => vi.fn());
 const authState = vi.hoisted(() => ({
   loginWithEmail: vi.fn(),
   loginWithPasskey: vi.fn(),
+  loginWithOAuth: vi.fn(),
   isAuthenticated: false,
   isLoading: false,
   error: null as string | null,

@@ -4,6 +4,7 @@ import React, { useCallback, useState } from 'react';
 
 import { useAuth } from '../auth/auth-context';
 import { DataExport } from '../components/DataExport';
+import { PrivacySettings } from '../components/gdpr';
 import { useOfflineStatus } from '../hooks/useOfflineStatus';
 import { useTheme } from '../hooks/useTheme';
 import type { ThemeValue } from '../hooks/useTheme';
@@ -291,26 +292,18 @@ export const SettingsPage: React.FC = () => {
           </div>
         </div>
       </section>
-      <section aria-label="Danger zone" className="page-section">
-        <div className="settings-group">
-          <h3
-            className="settings-group__title"
-            style={{ color: 'var(--semantic-status-negative)' }}
-          >
-            Danger Zone
-          </h3>
-          <button
-            type="button"
-            className="settings-item settings-item--button settings-item--destructive"
-            disabled
-            aria-disabled="true"
-            aria-label="Account deletion — available in a future update"
-          >
-            <span className="settings-item__label">Account Deletion</span>
-            <span className="settings-item__value settings-item__value--muted">Coming soon</span>
-          </button>
-        </div>
-      </section>
+      <PrivacySettings
+        onExportData={() => {
+          const exportBtn = document.querySelector(
+            '[aria-describedby="data-export-description"]',
+          ) as HTMLButtonElement | null;
+          exportBtn?.click();
+        }}
+        onDeleteAccount={async () => {
+          if (!isAuthenticated) return;
+          await logout();
+        }}
+      />
     </>
   );
 };

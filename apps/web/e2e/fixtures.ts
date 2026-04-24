@@ -209,6 +209,27 @@ export const test = base.extend<{ authenticatedPage: Page }>({
       window.__PLAYWRIGHT_E2E__ = true;
     });
 
+    // 0b. Pre-set GDPR consent in localStorage so the ConsentDialog
+    //     doesn't block the UI.  The consent dialog renders a fixed
+    //     overlay (z-index 9999) that intercepts all clicks — without
+    //     this, every test that interacts with the app will timeout.
+    await page.addInitScript(() => {
+      const consentRecord = {
+        categories: {
+          essential: true,
+          analytics: false,
+          error_reporting: false,
+          sync: false,
+          marketing: false,
+        },
+        timestamp: new Date().toISOString(),
+        policyVersion: '1.0.0',
+        method: 'first_run',
+        hasCompletedFirstRun: true,
+      };
+      localStorage.setItem('finance-gdpr-consent', JSON.stringify(consentRecord));
+    });
+
     // 1. Install route mocks before any navigation.
     //    The refresh mock returns 200 — AuthProvider auto-authenticates.
     await installAuthMocks(page);

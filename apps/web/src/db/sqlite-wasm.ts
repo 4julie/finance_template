@@ -58,6 +58,36 @@ export interface Migration {
 const DB_NAME = 'finance.db';
 const MIGRATIONS_TABLE = '_migrations';
 
+/**
+ * Module-level encryption secret.
+ *
+ * When set, IndexedDB-backed databases are encrypted at rest using
+ * AES-256-GCM via the Web Crypto API.  Set via `setEncryptionSecret()`
+ * before calling `initDatabase()`.
+ */
+let _encryptionSecret: string | null = null;
+
+/**
+ * Configure the encryption secret used to encrypt/decrypt the database
+ * when using the IndexedDB fallback backend.
+ *
+ * Call this before `initDatabase()` — typically after the user authenticates.
+ * Pass `null` to disable encryption (e.g. on logout).
+ *
+ * OPFS-backed databases use the browser's built-in OPFS security model
+ * (origin-scoped, not readable by other origins).  For an additional
+ * layer of defence, the encryption module can be used to encrypt OPFS
+ * snapshots during export/backup operations.
+ */
+export function setEncryptionSecret(secret: string | null): void {
+  _encryptionSecret = secret;
+}
+
+/** Check whether an encryption secret has been configured. */
+export function hasEncryptionSecret(): boolean {
+  return _encryptionSecret !== null;
+}
+
 // ---------------------------------------------------------------------------
 // Schema ΓÇö matches packages/models SQLDelight .sq files
 // ---------------------------------------------------------------------------
@@ -529,6 +559,19 @@ function openIDB(): Promise<IDBDatabase> {
 }
 
 async function loadFromIndexedDB(key: string): Promise<ArrayBuffer | null> {
+  // Try encrypted storage first when a secret is available
+  if (_encryptionSecret) {
+    try {
+      const { loadEncryptedDatabase } = await import('./encryption');
+      const decrypted = await loadEncryptedDatabase(_encryptionSecret);
+      if (decrypted) {
+        return decrypted.buffer as ArrayBuffer;
+      }
+    } catch {
+      // Fall through to unencrypted load — first use or migration
+    }
+  }
+
   const idb = await openIDB();
   return new Promise((resolve, reject) => {
     const tx = idb.transaction(IDB_STORE, 'readonly');
@@ -540,6 +583,17 @@ async function loadFromIndexedDB(key: string): Promise<ArrayBuffer | null> {
 }
 
 async function persistToIndexedDB(key: string, data: Uint8Array): Promise<void> {
+  // Encrypt when a secret is available
+  if (_encryptionSecret) {
+    try {
+      const { saveEncryptedDatabase } = await import('./encryption');
+      await saveEncryptedDatabase(data, _encryptionSecret);
+      return;
+    } catch {
+      // Fall through to unencrypted save as safety net
+    }
+  }
+
   const idb = await openIDB();
   return new Promise((resolve, reject) => {
     const tx = idb.transaction(IDB_STORE, 'readwrite');
