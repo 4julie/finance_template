@@ -4,6 +4,7 @@ package com.finance.desktop.di
 
 import com.finance.desktop.data.repository.*
 import com.finance.desktop.data.repository.impl.*
+import com.finance.desktop.data.repository.impl.sqldelight.*
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -12,16 +13,16 @@ import java.nio.file.Path
 /**
  * Koin module for repository bindings.
  *
- * Binds in-memory repository implementations to their interfaces.
- * When SQLDelight-backed implementations are ready, swap them here
- * without touching any ViewModel or screen code.
+ * Binds SQLDelight-backed repository implementations to their interfaces.
+ * All repositories operate against the encrypted SQLite database provided
+ * by [databaseModule]. The FinanceDatabase instance is injected by Koin.
  */
 val repositoryModule = module {
-    singleOf(::InMemoryAccountRepository) bind AccountRepository::class
-    singleOf(::InMemoryTransactionRepository) bind TransactionRepository::class
-    singleOf(::InMemoryBudgetRepository) bind BudgetRepository::class
-    singleOf(::InMemoryCategoryRepository) bind CategoryRepository::class
-    singleOf(::InMemoryGoalRepository) bind GoalRepository::class
+    singleOf(::SqlDelightAccountRepository) bind AccountRepository::class
+    singleOf(::SqlDelightTransactionRepository) bind TransactionRepository::class
+    singleOf(::SqlDelightBudgetRepository) bind BudgetRepository::class
+    singleOf(::SqlDelightCategoryRepository) bind CategoryRepository::class
+    singleOf(::SqlDelightGoalRepository) bind GoalRepository::class
 
     // ── Settings repository (DPAPI-encrypted persistence) ──
     single<SettingsRepository> {
