@@ -206,9 +206,7 @@ serve(async (req: Request): Promise<Response> => {
           .eq('id', householdId);
       } else {
         // Other members exist — record revocation for audit
-        shreddedKeys.push(
-          `revoked:user-access:${householdId}:${user.id}`,
-        );
+        shreddedKeys.push(`revoked:user-access:${householdId}:${user.id}`);
       }
     }
 

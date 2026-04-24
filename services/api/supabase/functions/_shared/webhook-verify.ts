@@ -191,11 +191,7 @@ export async function verifyIncomingWebhook(
   }
 
   // ── Step 2: Verify HMAC signature ──────────────────────────────────
-  const signatureValid = await verifyWebhookSignature(
-    payload,
-    signature,
-    config.signingSecret,
-  );
+  const signatureValid = await verifyWebhookSignature(payload, signature, config.signingSecret);
 
   if (!signatureValid) {
     logger.warn('Webhook signature verification failed', {

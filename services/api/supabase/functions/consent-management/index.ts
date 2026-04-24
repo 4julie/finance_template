@@ -153,13 +153,10 @@ serve(async (req: Request): Promise<Response> => {
       }
 
       // Current status — use the RPC for efficient DISTINCT ON query
-      const { data: statuses, error: statusError } = await supabase.rpc(
-        'get_user_consent_status',
-        {
-          p_user_id: user.id,
-          p_consent_type: consentType ?? null,
-        },
-      );
+      const { data: statuses, error: statusError } = await supabase.rpc('get_user_consent_status', {
+        p_user_id: user.id,
+        p_consent_type: consentType ?? null,
+      });
 
       if (statusError) {
         logger.error('Failed to fetch consent status', {
