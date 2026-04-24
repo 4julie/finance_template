@@ -67,6 +67,7 @@ const FUNCTION_ENV_VARS: Record<string, readonly EnvVarSpec[]> = {
     { name: 'PLAID_WEBHOOK_SECRET', type: 'string' },
     { name: 'MX_WEBHOOK_SECRET', type: 'string' },
   ],
+  'anomaly-detection': [{ name: 'ALLOWED_ORIGINS', type: 'csv' }],
 };
 
 // ---------------------------------------------------------------------------

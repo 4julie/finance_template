@@ -84,6 +84,7 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
   'spending-forecast': { maxRequests: 30, windowSeconds: 60, keyPrefix: 'spending-forecast' },
   'bank-connection': { maxRequests: 30, windowSeconds: 60, keyPrefix: 'bank-connection' },
   'bank-webhook': { maxRequests: 120, windowSeconds: 60, keyPrefix: 'bank-webhook' },
+  'anomaly-detection': { maxRequests: 30, windowSeconds: 60, keyPrefix: 'anomaly-detection' },
 };
 
 // ---------------------------------------------------------------------------
