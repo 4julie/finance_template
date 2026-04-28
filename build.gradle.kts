@@ -13,16 +13,12 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
 }
 
+// Configure detekt for all Kotlin files in the project
 detekt {
-    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
-    buildUponDefaultConfig = true
-    source.setFrom(files("apps", "packages"))
-    // Findings are reported via SARIF → GitHub Code Scanning; don't fail the build.
+    basePath = projectDir.absolutePath
+    config.setFrom("$rootDir/config/detekt/detekt.yml")
+    source.setFrom("$rootDir/build-logic", "$rootDir/packages", "$rootDir/apps")
+    parallel = true
     ignoreFailures = true
-}
-
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    reports {
-        sarif.required.set(true)
-    }
+    buildUponDefaultConfig = true
 }
