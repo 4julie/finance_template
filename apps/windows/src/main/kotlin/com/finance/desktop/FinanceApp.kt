@@ -23,6 +23,7 @@ import com.finance.desktop.screens.DashboardScreen
 import com.finance.desktop.screens.DiagnosticsScreen
 import com.finance.desktop.screens.GoalsScreen
 import com.finance.desktop.screens.HealthScoreScreen
+import com.finance.desktop.screens.InsightsScreen
 import com.finance.desktop.screens.LockScreen
 import com.finance.desktop.screens.ReportBuilderScreen
 import com.finance.desktop.screens.QuickAddTransactionDialog
@@ -123,6 +124,7 @@ fun FinanceApp(
                             Screen.Widgets -> WidgetBoardScreen()
                             Screen.Upgrade -> UpgradeScreen()
                             Screen.Tips -> TipsScreen()
+                            Screen.Insights -> InsightsScreen()
                             Screen.Diagnostics -> DiagnosticsScreen()
                             Screen.HealthScore -> HealthScoreScreen()
                             Screen.Reports -> ReportBuilderScreen()
