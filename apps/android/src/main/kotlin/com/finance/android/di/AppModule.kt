@@ -25,7 +25,8 @@ import com.finance.android.ui.streak.TransactionBackedStreakRepository
 import com.finance.android.ui.theme.ThemePreferenceManager
 import com.finance.android.ui.tips.TipsViewModel
 import com.finance.android.ui.insights.InsightsViewModel
-import com.finance.android.ui.gamification.GamificationViewModel
+import com.finance.android.billing.SubscriptionManager
+import com.finance.android.ui.paywall.PaywallViewModel
 import com.finance.android.ui.viewmodel.AccountCreateViewModel
 import com.finance.android.ui.viewmodel.AccountEditViewModel
 import com.finance.android.ui.viewmodel.AnalyticsViewModel
@@ -145,6 +146,7 @@ val appModule = module {
     // ── Insights ─────────────────────────────────────────────────────
     viewModelOf(::InsightsViewModel)
 
-    // ── Gamification ─────────────────────────────────────────────────
-    viewModelOf(::GamificationViewModel)
+    // ── Billing & Paywall ────────────────────────────────────────────
+    single { SubscriptionManager() }
+    viewModelOf(::PaywallViewModel)
 }
