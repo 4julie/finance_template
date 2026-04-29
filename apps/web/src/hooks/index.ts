@@ -44,3 +44,11 @@ export type {
   MonthComparison,
   Recommendation,
 } from './useInsights';
+export { useSpendingWatchlists } from './useSpendingWatchlists';
+export type {
+  UseSpendingWatchlistsResult,
+  Watchlist,
+  WatchlistAlert,
+  AlertLevel,
+  CreateWatchlistInput,
+} from './useSpendingWatchlists';
