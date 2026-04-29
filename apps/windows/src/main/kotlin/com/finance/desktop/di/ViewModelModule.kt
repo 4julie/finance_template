@@ -26,6 +26,8 @@ val viewModelModule = module {
     single { SyncViewModel(get()) }
     single { SettingsViewModel(get(), get()) }
     single { AuthViewModel(get(), get()) }
+    single { LoginViewModel(get()) }
+    single { GdprConsentViewModel(get(), get()) }
     single { WidgetViewModel(get()) }
     single { VoiceTransactionViewModel(get(), get(), get()) }
     single { DiagnosticsViewModel() }

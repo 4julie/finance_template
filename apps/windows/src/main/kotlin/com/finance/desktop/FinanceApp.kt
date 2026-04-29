@@ -34,7 +34,10 @@ import com.finance.desktop.screens.WidgetBoardScreen
 import com.finance.desktop.theme.FinanceDesktopTheme
 import com.finance.desktop.tray.FinanceSystemTray
 import com.finance.desktop.tray.QuickAddTransactionManager
+import com.finance.desktop.screens.auth.LoginScreen
+import com.finance.desktop.screens.gdpr.GdprConsentDialog
 import com.finance.desktop.viewmodel.AuthViewModel
+import com.finance.desktop.viewmodel.GdprConsentViewModel
 
 /**
  * Root composable for the Finance Windows desktop application.
@@ -67,6 +70,8 @@ fun FinanceApp(
 ) {
     val authViewModel = koinGet<AuthViewModel>()
     val authState by authViewModel.uiState.collectAsState()
+    val gdprViewModel = koinGet<GdprConsentViewModel>()
+    val gdprState by gdprViewModel.uiState.collectAsState()
 
     FinanceDesktopTheme {
         Surface(
@@ -75,17 +80,37 @@ fun FinanceApp(
                 .semantics { contentDescription = "Finance application" },
             color = MaterialTheme.colorScheme.background,
         ) {
-            if (authState.requiresAuth && !authState.isAuthenticated) {
-                // Lock screen — gate access to financial data
-                LockScreen(
-                    isAuthenticating = authState.isAuthenticating,
-                    isWindowsHelloAvailable = authState.isWindowsHelloAvailable,
-                    authError = authState.authError,
-                    onAuthenticate = { authViewModel.authenticate() },
-                    onSkip = { authViewModel.skipAuth() },
+            // ── Layer 1: GDPR consent dialog (first run) ──
+            if (gdprState.showConsentDialog) {
+                GdprConsentDialog(
+                    onAcceptAll = { gdprViewModel.acceptAll() },
+                    onAcceptRequired = { gdprViewModel.acceptRequiredOnly() },
+                    onCustomize = { analytics, crash ->
+                        gdprViewModel.customizeConsent(analytics, crash)
+                    },
                 )
+                return@Surface
+            }
+
+            // ── Layer 2: Auth gate ──
+            if (authState.requiresAuth && !authState.isAuthenticated) {
+                if (authState.isWindowsHelloAvailable) {
+                    // Windows Hello lock screen
+                    LockScreen(
+                        isAuthenticating = authState.isAuthenticating,
+                        isWindowsHelloAvailable = authState.isWindowsHelloAvailable,
+                        authError = authState.authError,
+                        onAuthenticate = { authViewModel.authenticate() },
+                        onSkip = { authViewModel.skipAuth() },
+                    )
+                } else {
+                    // Email/password login
+                    LoginScreen(
+                        onAuthenticated = { authViewModel.skipAuth() },
+                    )
+                }
             } else {
-                // Main app — authenticated or auth not required
+                // ── Layer 3: Main app — authenticated ──
                 Box(modifier = Modifier.fillMaxSize()) {
                     SidebarNavigation(shortcutHandler = shortcutHandler) { screen ->
                         when (screen) {

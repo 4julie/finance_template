@@ -2,6 +2,7 @@
 
 package com.finance.desktop.di
 
+import com.finance.desktop.sync.DesktopSyncCoordinator
 import com.finance.desktop.sync.DesktopSyncProvider
 import com.finance.sync.DefaultSyncEngine
 import com.finance.sync.SyncConfig
@@ -19,16 +20,13 @@ import org.koin.dsl.module
  * Koin module for sync infrastructure from KMP shared packages.
  *
  * Wires the desktop sync provider, mutation queue, sequence tracker,
- * delta sync manager, and the top-level sync engine. The [SyncConfig]
- * specifies the remote endpoint and local database name.
- *
- * When moving to a production backend (PowerSync), update [SyncConfig]
- * and swap [DesktopSyncProvider] for a Ktor-backed implementation.
+ * delta sync manager, sync engine, and the desktop sync coordinator
+ * that manages background sync and system tray status.
  */
 val syncModule = module {
     single<SyncConfig> {
         SyncConfig(
-            endpoint = "https://sync.finance.app",
+            endpoint = System.getenv("POWERSYNC_URL") ?: "https://sync.finance.app",
             databaseName = "finance-desktop.db",
         )
     }
@@ -50,4 +48,6 @@ val syncModule = module {
             deltaSyncManager = get(),
         )
     }
+    // Desktop sync coordinator for background sync + tray status
+    single { DesktopSyncCoordinator(get(), get()) }
 }

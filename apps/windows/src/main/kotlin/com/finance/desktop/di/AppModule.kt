@@ -13,14 +13,16 @@ import org.koin.core.module.Module
  *
  * ## Module Breakdown
  *
- * | Module             | Contents                                         |
- * |--------------------|--------------------------------------------------|
- * | [repositoryModule] | In-memory repository bindings (→ SQLDelight)     |
- * | [syncModule]       | KMP sync engine, provider, mutation queue         |
- * | [securityModule]   | WindowsHelloManager, DpapiManager, TokenStorage  |
- * | [platformModule]   | DesktopNotificationManager                       |
- * | [viewModelModule]  | All ViewModels (Dashboard, Accounts, Auth, etc.) |
+ * | Module             | Contents                                              |
+ * |--------------------|-------------------------------------------------------|
+ * | [databaseModule]   | DPAPI-encrypted SQLCipher database via SQLDelight      |
+ * | [repositoryModule] | SQLDelight-backed repository bindings                  |
+ * | [syncModule]       | KMP sync engine, provider, mutation queue              |
+ * | [securityModule]   | WindowsHelloManager, DpapiManager, TokenStorage        |
+ * | [platformModule]   | DesktopNotificationManager                             |
+ * | [viewModelModule]  | All ViewModels (Dashboard, Accounts, Auth, etc.)       |
  *
+ * @see databaseModule
  * @see repositoryModule
  * @see syncModule
  * @see securityModule
@@ -28,7 +30,9 @@ import org.koin.core.module.Module
  * @see viewModelModule
  */
 val appModules: List<Module> = listOf(
+    databaseModule,
     repositoryModule,
+    authModule,
     syncModule,
     securityModule,
     platformModule,
