@@ -54,3 +54,5 @@ export type {
 } from './useSpendingWatchlists';
 export { useFinancialTips } from './useFinancialTips';
 export type { UseFinancialTipsResult } from './useFinancialTips';
+export { usePredictiveBalance } from './usePredictiveBalance';
+export type { UsePredictiveBalanceResult } from './usePredictiveBalance';
