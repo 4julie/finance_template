@@ -54,11 +54,5 @@ export type {
 } from './useSpendingWatchlists';
 export { useFinancialTips } from './useFinancialTips';
 export type { UseFinancialTipsResult } from './useFinancialTips';
-export { useHousehold } from './useHousehold';
-export type {
-  UseHouseholdResult,
-  HouseholdInvitation,
-  CreateHouseholdInput,
-  InviteMemberInput,
-  BudgetVisibility,
-} from './useHousehold';
+export { useReferral } from './useReferral';
+export type { UseReferralResult, Referral, ReferralReward, ReferralStatus } from './useReferral';
