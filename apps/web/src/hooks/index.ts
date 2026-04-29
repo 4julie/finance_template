@@ -52,3 +52,5 @@ export type {
   AlertLevel,
   CreateWatchlistInput,
 } from './useSpendingWatchlists';
+export { useFinancialTips } from './useFinancialTips';
+export type { UseFinancialTipsResult } from './useFinancialTips';
