@@ -58,6 +58,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.finance.android.ui.data.SampleData
 import com.finance.android.ui.theme.FinanceTheme
+import com.finance.android.ui.tips.TipsSection
 import com.finance.android.ui.viewmodel.BudgetStatusUi
 import com.finance.android.ui.viewmodel.DashboardUiState
 import com.finance.android.ui.viewmodel.DashboardViewModel
@@ -114,6 +115,7 @@ internal fun DashboardContent(
             item(key = "spending") { SpendingSummaryRow(state.todaySpendingFormatted, state.monthlySpendingFormatted) }
             item(key = "affordability") { AffordabilityCheckCard(onAffordabilityCheck) }
             item(key = "insights") { InsightsCard(onViewInsights) }
+            item(key = "tips") { TipsSection() }
             if (state.budgetStatuses.isNotEmpty()) {
                 item(key = "budget-hdr") {
                     Text("Budget Health", style = MaterialTheme.typography.titleMedium,
