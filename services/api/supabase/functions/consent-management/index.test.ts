@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Tests for consent-management Edge Function (#1100)
+
+/**
+ * Tests for the `consent-management` Edge Function (#1100).
+ *
+ * Validates consent recording, querying, validation, and error handling.
+ */
+
 import { assertEquals } from 'https://deno.land/std@0.208.0/testing/asserts.ts';
 import {
   assertStatus,
@@ -9,8 +15,13 @@ import {
   assertNoSensitiveDataLeakage,
 } from '../_test_helpers/assertions.ts';
 import { createMockRequest } from '../_test_helpers/mock-request.ts';
+import { TEST_USER } from '../_test_helpers/test-fixtures.ts';
 
-const VALID = new Set([
+// ---------------------------------------------------------------------------
+// Inline handler logic for isolated testing (mirrors index.ts patterns)
+// ---------------------------------------------------------------------------
+
+const VALID_CONSENT_TYPES = new Set([
   'terms_of_service',
   'privacy_policy',
   'data_processing',
@@ -19,232 +30,357 @@ const VALID = new Set([
   'third_party_sharing',
   'biometric_data',
 ]);
-const cors: Record<string, string> = {
+
+const VALID_STATUSES = new Set(['granted', 'withdrawn']);
+const SEMVER_PATTERN = /^\d+\.\d+\.\d+$/;
+
+const testCorsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': 'https://app.finance.example.com',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, accept',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Max-Age': '86400',
 };
-function jr(d: Record<string, unknown>, s = 200) {
-  return new Response(JSON.stringify(d), {
-    status: s,
-    headers: { ...cors, 'Content-Type': 'application/json' },
-  });
-}
-function er(m: string, s = 400) {
-  return jr({ error: m }, s);
-}
 
-interface Deps {
-  consents?: {
+interface MockConsentDeps {
+  userId?: string;
+  existingConsents?: Array<{
     id: string;
     consent_type: string;
     status: string;
     policy_version: string;
     created_at: string;
-  }[];
+  }>;
+  insertResult?: { id: string } | null;
   insertError?: boolean;
 }
 
-async function handle(req: Request, deps: Deps = {}): Promise<Response> {
-  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
-  if (req.method !== 'GET' && req.method !== 'POST') return er('Method not allowed', 405);
-  if (req.method === 'GET') {
-    const ct = new URL(req.url).searchParams.get('type');
-    if (ct && !VALID.has(ct)) return er(`Invalid consent type: ${ct}`);
-    return jr({ consents: (deps.consents ?? []).filter((c) => !ct || c.consent_type === ct) });
-  }
-  let body: Record<string, unknown>;
-  try {
-    body = await req.json();
-  } catch {
-    return er('Invalid JSON body');
-  }
-  const { consent_type: ct, status: st, policy_version: pv, metadata: md } = body;
-  if (!ct || typeof ct !== 'string') return er('consent_type is required');
-  if (!VALID.has(ct)) return er(`Invalid consent_type. Must be one of: ${[...VALID].join(', ')}`);
-  if (!st || typeof st !== 'string') return er('status is required (granted or withdrawn)');
-  if (!new Set(['granted', 'withdrawn']).has(st))
-    return er('status must be "granted" or "withdrawn"');
-  if (!pv || typeof pv !== 'string')
-    return er('policy_version is required (semver format, e.g. "1.0.0")');
-  if (!/^\d+\.\d+\.\d+$/.test(pv as string))
-    return er('policy_version must be in semver format (e.g. "1.0.0")');
-  if (md !== undefined && (typeof md !== 'object' || md === null))
-    return er('metadata must be a JSON object if provided');
-  if (deps.insertError) return er('Internal server error', 500);
-  return jr(
-    {
-      consent: {
-        id: 'new-id',
-        consent_type: ct,
-        status: st,
-        policy_version: pv,
-        created_at: new Date().toISOString(),
-      },
-      message: `Consent ${st === 'granted' ? 'granted' : 'withdrawn'} successfully`,
-    },
-    201,
-  );
+function jsonRes(data: Record<string, unknown>, status = 200): Response {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...testCorsHeaders, 'Content-Type': 'application/json' },
+  });
 }
 
-Deno.test('405 for PUT', async () => {
-  await assertErrorResponse(await handle(createMockRequest({ method: 'PUT', body: {} })), 405);
-});
-Deno.test('405 for DELETE', async () => {
-  await assertErrorResponse(await handle(createMockRequest({ method: 'DELETE' })), 405);
-});
-Deno.test('OPTIONS 204', async () => {
-  assertStatus(await handle(createMockRequest({ method: 'OPTIONS' })), 204);
-});
-Deno.test('GET returns consents', async () => {
-  const r = await handle(
-    createMockRequest({ method: 'GET', url: 'https://t.co/consent-management' }),
-    {
-      consents: [
-        {
-          id: 'c1',
-          consent_type: 'privacy_policy',
-          status: 'granted',
-          policy_version: '1.0.0',
-          created_at: '2024-01-01T00:00:00Z',
+function errRes(message: string, status = 400): Response {
+  return jsonRes({ error: message }, status);
+}
+
+async function handleConsent(req: Request, deps: MockConsentDeps = {}): Promise<Response> {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: testCorsHeaders });
+  }
+
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return errRes('Method not allowed', 405);
+  }
+
+  // Simulated auth check
+  const _userId = deps.userId ?? TEST_USER.id;
+
+  if (req.method === 'GET') {
+    const url = new URL(req.url);
+    const consentType = url.searchParams.get('type');
+
+    if (consentType && !VALID_CONSENT_TYPES.has(consentType)) {
+      return errRes(`Invalid consent type: ${consentType}`);
+    }
+
+    const consents = (deps.existingConsents ?? []).filter(
+      (c) => !consentType || c.consent_type === consentType,
+    );
+
+    return jsonRes({ consents });
+  }
+
+  if (req.method === 'POST') {
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
+      return errRes('Invalid JSON body');
+    }
+
+    const { consent_type, status, policy_version, metadata } = body;
+
+    // Validate consent_type
+    if (!consent_type || typeof consent_type !== 'string') {
+      return errRes('consent_type is required');
+    }
+    if (!VALID_CONSENT_TYPES.has(consent_type)) {
+      return errRes(
+        `Invalid consent_type. Must be one of: ${Array.from(VALID_CONSENT_TYPES).join(', ')}`,
+      );
+    }
+
+    // Validate status
+    if (!status || typeof status !== 'string') {
+      return errRes('status is required (granted or withdrawn)');
+    }
+    if (!VALID_STATUSES.has(status)) {
+      return errRes('status must be "granted" or "withdrawn"');
+    }
+
+    // Validate policy_version
+    if (!policy_version || typeof policy_version !== 'string') {
+      return errRes('policy_version is required (semver format, e.g. "1.0.0")');
+    }
+    if (!SEMVER_PATTERN.test(policy_version as string)) {
+      return errRes('policy_version must be in semver format (e.g. "1.0.0")');
+    }
+
+    // Validate metadata
+    if (metadata !== undefined && (typeof metadata !== 'object' || metadata === null)) {
+      return errRes('metadata must be a JSON object if provided');
+    }
+
+    if (deps.insertError) {
+      return errRes('Internal server error', 500);
+    }
+
+    const insertResult = deps.insertResult ?? {
+      id: 'new-consent-id',
+    };
+
+    return jsonRes(
+      {
+        consent: {
+          id: insertResult.id,
+          consent_type,
+          status,
+          policy_version,
+          created_at: new Date().toISOString(),
         },
-      ],
+        message: `Consent ${status === 'granted' ? 'granted' : 'withdrawn'} successfully`,
+      },
+      201,
+    );
+  }
+
+  return errRes('Method not allowed', 405);
+}
+
+// ---------------------------------------------------------------------------
+// Tests: method restrictions
+// ---------------------------------------------------------------------------
+
+Deno.test('consent-management — returns 405 for PUT', async () => {
+  const req = createMockRequest({ method: 'PUT', body: {} });
+  const res = await handleConsent(req);
+  await assertErrorResponse(res, 405, 'Method not allowed');
+});
+
+Deno.test('consent-management — returns 405 for DELETE', async () => {
+  const req = createMockRequest({ method: 'DELETE' });
+  const res = await handleConsent(req);
+  await assertErrorResponse(res, 405, 'Method not allowed');
+});
+
+// ---------------------------------------------------------------------------
+// Tests: CORS preflight
+// ---------------------------------------------------------------------------
+
+Deno.test('consent-management — OPTIONS returns 204', async () => {
+  const req = createMockRequest({ method: 'OPTIONS' });
+  const res = await handleConsent(req);
+  assertStatus(res, 204);
+});
+
+// ---------------------------------------------------------------------------
+// Tests: GET consent status
+// ---------------------------------------------------------------------------
+
+Deno.test('consent-management — GET returns current consents', async () => {
+  const req = createMockRequest({
+    method: 'GET',
+    url: 'https://test.supabase.co/functions/v1/consent-management',
+  });
+  const res = await handleConsent(req, {
+    existingConsents: [
+      {
+        id: 'consent-1',
+        consent_type: 'privacy_policy',
+        status: 'granted',
+        policy_version: '1.0.0',
+        created_at: '2024-01-15T10:00:00.000Z',
+      },
+    ],
+  });
+
+  assertStatus(res, 200);
+  const body = await assertJsonBody(res);
+  const consents = body.consents as unknown[];
+  assertEquals(consents.length, 1);
+});
+
+Deno.test('consent-management — GET with type filter', async () => {
+  const req = createMockRequest({
+    method: 'GET',
+    url: 'https://test.supabase.co/functions/v1/consent-management?type=marketing_email',
+  });
+  const res = await handleConsent(req, {
+    existingConsents: [
+      {
+        id: 'consent-1',
+        consent_type: 'privacy_policy',
+        status: 'granted',
+        policy_version: '1.0.0',
+        created_at: '2024-01-15T10:00:00.000Z',
+      },
+      {
+        id: 'consent-2',
+        consent_type: 'marketing_email',
+        status: 'granted',
+        policy_version: '1.0.0',
+        created_at: '2024-01-15T10:00:00.000Z',
+      },
+    ],
+  });
+
+  assertStatus(res, 200);
+  const body = await assertJsonBody(res);
+  const consents = body.consents as unknown[];
+  assertEquals(consents.length, 1);
+});
+
+Deno.test('consent-management — GET with invalid type returns 400', async () => {
+  const req = createMockRequest({
+    method: 'GET',
+    url: 'https://test.supabase.co/functions/v1/consent-management?type=invalid_type',
+  });
+  const res = await handleConsent(req);
+  await assertErrorResponse(res, 400, 'Invalid consent type');
+});
+
+// ---------------------------------------------------------------------------
+// Tests: POST consent recording
+// ---------------------------------------------------------------------------
+
+Deno.test('consent-management — POST records consent grant', async () => {
+  const req = createMockRequest({
+    method: 'POST',
+    body: {
+      consent_type: 'privacy_policy',
+      status: 'granted',
+      policy_version: '1.0.0',
     },
-  );
-  assertStatus(r, 200);
-  const b = await assertJsonBody(r);
-  assertEquals((b.consents as unknown[]).length, 1);
+  });
+  const res = await handleConsent(req);
+
+  assertStatus(res, 201);
+  const body = await assertJsonBody(res);
+  assertEquals(typeof body.consent, 'object');
+  assertEquals((body.consent as Record<string, unknown>).consent_type, 'privacy_policy');
+  assertEquals((body.consent as Record<string, unknown>).status, 'granted');
 });
-Deno.test('GET invalid type 400', async () => {
-  await assertErrorResponse(
-    await handle(
-      createMockRequest({ method: 'GET', url: 'https://t.co/consent-management?type=bad' }),
-    ),
-    400,
-    'Invalid consent type',
-  );
+
+Deno.test('consent-management — POST records consent withdrawal', async () => {
+  const req = createMockRequest({
+    method: 'POST',
+    body: {
+      consent_type: 'marketing_email',
+      status: 'withdrawn',
+      policy_version: '1.0.0',
+    },
+  });
+  const res = await handleConsent(req);
+
+  assertStatus(res, 201);
+  const body = await assertJsonBody(res);
+  assertEquals((body.consent as Record<string, unknown>).status, 'withdrawn');
+  assertEquals(typeof body.message, 'string');
 });
-Deno.test('POST grant', async () => {
-  const r = await handle(
-    createMockRequest({
-      method: 'POST',
-      body: { consent_type: 'privacy_policy', status: 'granted', policy_version: '1.0.0' },
-    }),
-  );
-  assertStatus(r, 201);
-  const b = await assertJsonBody(r);
-  assertEquals((b.consent as Record<string, unknown>).status, 'granted');
+
+Deno.test('consent-management — POST rejects missing consent_type', async () => {
+  const req = createMockRequest({
+    method: 'POST',
+    body: { status: 'granted', policy_version: '1.0.0' },
+  });
+  const res = await handleConsent(req);
+  await assertErrorResponse(res, 400, 'consent_type is required');
 });
-Deno.test('POST withdraw', async () => {
-  const r = await handle(
-    createMockRequest({
-      method: 'POST',
-      body: { consent_type: 'marketing_email', status: 'withdrawn', policy_version: '1.0.0' },
-    }),
-  );
-  assertStatus(r, 201);
-  assertEquals(((await assertJsonBody(r)).consent as Record<string, unknown>) !== null, true);
+
+Deno.test('consent-management — POST rejects invalid consent_type', async () => {
+  const req = createMockRequest({
+    method: 'POST',
+    body: { consent_type: 'invalid', status: 'granted', policy_version: '1.0.0' },
+  });
+  const res = await handleConsent(req);
+  await assertErrorResponse(res, 400, 'Invalid consent_type');
 });
-Deno.test('POST missing consent_type', async () => {
-  await assertErrorResponse(
-    await handle(
-      createMockRequest({ method: 'POST', body: { status: 'granted', policy_version: '1.0.0' } }),
-    ),
-    400,
-    'consent_type is required',
-  );
+
+Deno.test('consent-management — POST rejects missing status', async () => {
+  const req = createMockRequest({
+    method: 'POST',
+    body: { consent_type: 'privacy_policy', policy_version: '1.0.0' },
+  });
+  const res = await handleConsent(req);
+  await assertErrorResponse(res, 400, 'status is required');
 });
-Deno.test('POST invalid consent_type', async () => {
-  await assertErrorResponse(
-    await handle(
-      createMockRequest({
-        method: 'POST',
-        body: { consent_type: 'x', status: 'granted', policy_version: '1.0.0' },
-      }),
-    ),
-    400,
-    'Invalid consent_type',
-  );
+
+Deno.test('consent-management — POST rejects invalid status', async () => {
+  const req = createMockRequest({
+    method: 'POST',
+    body: { consent_type: 'privacy_policy', status: 'maybe', policy_version: '1.0.0' },
+  });
+  const res = await handleConsent(req);
+  await assertErrorResponse(res, 400, 'status must be');
 });
-Deno.test('POST missing status', async () => {
-  await assertErrorResponse(
-    await handle(
-      createMockRequest({
-        method: 'POST',
-        body: { consent_type: 'privacy_policy', policy_version: '1.0.0' },
-      }),
-    ),
-    400,
-    'status is required',
-  );
+
+Deno.test('consent-management — POST rejects missing policy_version', async () => {
+  const req = createMockRequest({
+    method: 'POST',
+    body: { consent_type: 'privacy_policy', status: 'granted' },
+  });
+  const res = await handleConsent(req);
+  await assertErrorResponse(res, 400, 'policy_version is required');
 });
-Deno.test('POST invalid status', async () => {
-  await assertErrorResponse(
-    await handle(
-      createMockRequest({
-        method: 'POST',
-        body: { consent_type: 'privacy_policy', status: 'x', policy_version: '1.0.0' },
-      }),
-    ),
-    400,
-    'status must be',
-  );
+
+Deno.test('consent-management — POST rejects invalid policy_version format', async () => {
+  const req = createMockRequest({
+    method: 'POST',
+    body: { consent_type: 'privacy_policy', status: 'granted', policy_version: 'v1' },
+  });
+  const res = await handleConsent(req);
+  await assertErrorResponse(res, 400, 'semver format');
 });
-Deno.test('POST missing version', async () => {
-  await assertErrorResponse(
-    await handle(
-      createMockRequest({
-        method: 'POST',
-        body: { consent_type: 'privacy_policy', status: 'granted' },
-      }),
-    ),
-    400,
-    'policy_version is required',
-  );
+
+Deno.test('consent-management — POST rejects invalid metadata', async () => {
+  const req = createMockRequest({
+    method: 'POST',
+    body: {
+      consent_type: 'privacy_policy',
+      status: 'granted',
+      policy_version: '1.0.0',
+      metadata: 'not-an-object',
+    },
+  });
+  const res = await handleConsent(req);
+  await assertErrorResponse(res, 400, 'metadata must be a JSON object');
 });
-Deno.test('POST bad semver', async () => {
-  await assertErrorResponse(
-    await handle(
-      createMockRequest({
-        method: 'POST',
-        body: { consent_type: 'privacy_policy', status: 'granted', policy_version: 'v1' },
-      }),
-    ),
-    400,
-    'semver',
-  );
+
+Deno.test('consent-management — POST returns 500 on insert error', async () => {
+  const req = createMockRequest({
+    method: 'POST',
+    body: {
+      consent_type: 'privacy_policy',
+      status: 'granted',
+      policy_version: '1.0.0',
+    },
+  });
+  const res = await handleConsent(req, { insertError: true });
+  assertStatus(res, 500);
+  await assertNoSensitiveDataLeakage(res);
 });
-Deno.test('POST bad metadata', async () => {
-  await assertErrorResponse(
-    await handle(
-      createMockRequest({
-        method: 'POST',
-        body: {
-          consent_type: 'privacy_policy',
-          status: 'granted',
-          policy_version: '1.0.0',
-          metadata: 'x',
-        },
-      }),
-    ),
-    400,
-    'metadata',
-  );
-});
-Deno.test('POST 500 on error', async () => {
-  const r = await handle(
-    createMockRequest({
-      method: 'POST',
-      body: { consent_type: 'privacy_policy', status: 'granted', policy_version: '1.0.0' },
-    }),
-    { insertError: true },
-  );
-  assertStatus(r, 500);
-  await assertNoSensitiveDataLeakage(r);
-});
-Deno.test('CORS headers', async () => {
-  assertCorsHeaders(
-    await handle(createMockRequest({ method: 'GET', url: 'https://t.co/consent-management' })),
-  );
+
+// ---------------------------------------------------------------------------
+// Tests: CORS headers present on all responses
+// ---------------------------------------------------------------------------
+
+Deno.test('consent-management — all responses include CORS headers', async () => {
+  const req = createMockRequest({
+    method: 'GET',
+    url: 'https://test.supabase.co/functions/v1/consent-management',
+  });
+  const res = await handleConsent(req);
+  assertCorsHeaders(res);
 });

@@ -21,9 +21,9 @@ import com.finance.desktop.screens.BudgetNegotiationScreen
 import com.finance.desktop.screens.BudgetsScreen
 import com.finance.desktop.screens.DashboardScreen
 import com.finance.desktop.screens.DiagnosticsScreen
+import com.finance.desktop.screens.GamificationScreen
 import com.finance.desktop.screens.GoalsScreen
 import com.finance.desktop.screens.HealthScoreScreen
-import com.finance.desktop.screens.InsightsScreen
 import com.finance.desktop.screens.LockScreen
 import com.finance.desktop.screens.ReportBuilderScreen
 import com.finance.desktop.screens.QuickAddTransactionDialog
@@ -124,10 +124,15 @@ fun FinanceApp(
                             Screen.Widgets -> WidgetBoardScreen()
                             Screen.Upgrade -> UpgradeScreen()
                             Screen.Tips -> TipsScreen()
-                            Screen.Insights -> InsightsScreen()
+                            Screen.Investments -> {} // placeholder
+                            Screen.Household -> {} // placeholder
+                            Screen.Achievements -> GamificationScreen()
                             Screen.Diagnostics -> DiagnosticsScreen()
                             Screen.HealthScore -> HealthScoreScreen()
                             Screen.Reports -> ReportBuilderScreen()
+                            Screen.QuickAdd -> {} // handled by dialog
+                            Screen.Import -> {} // placeholder
+                            Screen.Referral -> {} // placeholder
                             Screen.Negotiate -> BudgetNegotiationScreen()
                             Screen.Settings -> SettingsScreen()
                         }
