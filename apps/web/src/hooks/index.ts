@@ -54,15 +54,9 @@ export type {
 } from './useSpendingWatchlists';
 export { useFinancialTips } from './useFinancialTips';
 export type { UseFinancialTipsResult } from './useFinancialTips';
-export { useDataImportWizard, parseCsv, detectFormat } from './useDataImportWizard';
+export { useNaturalLanguageInput, parseTransactionText } from './useNaturalLanguageInput';
 export type {
-  UseDataImportWizardResult,
-  ImportWizardStep,
-  DetectedFormat,
-  CsvColumn,
-  ColumnMapping,
-  TransactionField,
-  ImportPreviewRow,
-  ImportProgress as DataImportProgress,
-  ImportResult,
-} from './useDataImportWizard';
+  UseNaturalLanguageInputResult,
+  ParsedTransaction,
+  NLSuggestion,
+} from './useNaturalLanguageInput';
