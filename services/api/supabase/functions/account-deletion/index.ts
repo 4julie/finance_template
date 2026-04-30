@@ -139,8 +139,10 @@ serve(async (req: Request): Promise<Response> => {
     const householdIds = (memberships ?? []).map((m: { household_id: string }) => m.household_id);
 
     // ===================================================================
-    // Step 3: Crypto-shredding — destroy real DEKs (#1101)
+    // Step 3: Trigger crypto-shredding — destroy real DEKs (#1101)
     // ===================================================================
+    // Calls the destroy_*_encryption_keys() RPCs which set key_material
+    // to NULL, making all encrypted data permanently unrecoverable.
     for (const householdId of householdIds) {
       const { data: otherMembers } = await supabase
         .from('household_members')
@@ -152,7 +154,8 @@ serve(async (req: Request): Promise<Response> => {
       const isSoleMember = !otherMembers || otherMembers.length === 0;
 
       if (isSoleMember) {
-        const { data: destroyedHhKeys, error: hhKeyErr } = await supabase.rpc(
+        // User is the only member — shred ALL household keys
+        const { data: destroyedHouseholdKeys, error: hhKeyError } = await supabase.rpc(
           'destroy_household_encryption_keys',
           {
             p_household_id: householdId,
@@ -160,13 +163,18 @@ serve(async (req: Request): Promise<Response> => {
             p_reason: 'account_deletion_sole_member',
           },
         );
-        if (hhKeyErr) {
-          logger.error('Failed to destroy household keys', { errorMessage: hhKeyErr.message });
+
+        if (hhKeyError) {
+          logger.error('Failed to destroy household keys', {
+            errorMessage: hhKeyError.message,
+          });
+          // Continue — best-effort shredding for remaining households
         }
-        if (destroyedHhKeys && Array.isArray(destroyedHhKeys)) {
-          for (const k of destroyedHhKeys) {
+
+        if (destroyedHouseholdKeys && Array.isArray(destroyedHouseholdKeys)) {
+          for (const key of destroyedHouseholdKeys) {
             shreddedKeys.push(
-              `shredded:household:${householdId}:${(k as { key_fingerprint: string }).key_fingerprint}`,
+              `shredded:household:${householdId}:${(key as { key_fingerprint: string }).key_fingerprint}`,
             );
           }
         }
@@ -192,24 +200,36 @@ serve(async (req: Request): Promise<Response> => {
           .update({ deleted_at: deletionTimestamp })
           .eq('id', householdId);
       } else {
+        // Other members exist — record revocation for audit
         shreddedKeys.push(`revoked:user-access:${householdId}:${user.id}`);
       }
     }
 
-    const { data: destroyedUserKeys, error: userKeyErr } = await supabase.rpc(
+    // Shred user's personal encryption keys (user_dek, export_key, etc.)
+    const { data: destroyedUserKeys, error: userKeyError } = await supabase.rpc(
       'destroy_user_encryption_keys',
-      { p_user_id: user.id, p_destroyed_by: user.id, p_reason: 'account_deletion' },
+      {
+        p_user_id: user.id,
+        p_destroyed_by: user.id,
+        p_reason: 'account_deletion',
+      },
     );
-    if (userKeyErr) {
-      logger.error('Failed to destroy user keys', { errorMessage: userKeyErr.message });
+
+    if (userKeyError) {
+      logger.error('Failed to destroy user encryption keys', {
+        errorMessage: userKeyError.message,
+      });
+      // Non-fatal: the user record will still be soft-deleted
     }
+
     if (destroyedUserKeys && Array.isArray(destroyedUserKeys)) {
-      for (const k of destroyedUserKeys) {
+      for (const key of destroyedUserKeys) {
         shreddedKeys.push(
-          `shredded:user:${user.id}:${(k as { key_fingerprint: string }).key_fingerprint}`,
+          `shredded:user:${user.id}:${(key as { key_fingerprint: string }).key_fingerprint}`,
         );
       }
     } else {
+      // Fallback fingerprint if no keys existed (new user / never provisioned)
       shreddedKeys.push(`shredded:user:${user.id}:no-keys-found`);
     }
 

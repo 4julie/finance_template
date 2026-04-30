@@ -192,6 +192,7 @@ serve(async (req: Request): Promise<Response> => {
       }
 
       // ── Credential lookup ────────────────────────────────────────────
+      // Verify the credential user is not soft-deleted before proceeding.
       const { data: storedCred, error: credError } = await supabaseAdmin
         .from('passkey_credentials')
         .select('*')
@@ -205,7 +206,7 @@ serve(async (req: Request): Promise<Response> => {
 
       const credential = storedCred as StoredCredential;
 
-      // Verify credential owner is still active (#1102)
+      // Verify the credential's user account is still active (#1102)
       const { data: credOwner, error: ownerError } = await supabaseAdmin
         .from('users')
         .select('id')
@@ -214,7 +215,9 @@ serve(async (req: Request): Promise<Response> => {
         .single();
 
       if (ownerError || !credOwner) {
-        logger.warn('Passkey auth for deleted user', { credentialId: credential.id });
+        logger.warn('Passkey auth attempt for deleted/inactive user', {
+          credentialId: credential.id,
+        });
         return errorResponse(req, 'Account is no longer active', 403);
       }
 
@@ -325,22 +328,27 @@ serve(async (req: Request): Promise<Response> => {
         return internalErrorResponse(req);
       }
 
-      // Session integrity validation (#1102)
+      // ── Session integrity validation (#1102) ─────────────────────────
+      // Ensure the minted session is complete and belongs to the correct user.
       if (
         !session.access_token ||
         !session.refresh_token ||
         typeof session.expires_in !== 'number' ||
         !session.user?.id
       ) {
-        logger.error('Session minted with missing fields', {
+        logger.error('Session minted with missing fields — rejecting', {
           hasAccessToken: !!session.access_token,
           hasRefreshToken: !!session.refresh_token,
           hasUser: !!session.user?.id,
         });
         return internalErrorResponse(req);
       }
+
+      // Critical: Verify the session user matches the credential owner.
+      // This prevents a class of bugs where the magic-link resolves to
+      // a different user (e.g. email reuse, race condition).
       if (session.user.id !== credential.user_id) {
-        logger.error('Session user mismatch', {
+        logger.error('Session user mismatch — credential.user_id does not match session.user.id', {
           expected: credential.user_id,
           actual: session.user.id,
         });
@@ -350,6 +358,8 @@ serve(async (req: Request): Promise<Response> => {
       logger.setUserId(credential.user_id);
       logger.info('Passkey authentication successful', { httpStatus: 200 });
 
+      // Return a standard Supabase session payload — clients can use
+      // supabase.auth.setSession() with these tokens.
       const successResponse = jsonResponse(req, {
         access_token: session.access_token,
         refresh_token: session.refresh_token,

@@ -263,6 +263,24 @@ export function appendRateLimitHeaders(
 // Enhanced rate-limit check with burst detection (#1103)
 // ---------------------------------------------------------------------------
 
+/**
+ * Enhanced rate limit check with burst detection and auto-blocking.
+ *
+ * Uses the `check_rate_limit_enhanced` PostgreSQL RPC which:
+ *   - Performs the standard sliding-window check
+ *   - Detects burst patterns (>2x limit in window)
+ *   - Auto-blocks abusive identifiers for a cooling-off period
+ *
+ * Falls back to the standard `checkRateLimit` if the enhanced RPC
+ * is unavailable (graceful degradation).
+ *
+ * @param supabase   A Supabase client (service_role) or compatible mock.
+ * @param identifier The rate-limit subject — user ID or client IP.
+ * @param config     The rate limit configuration for this endpoint.
+ * @param burstLimit Optional burst threshold (default: 2x maxRequests).
+ * @param blockSeconds How long to block on burst detection (default: 300s).
+ * @returns The rate limit check result.
+ */
 export async function checkRateLimitEnhanced(
   supabase: RpcClient,
   identifier: string,
@@ -271,6 +289,7 @@ export async function checkRateLimitEnhanced(
   blockSeconds: number = 300,
 ): Promise<RateLimitResult & { blocked?: boolean; blockReason?: string }> {
   const key = `${config.keyPrefix}:${identifier}`;
+
   try {
     const { data, error } = await supabase.rpc('check_rate_limit_enhanced', {
       p_key: key,
@@ -279,8 +298,13 @@ export async function checkRateLimitEnhanced(
       p_burst_limit: burstLimit ?? null,
       p_block_seconds: blockSeconds,
     });
-    if (error || !data) return checkRateLimit(supabase, identifier, config);
-    const r = data as {
+
+    if (error || !data) {
+      // Fall back to standard rate limiting
+      return checkRateLimit(supabase, identifier, config);
+    }
+
+    const result = data as {
       allowed: boolean;
       remaining: number;
       reset_at: string;
@@ -288,18 +312,22 @@ export async function checkRateLimitEnhanced(
       blocked: boolean;
       block_reason: string | null;
     };
-    const resetAt = new Date(r.reset_at);
+
+    const resetAt = new Date(result.reset_at);
+    const retryAfterSeconds = result.allowed
+      ? undefined
+      : Math.max(0, Math.ceil((resetAt.getTime() - Date.now()) / 1000));
+
     return {
-      allowed: r.allowed,
-      remaining: r.remaining,
+      allowed: result.allowed,
+      remaining: result.remaining,
       resetAt,
-      retryAfterSeconds: r.allowed
-        ? undefined
-        : Math.max(0, Math.ceil((resetAt.getTime() - Date.now()) / 1000)),
-      blocked: r.blocked,
-      blockReason: r.block_reason ?? undefined,
+      retryAfterSeconds,
+      blocked: result.blocked,
+      blockReason: result.block_reason ?? undefined,
     };
   } catch {
+    // Fall back to standard rate limiting
     return checkRateLimit(supabase, identifier, config);
   }
 }
