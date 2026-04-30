@@ -22,9 +22,11 @@ vi.mock('../auth/auth-context', () => ({
     webAuthnSupported: true,
     loginWithEmail: vi.fn(),
     loginWithPasskey: vi.fn(),
+    loginWithOAuth: vi.fn(),
     registerNewPasskey: vi.fn(),
     logout: logoutMock,
     refresh: vi.fn(),
+    signupWithEmail: vi.fn(),
   }),
 }));
 
@@ -40,6 +42,15 @@ vi.mock('../hooks/useTheme', () => ({
     setTheme: setThemeMock,
     themes: ['system', 'light', 'dark', 'dark-oled'],
   }),
+}));
+
+// Mock the GDPR components to avoid pulling in full consent logic
+vi.mock('../components/gdpr', () => ({
+  PrivacySettings: () => (
+    <section aria-label="Privacy & Data">
+      <div>Privacy Settings Mock</div>
+    </section>
+  ),
 }));
 
 import { SettingsPage } from './SettingsPage';
@@ -76,7 +87,7 @@ describe('SettingsPage', () => {
     expect(screen.getByText('Security')).toBeInTheDocument();
     expect(screen.getByText('Data')).toBeInTheDocument();
     expect(screen.getByText('About')).toBeInTheDocument();
-    expect(screen.getByText('Danger Zone')).toBeInTheDocument();
+    expect(screen.getByText('Privacy Settings Mock')).toBeInTheDocument();
     expect(screen.getByLabelText('Currency')).toHaveValue('USD');
     expect(screen.getByLabelText('Theme')).toHaveValue('system');
     expect(screen.getByRole('checkbox', { name: 'Notifications' })).toBeChecked();
@@ -97,15 +108,10 @@ describe('SettingsPage', () => {
     const biometricLockButton = screen.getByRole('button', {
       name: 'Biometric lock — available in a future update',
     });
-    const accountDeletionButton = screen.getByRole('button', {
-      name: 'Account deletion — available in a future update',
-    });
 
     expect(biometricLockButton).toBeDisabled();
     expect(biometricLockButton).toHaveAttribute('aria-disabled', 'true');
-    expect(accountDeletionButton).toBeDisabled();
-    expect(accountDeletionButton).toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getAllByText('Coming soon')).toHaveLength(2);
+    expect(screen.getByText('Coming soon')).toBeInTheDocument();
   });
 
   it('shows offline sync messaging when the app is offline', () => {
@@ -132,8 +138,9 @@ describe('SettingsPage', () => {
 
     expect(screen.getByRole('region', { name: /preferences/i })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: /security/i })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: /data/i })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: /about/i })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: /danger zone/i })).toBeInTheDocument();
+    // "Data" and "Privacy & Data" sections both exist
+    const dataRegions = screen.getAllByRole('region', { name: /data/i });
+    expect(dataRegions.length).toBeGreaterThanOrEqual(2);
   });
 });

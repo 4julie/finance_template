@@ -66,6 +66,8 @@ export interface AuthActions {
   loginWithEmail: (email: string, password: string) => Promise<void>;
   /** Sign in with a registered passkey. */
   loginWithPasskey: (email?: string) => Promise<void>;
+  /** Sign in with an OAuth provider (opens popup/redirect). */
+  loginWithOAuth: (provider: OAuthProvider) => Promise<void>;
   /** Register a new passkey for the current user. */
   registerNewPasskey: () => Promise<void>;
   /** Sign out and clear all tokens. */
@@ -75,6 +77,9 @@ export interface AuthActions {
   /** Create a new account with email and password. */
   signupWithEmail: (email: string, password: string) => Promise<void>;
 }
+
+/** Supported OAuth providers. */
+export type OAuthProvider = 'google' | 'github' | 'apple';
 
 /** The shape of the auth context value. */
 export interface AuthContextValue extends AuthActions {
@@ -384,6 +389,26 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
     [config.signupEndpoint],
   );
 
+  const loginWithOAuth = useCallback(
+    async (provider: OAuthProvider): Promise<void> => {
+      setError(null);
+      setIsLoading(true);
+
+      try {
+        // Redirect to Supabase OAuth flow
+        const redirectTo = `${window.location.origin}/dashboard`;
+        const oauthUrl = `${config.supabaseUrl}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectTo)}`;
+        window.location.href = oauthUrl;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : `OAuth login with ${provider} failed`;
+        setError(message);
+        setIsLoading(false);
+        throw err;
+      }
+    },
+    [config.supabaseUrl],
+  );
+
   // -----------------------------------------------------------------------
   // Context Value (memoised to prevent unnecessary re-renders)
   // -----------------------------------------------------------------------
@@ -397,6 +422,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       webAuthnSupported,
       loginWithEmail,
       loginWithPasskey,
+      loginWithOAuth,
       registerNewPasskey,
       logout,
       refresh,
@@ -410,6 +436,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       webAuthnSupported,
       loginWithEmail,
       loginWithPasskey,
+      loginWithOAuth,
       registerNewPasskey,
       logout,
       refresh,
