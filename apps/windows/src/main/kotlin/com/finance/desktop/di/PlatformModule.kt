@@ -3,6 +3,8 @@
 package com.finance.desktop.di
 
 import com.finance.desktop.notifications.DesktopNotificationManager
+import com.finance.desktop.notifications.EnhancedNotificationManager
+import com.finance.desktop.navigation.DeepLinkHandler
 import com.finance.desktop.voice.VoiceCommandManager
 import com.finance.desktop.voice.VoiceCommandParser
 import com.finance.desktop.tray.FinanceSystemTray
@@ -45,4 +47,8 @@ val platformModule = module {
     // ── System tray integration ──
     single { FinanceSystemTray(get(), get(), get()) }
     single { QuickAddTransactionManager(get()) }
+
+    // -- Enhanced notifications and deep links --
+    single { EnhancedNotificationManager() }
+    single { DeepLinkHandler }
 }

@@ -86,6 +86,18 @@
           </uap:FileTypeAssociation>
         </uap:Extension>
 
+        <!-- Protocol handler for finance:// deep links -->
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="finance">
+            <uap:DisplayName>Finance App Link</uap:DisplayName>
+            <uap:Logo>assets\Square44x44Logo.png</uap:Logo>
+          </uap:Protocol>
+        </uap:Extension>
+
+        <!-- Auto-update check (Store-managed) -->
+        <!-- Update frequency is managed by the Microsoft Store. -->
+        <!-- For sideloaded MSIX, configure AppInstaller file separately. -->
+
         <!-- Toast notification support -->
         <desktop:Extension Category="windows.toastNotificationActivation">
           <desktop:ToastNotificationActivation
