@@ -75,6 +75,7 @@ const FUNCTION_ENV_VARS: Record<string, readonly EnvVarSpec[]> = {
   ],
   'anomaly-detection': [{ name: 'ALLOWED_ORIGINS', type: 'csv' }],
   'consent-management': [],
+  'investment-sync': [{ name: 'ALLOWED_ORIGINS', type: 'csv' }],
 };
 
 // ---------------------------------------------------------------------------

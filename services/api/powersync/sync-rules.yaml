@@ -144,6 +144,42 @@ bucket_definitions:
         FROM detected_bills
         WHERE household_id = bucket.household_id AND deleted_at IS NULL
 
+      # Investment portfolios
+      - >
+        SELECT id, household_id, owner_id, name, description, currency_code,
+               is_active, provider, last_synced_at,
+               created_at, updated_at, deleted_at
+        FROM investment_portfolios
+        WHERE household_id = bucket.household_id AND deleted_at IS NULL
+
+      # Investment holdings
+      - >
+        SELECT id, portfolio_id, household_id, owner_id, ticker_symbol,
+               name, asset_type, quantity_units, quantity_precision,
+               cost_basis_cents, currency_code, acquired_date,
+               created_at, updated_at, deleted_at
+        FROM investment_holdings
+        WHERE household_id = bucket.household_id AND deleted_at IS NULL
+
+      # Bill reminders
+      - >
+        SELECT id, household_id, owner_id, detected_bill_id, merchant,
+               amount_cents, currency_code, frequency, next_due_date,
+               is_auto_pay, is_active, reminder_days, account_id,
+               category_id, note,
+               created_at, updated_at, deleted_at
+        FROM bill_reminders
+        WHERE household_id = bucket.household_id AND deleted_at IS NULL
+
+      # Report templates
+      - >
+        SELECT id, household_id, owner_id, name, description,
+               report_type, template_config, is_default, usage_count,
+               last_used_at,
+               created_at, updated_at, deleted_at
+        FROM report_templates
+        WHERE household_id = bucket.household_id AND deleted_at IS NULL
+
       # Import job status (for progress tracking)
       - >
         SELECT id, household_id, owner_id, account_id, file_name,
@@ -196,14 +232,10 @@ bucket_definitions:
         WHERE (referrer_id = bucket.user_id OR referee_id = bucket.user_id)
               AND deleted_at IS NULL
 
-      # User consent records (GDPR compliance).
-      # Synced to client so the app can display current consent state and
-      # prompt for re-consent when policy versions change.
-      # SECURITY: ip_address and user_agent are excluded — they are PII
-      # stored server-side for audit only.
+      # User consent records (GDPR). Synced for local consent state display.
+      # SECURITY: ip_address/user_agent excluded — PII for server audit only.
       - >
-        SELECT id, user_id, consent_type, status, policy_version,
-               created_at
+        SELECT id, user_id, consent_type, status, policy_version, created_at
         FROM user_consents
         WHERE user_id = bucket.user_id
 
@@ -223,4 +255,18 @@ bucket_definitions:
                rate_precision, source, valid_date,
                created_at, updated_at, deleted_at
         FROM exchange_rates
+        WHERE deleted_at IS NULL
+
+      # Price history (global, read-only)
+      - >
+        SELECT id, ticker_symbol, close_price_cents, currency_code, price_date, source, created_at, updated_at, deleted_at
+        FROM price_history
+        WHERE deleted_at IS NULL
+
+      # Price history (global, read-only on clients)
+      - >
+        SELECT id, ticker_symbol, close_price_cents, currency_code,
+               price_date, source,
+               created_at, updated_at, deleted_at
+        FROM price_history
         WHERE deleted_at IS NULL
