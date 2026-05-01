@@ -1,4 +1,4 @@
-{
+﻿{
   "editor.formatOnSave": true,
   "editor.defaultFormatter": null,
   "files.trimTrailingWhitespace": true,
@@ -21,18 +21,22 @@
   "github.copilot.chat.tools.autoApprove": false,
   "github.copilot.chat.tools.terminal.allowlist": [
     "^git (status|log|diff|show|branch|stash list)( .*)?",
+    "^git (add|commit|checkout|worktree|stash)( .*)?",
+    "^git (fetch|rebase|push)( .*)?",
+    "^gh (pr create|pr checks|issue create|issue list)( .*)?",
     "^(ls|dir|Get-ChildItem|cat|type|head|tail|wc|find|grep|rg)( .*)?",
-    "^(node|npx) (--version|--help)",
+    "^(node|npx)( .*)?",
     "^echo [^$%]",
     "^pwd$",
-    "^npm (test|run lint|run build)( .*)?"
+    "^npm (test|run|install)( .*)?",
+    "^\\$env:HUSKY"
   ],
   "github.copilot.chat.tools.terminal.denylist": [
     "git push.*(main|master|--force(?!-with-lease))",
-    "git (pull|fetch|remote|clone|merge|rebase)",
+    "git (pull|remote|clone)",
+    "git merge",
     "git branch -[dD]",
-    "git checkout -b .* origin",
-    "gh pr (create|merge|review|close|approve)",
+    "gh pr (merge|review|close|approve)",
     "gh issue (close|delete|transfer)",
     "gh repo",
     "rm -rf|del /[sS]|Remove-Item.*-Recurse.*-Force",
