@@ -101,3 +101,6 @@ playwright-report/
 .turbo/
 .kotlin/
 kotlin-js-store/
+
+# Git worktrees (agent work directories)
+worktrees/
