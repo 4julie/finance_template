@@ -6,8 +6,8 @@ import android.content.Context
 import android.net.Uri
 import com.finance.android.data.repository.AccountRepository
 import com.finance.android.data.repository.TransactionRepository
+import com.finance.android.auth.HouseholdIdProvider
 import com.finance.models.Transaction
-import com.finance.models.types.SyncId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -44,13 +44,13 @@ sealed class ExportResult {
  * - No export metadata is logged beyond record counts.
  *
  * @param context Application context for content resolver access.
- * @param householdId The household whose data to export.
+ * @param householdIdProvider Provider of the current household ID.
  * @param transactionRepository Source of transaction data.
  * @param accountRepository Source of account data for enrichment.
  */
 class DataExportManager(
     private val context: Context,
-    private val householdId: SyncId,
+    private val householdIdProvider: HouseholdIdProvider,
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
 ) {
@@ -67,18 +67,9 @@ class DataExportManager(
         accountId: String? = null,
     ): ExportResult = withContext(Dispatchers.IO) {
         try {
+            val householdId = householdIdProvider.householdId.value
+                ?: return@withContext ExportResult.Error("No household selected")
             val transactions = transactionRepository.observeAll(householdId).first()
-            val filtered = if (accountId != null) {
-                transactions.filter { it.accountId.value == accountId }
-            } else {
-                transactions
-            }
-
-            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                val writer = outputStream.bufferedWriter()
-
-                // CSV header
-                writer.write("Date,Amount,Payee,Category,Notes,Account ID")
                 writer.newLine()
 
                 // CSV rows — monetary values in cents for precision
@@ -110,6 +101,8 @@ class DataExportManager(
         accountId: String? = null,
     ): ExportResult = withContext(Dispatchers.IO) {
         try {
+            val householdId = householdIdProvider.householdId.value
+                ?: return@withContext ExportResult.Error("No household selected")
             val transactions = transactionRepository.observeAll(householdId).first()
             val filtered = if (accountId != null) {
                 transactions.filter { it.accountId.value == accountId }

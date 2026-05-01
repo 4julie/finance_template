@@ -199,7 +199,7 @@ val appModule = module {
     single { ThemeManager(get()) }
 
     /** Data export manager — CSV/PDF export (#Sprint26). */
-    single { DataExportManager(androidContext(), get(), get()) }
+    single { DataExportManager(androidContext(), get(), get(), get()) }
 
     /** Sync scheduler — configurable sync intervals (#Sprint32). */
     single { SyncScheduler(androidContext(), get()) }
