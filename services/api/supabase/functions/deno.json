@@ -18,7 +18,8 @@
       "launch-readiness/**/*.test.ts",
       "spending-forecast/**/*.test.ts",
       "bank-connection/**/*.test.ts",
-      "anomaly-detection/**/*.test.ts"
+      "anomaly-detection/**/*.test.ts",
+      "investment-sync/**/*.test.ts"
     ],
     "exclude": ["node_modules"]
   },
