@@ -70,6 +70,17 @@ class DataExportManager(
             val householdId = householdIdProvider.householdId.value
                 ?: return@withContext ExportResult.Error("No household selected")
             val transactions = transactionRepository.observeAll(householdId).first()
+            val filtered = if (accountId != null) {
+                transactions.filter { it.accountId.value == accountId }
+            } else {
+                transactions
+            }
+
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                val writer = outputStream.bufferedWriter()
+
+                // CSV header
+                writer.write("Date,Amount,Payee,Category,Notes,Account ID")
                 writer.newLine()
 
                 // CSV rows — monetary values in cents for precision
