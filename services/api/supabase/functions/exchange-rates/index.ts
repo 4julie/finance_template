@@ -57,8 +57,87 @@ const RATE_MULTIPLIER = 10 ** RATE_PRECISION;
 /** ECB XML feed URL for daily exchange rates. */
 const ECB_DAILY_URL = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
 
+/** ECB historical (last 90 days) XML feed URL — reserved for future bulk backfill. */
+const _ECB_HIST_90_URL = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml';
+
 /** ISO 4217 currency code pattern. */
 const CURRENCY_PATTERN = /^[A-Z]{3}$/;
+
+/** ISO date pattern: YYYY-MM-DD. */
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Maximum staleness (in hours) before rates are flagged as stale. */
+const STALENESS_THRESHOLD_HOURS = 48;
+
+/**
+ * All 33 currencies supported by ECB daily reference rates + EUR base.
+ * Used for documentation and validation.
+ */
+export const SUPPORTED_CURRENCIES = [
+  'EUR',
+  'USD',
+  'JPY',
+  'GBP',
+  'CHF',
+  'AUD',
+  'CAD',
+  'CNY',
+  'HKD',
+  'NZD',
+  'SEK',
+  'KRW',
+  'SGD',
+  'NOK',
+  'MXN',
+  'INR',
+  'RUB',
+  'ZAR',
+  'TRY',
+  'BRL',
+  'TWD',
+  'DKK',
+  'PLN',
+  'THB',
+  'IDR',
+  'HUF',
+  'CZK',
+  'ILS',
+  'CLP',
+  'PHP',
+  'AED',
+  'COP',
+  'SAR',
+  'MYR',
+  'RON',
+  'BGN',
+  'HRK',
+  'ISK',
+] as const;
+
+/**
+ * Compute staleness metadata for a set of rates.
+ *
+ * @param validDate The date the rates are valid for (YYYY-MM-DD).
+ * @returns Staleness metadata.
+ */
+export function computeStaleness(validDate: string): {
+  is_stale: boolean;
+  staleness_hours: number;
+  staleness_message: string;
+} {
+  const rateDate = new Date(validDate + 'T16:00:00Z'); // ECB publishes ~16:00 CET
+  const now = new Date();
+  const hoursAgo = Math.round((now.getTime() - rateDate.getTime()) / (1000 * 60 * 60));
+  const isStale = hoursAgo > STALENESS_THRESHOLD_HOURS;
+
+  return {
+    is_stale: isStale,
+    staleness_hours: Math.max(0, hoursAgo),
+    staleness_message: isStale
+      ? `Rates are ${hoursAgo} hours old (threshold: ${STALENESS_THRESHOLD_HOURS}h). Using cached fallback.`
+      : 'Rates are current.',
+  };
+}
 
 /**
  * Parse ECB XML response to extract currency rates.
@@ -224,11 +303,12 @@ serve(async (req: Request): Promise<Response> => {
 
     if (action === 'convert') {
       // ===================================================================
-      // CONVERT AMOUNT
+      // CONVERT AMOUNT (with optional historical date)
       // ===================================================================
       const from = url.searchParams.get('from')?.toUpperCase();
       const to = url.searchParams.get('to')?.toUpperCase();
       const amountCentsParam = url.searchParams.get('amount_cents');
+      const dateParam = url.searchParams.get('date');
 
       if (!from || !CURRENCY_PATTERN.test(from)) {
         return errorResponse(req, 'from query parameter is required (3-letter currency code)');
@@ -238,6 +318,9 @@ serve(async (req: Request): Promise<Response> => {
       }
       if (!amountCentsParam || isNaN(parseInt(amountCentsParam, 10))) {
         return errorResponse(req, 'amount_cents query parameter is required (integer)');
+      }
+      if (dateParam && !DATE_PATTERN.test(dateParam)) {
+        return errorResponse(req, 'date must be in YYYY-MM-DD format');
       }
 
       const amountCents = BigInt(amountCentsParam);
@@ -249,30 +332,29 @@ serve(async (req: Request): Promise<Response> => {
           amount_cents: Number(amountCents),
           converted_cents: Number(amountCents),
           rate: 1.0,
-          rate_date: new Date().toISOString().substring(0, 10),
+          rate_date: dateParam ?? new Date().toISOString().substring(0, 10),
+          is_historical: !!dateParam,
         });
       }
 
-      // Get rates for both currencies relative to EUR
-      const { data: fromRate } = await supabase
-        .from('exchange_rates')
-        .select('rate_multiplied, rate_precision, valid_date')
-        .eq('base_currency', 'EUR')
-        .eq('target_currency', from)
-        .is('deleted_at', null)
-        .order('valid_date', { ascending: false })
-        .limit(1)
-        .single();
+      // Build rate query — if date is specified, find closest rate on or before that date
+      const buildRateQuery = (targetCurrency: string) => {
+        let query = supabase
+          .from('exchange_rates')
+          .select('rate_multiplied, rate_precision, valid_date')
+          .eq('base_currency', 'EUR')
+          .eq('target_currency', targetCurrency)
+          .is('deleted_at', null);
 
-      const { data: toRate } = await supabase
-        .from('exchange_rates')
-        .select('rate_multiplied, rate_precision, valid_date')
-        .eq('base_currency', 'EUR')
-        .eq('target_currency', to)
-        .is('deleted_at', null)
-        .order('valid_date', { ascending: false })
-        .limit(1)
-        .single();
+        if (dateParam) {
+          query = query.lte('valid_date', dateParam);
+        }
+
+        return query.order('valid_date', { ascending: false }).limit(1).single();
+      };
+
+      const { data: fromRate } = from === 'EUR' ? { data: null } : await buildRateQuery(from);
+      const { data: toRate } = to === 'EUR' ? { data: null } : await buildRateQuery(to);
 
       // Handle EUR as from or to
       let crossRate: number;
@@ -295,15 +377,21 @@ serve(async (req: Request): Promise<Response> => {
       } else {
         return errorResponse(
           req,
-          'Exchange rate not available for this currency pair. Try refreshing rates.',
+          dateParam
+            ? `Exchange rate not available for this currency pair on ${dateParam}. Historical data may be limited.`
+            : 'Exchange rate not available for this currency pair. Try refreshing rates.',
           404,
         );
       }
 
       // Convert amount using integer arithmetic for precision
       const convertedCents = Math.round(Number(amountCents) * crossRate);
+      const staleness = computeStaleness(rateDate);
 
-      logger.info('Currency conversion performed', { httpStatus: 200 });
+      logger.info('Currency conversion performed', {
+        httpStatus: 200,
+        isHistorical: !!dateParam,
+      });
 
       return jsonResponse(req, {
         from_currency: from,
@@ -312,24 +400,37 @@ serve(async (req: Request): Promise<Response> => {
         converted_cents: convertedCents,
         rate: Math.round(crossRate * RATE_MULTIPLIER) / RATE_MULTIPLIER,
         rate_date: rateDate,
+        is_historical: !!dateParam,
+        requested_date: dateParam ?? null,
+        staleness,
       });
     }
 
     // =====================================================================
-    // GET LATEST RATES
+    // GET RATES (latest or historical by date)
     // =====================================================================
     const baseCurrency = (url.searchParams.get('base') ?? 'EUR').toUpperCase();
+    const dateParam = url.searchParams.get('date');
 
     if (!CURRENCY_PATTERN.test(baseCurrency)) {
       return errorResponse(req, 'base must be a 3-letter currency code');
     }
+    if (dateParam && !DATE_PATTERN.test(dateParam)) {
+      return errorResponse(req, 'date must be in YYYY-MM-DD format');
+    }
 
-    // Get latest rates
-    const { data: latestRates, error: rateErr } = await supabase
+    // Build query — if date specified, find rates on or before that date
+    let rateQuery = supabase
       .from('exchange_rates')
       .select('base_currency, target_currency, rate_multiplied, rate_precision, valid_date')
       .eq('base_currency', 'EUR')
-      .is('deleted_at', null)
+      .is('deleted_at', null);
+
+    if (dateParam) {
+      rateQuery = rateQuery.lte('valid_date', dateParam);
+    }
+
+    const { data: latestRates, error: rateErr } = await rateQuery
       .order('valid_date', { ascending: false })
       .limit(50);
 
@@ -339,10 +440,16 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     if (!latestRates || latestRates.length === 0) {
-      return errorResponse(req, 'No exchange rates available. Rates need to be refreshed.', 404);
+      return errorResponse(
+        req,
+        dateParam
+          ? `No exchange rates available for date ${dateParam}. Historical data may be limited.`
+          : 'No exchange rates available. Rates need to be refreshed.',
+        404,
+      );
     }
 
-    // Get the latest date
+    // Get the latest date from the results
     const latestDate = latestRates[0].valid_date;
     const todayRates = latestRates.filter(
       (r: Record<string, unknown>) => r.valid_date === latestDate,
@@ -356,13 +463,24 @@ serve(async (req: Request): Promise<Response> => {
       rate_precision: r.rate_precision,
     }));
 
-    logger.info('Rates retrieved', { httpStatus: 200, count: rates.length });
+    const staleness = computeStaleness(latestDate);
+
+    logger.info('Rates retrieved', {
+      httpStatus: 200,
+      count: rates.length,
+      isHistorical: !!dateParam,
+    });
 
     return jsonResponse(req, {
       base_currency: 'EUR',
       valid_date: latestDate,
+      is_historical: !!dateParam,
+      requested_date: dateParam ?? null,
       rates,
+      rate_count: rates.length,
+      supported_currencies: SUPPORTED_CURRENCIES.length,
       source: 'ecb',
+      staleness,
       fetched_at: new Date().toISOString(),
     });
   } catch (err) {
