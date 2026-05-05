@@ -7,9 +7,9 @@
 > the product in plain language, but it has not yet been approved by legal
 > counsel. Do not publish or rely on this document as final legal advice.
 
-**Effective date:** 2026-03-16  
-**Last updated:** 2026-03-16  
-**Version:** Draft 0.1
+**Effective date:** [TBD — set before publication]  
+**Last updated:** 2025-07-28  
+**Version:** Draft 0.9 (beta-ready)
 
 ## 1. Who we are
 
@@ -167,11 +167,14 @@ limit its use accordingly.
 We use a combination of technical and organizational safeguards designed to
 protect personal information, including:
 
-- encryption in transit using HTTPS/TLS;
-- encryption at rest for supported storage layers, including encrypted native
-  databases and secure credential storage;
-- platform-native secure key storage such as Keychain, Keystore, DPAPI, or
-  equivalent secure storage mechanisms where available;
+- encryption in transit using **TLS 1.3** (HTTPS) for all network
+  communications between the app and backend services;
+- encryption at rest using **SQLCipher (AES-256)** for local databases on
+  native platforms (iOS, Android, Windows), ensuring financial data stored on
+  your device is encrypted;
+- platform-native secure key storage such as **Apple Keychain** (iOS/macOS),
+  **Android Keystore**, **DPAPI** (Windows), or equivalent secure storage
+  mechanisms where available;
 - row-level security and least-privilege access controls for multi-tenant backend
   data;
 - passkey and WebAuthn-based authentication flows;
@@ -262,7 +265,34 @@ You may designate an authorized agent to submit requests on your behalf where
 allowed by law. We may require proof of that authorization and identity
 verification.
 
-## 12. Cookies and local storage
+### Full CCPA/CPRA notice
+
+For a more detailed description of California-specific disclosures, including
+categories of recipients, sensitive personal information handling, and retention
+schedules, see the [CCPA/CPRA Privacy Notice](./ccpa-notice.md).
+
+## 12. Data breach notification
+
+If we become aware of a security breach that results in the unauthorized access,
+disclosure, or loss of personal information, we will:
+
+- investigate the incident promptly and take reasonable steps to contain and
+  remediate the breach;
+- notify affected users without undue delay and, where required by GDPR, within
+  **72 hours** of becoming aware of the breach, unless the breach is unlikely to
+  result in a risk to the rights and freedoms of individuals;
+- notify relevant supervisory authorities as required by applicable data
+  protection law, including the GDPR (Article 33) and CCPA/CPRA;
+- provide affected users with a description of the nature of the breach, the
+  categories and approximate number of records concerned, the likely
+  consequences, and the measures taken or proposed to address the breach; and
+- document all breaches, including those that do not require notification, as
+  part of our internal incident response process.
+
+For more information about our security incident response procedures, see our
+internal [Incident Response Runbook](../architecture/incident-response-runbook.md).
+
+## 13. Cookies and local storage
 
 Finance uses only **strictly necessary** cookies and similar storage
 technologies required to operate the service and support offline-first
@@ -295,13 +325,13 @@ If you believe a child under 13 has provided personal information to Finance,
 please contact us at **[Privacy Contact Email]** so we can investigate and, where
 required, delete the information.
 
-## 14. Do Not Sell or Share statement
+## 15. Do Not Sell or Share statement
 
 Finance does not sell personal information and does not share personal
 information for cross-context behavioral advertising. We do not broker,
 monetize, or rent user financial data to advertisers or data brokers.
 
-## 15. Changes to this policy
+## 16. Changes to this policy
 
 We may update this privacy policy from time to time. If we make a material
 change, we will provide at least **30 days’ notice** before the updated policy
@@ -314,7 +344,7 @@ We may provide notice by:
 - sending an in-app notification or email; or
 - updating the effective date shown at the top of this document.
 
-## 16. Contact us and complaints
+## 17. Contact us and complaints
 
 If you have questions, requests, or complaints about this policy or our privacy
 practices, contact:
