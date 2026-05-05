@@ -19,7 +19,8 @@
       "spending-forecast/**/*.test.ts",
       "bank-connection/**/*.test.ts",
       "anomaly-detection/**/*.test.ts",
-      "investment-sync/**/*.test.ts"
+      "investment-sync/**/*.test.ts",
+      "detect-bills/**/*.test.ts"
     ],
     "exclude": ["node_modules"]
   },
@@ -35,7 +36,8 @@
     "test:household-invite": "deno test --allow-env --allow-net=none --no-check household-invite/",
     "test:data-export": "deno test --allow-env --allow-net=none --no-check data-export/",
     "test:account-deletion": "deno test --allow-env --allow-net=none --no-check account-deletion/",
-    "test:consent-management": "deno test --allow-env --allow-net=none --no-check consent-management/"
+    "test:consent-management": "deno test --allow-env --allow-net=none --no-check consent-management/",
+    "test:detect-bills": "deno test --allow-env --allow-net=none --no-check detect-bills/"
   },
   "imports": {
     "std/testing/": "https://deno.land/std@0.208.0/testing/",
