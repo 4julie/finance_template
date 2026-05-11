@@ -59,8 +59,23 @@ export type {
   UseNaturalLanguageInputResult,
   ParsedTransaction,
   NLSuggestion,
+  RecentNLInput,
+  EditableField,
+  FieldConfidence,
+  ParsedFieldConfidences,
 } from './useNaturalLanguageInput';
 export { useInvestments } from './useInvestments';
 export type { UseInvestmentsResult, PortfolioSummary } from './useInvestments';
 export { useBills } from './useBills';
 export type { UseBillsResult, BillsSummary } from './useBills';
+export { useReportBuilder } from './useReportBuilder';
+export type {
+  UseReportBuilderResult,
+  ReportConfig,
+  ReportField,
+  ReportPreview,
+  ReportTemplate,
+  ChartType,
+  DatePreset,
+  SavedReport,
+} from './useReportBuilder';
