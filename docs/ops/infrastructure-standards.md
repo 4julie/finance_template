@@ -47,9 +47,9 @@
 | Docker volume         | `finance-{service}-data`             | `finance-postgres-data`             |
 | Docker network        | `finance-{scope}`                    | `finance-internal`                  |
 | Docker image tag      | `finance/{service}:{semver}`         | `finance/edge-functions:1.2.3`      |
-| Domain (prod)         | `{domain}`                           | `financetrackerapp.com`             |
-| Subdomain (staging)   | `staging.{domain}`                   | `staging.financetrackerapp.com`     |
-| API endpoint          | `api.{domain}` or `{domain}/rest/`   | `financetrackerapp.com/rest/`       |
+| Domain (prod)         | `finance.{base-domain}`              | `finance.jrmoulckers.com`           |
+| Subdomain (staging)   | `finance-staging.{base-domain}`      | `finance-staging.jrmoulckers.com`   |
+| API endpoint          | `{domain}/rest/`                     | `finance.jrmoulckers.com/rest/`     |
 | Env variable          | `{SERVICE}_{KEY}`                    | `POSTGRES_PASSWORD`                 |
 | GitHub Actions secret | `{SERVICE}_{KEY}` (env-scoped)       | `SUPABASE_URL` (in `staging` env)   |
 | GitHub branch         | `{type}/{description}-{issue#}`      | `feat/budget-rollover-134`          |
@@ -425,13 +425,15 @@ DNS names are the most visible identifier of the project. They appear in TLS cer
 
 ### Domain Structure
 
-| Level              | Pattern            | Example                                        |
-| ------------------ | ------------------ | ---------------------------------------------- |
-| **Primary domain** | `{app-name}.{tld}` | `financetrackerapp.com` (example — actual TBD) |
-| **Production**     | `{domain}`         | `financetrackerapp.com`                        |
-| **Staging**        | `staging.{domain}` | `staging.financetrackerapp.com`                |
+The alpha deployment uses a subdomain of the owner's personal domain. A dedicated product domain will be registered before public launch.
 
-> **Note:** "Finance" is a working title for alpha. The domain will be finalized before public launch. All configurations use the `DOMAIN` environment variable, so changing the domain requires updating only `.env`.
+| Level           | Pattern                         | Alpha Value                       |
+| --------------- | ------------------------------- | --------------------------------- |
+| **Production**  | `finance.{base-domain}`         | `finance.jrmoulckers.com`         |
+| **Staging**     | `finance-staging.{base-domain}` | `finance-staging.jrmoulckers.com` |
+| **Base domain** | (owner's domain)                | `jrmoulckers.com` (Namecheap)     |
+
+> **Note:** All configurations use the `DOMAIN` environment variable, so migrating to a dedicated domain (e.g., `financetrackerapp.com`) later requires updating only `.env` — no code changes.
 
 ### Path-Based Routing (Current Architecture)
 
@@ -460,17 +462,17 @@ If the project grows beyond a single VM and requires dedicated hosts per service
 
 ### Environment Subdomains
 
-| Pattern        | `{env}.{domain}`                                                               |
-| -------------- | ------------------------------------------------------------------------------ |
-| **Convention** | Environment prefix comes first, before the domain. NOT `api.staging.{domain}`. |
+| Pattern        | `finance-{env}.{base-domain}` for subdomained deployments                          |
+| -------------- | ---------------------------------------------------------------------------------- |
+| **Convention** | Environment suffix on the app subdomain. NOT a sub-subdomain of the app subdomain. |
 
-| Environment | URL                                     |
-| ----------- | --------------------------------------- |
-| Production  | `https://financetrackerapp.com`         |
-| Staging     | `https://staging.financetrackerapp.com` |
-| Development | `http://localhost` (no DNS)             |
+| Environment | URL                                       |
+| ----------- | ----------------------------------------- |
+| Production  | `https://finance.jrmoulckers.com`         |
+| Staging     | `https://finance-staging.jrmoulckers.com` |
+| Development | `http://localhost` (no DNS)               |
 
-> **Rationale:** `staging.{domain}` is simpler than `{service}.staging.{domain}` — staging uses the same path-based routing as production.
+> **Rationale:** `finance-staging.jrmoulckers.com` avoids multi-level subdomain complexity (no `staging.finance.jrmoulckers.com`). DNS A records are simpler — each is a direct entry on the base domain. When migrating to a dedicated domain, staging becomes `staging.{domain}`.
 
 ### Vercel (Web Frontend)
 
@@ -485,12 +487,12 @@ The web PWA may also be deployed to Vercel (free tier) for preview deployments:
 
 Configured in `.env` via `AUTH_REDIRECT_URLS`:
 
-| Platform              | URI Pattern                              |
-| --------------------- | ---------------------------------------- |
-| Web (prod)            | `https://{domain}/auth/callback`         |
-| Web (staging)         | `https://staging.{domain}/auth/callback` |
-| iOS/Android           | `com.finance.app://auth/callback`        |
-| iOS/Android (staging) | `com.finance.staging://auth/callback`    |
+| Platform              | URI Pattern                                             |
+| --------------------- | ------------------------------------------------------- |
+| Web (prod)            | `https://finance.jrmoulckers.com/auth/callback`         |
+| Web (staging)         | `https://finance-staging.jrmoulckers.com/auth/callback` |
+| iOS/Android           | `com.finance.app://auth/callback`                       |
+| iOS/Android (staging) | `com.finance.staging://auth/callback`                   |
 
 ### Internal Service Names
 
@@ -510,12 +512,12 @@ These are Docker's internal DNS names and are not externally resolvable.
 
 ### Anti-patterns
 
-| ❌ Don't                                                  | ✅ Do                                 |
-| --------------------------------------------------------- | ------------------------------------- |
-| `api.staging.financetrackerapp.com` (service before env)  | `staging.financetrackerapp.com/rest/` |
-| `finance-api-prod.azurewebsites.net` (provider in domain) | Use a custom domain                   |
-| Hardcode domain in source code                            | Use `DOMAIN` env var everywhere       |
-| Use IP addresses in client configs                        | Always use DNS names                  |
+| ❌ Don't                                                  | ✅ Do                             |
+| --------------------------------------------------------- | --------------------------------- |
+| `staging.finance.jrmoulckers.com` (sub-sub-domain)        | `finance-staging.jrmoulckers.com` |
+| `finance-api-prod.azurewebsites.net` (provider in domain) | Use a custom domain               |
+| Hardcode domain in source code                            | Use `DOMAIN` env var everywhere   |
+| Use IP addresses in client configs                        | Always use DNS names              |
 
 ---
 
