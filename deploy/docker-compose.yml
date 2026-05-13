@@ -241,7 +241,7 @@ services:
       start_period: 15s
     depends_on:
       rest:
-        condition: service_healthy
+        condition: service_started
     command: start --main-service /home/deno/functions/main
     deploy:
       resources:
