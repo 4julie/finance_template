@@ -6,13 +6,13 @@
  * Required by supabase/edge-runtime as the `--main-service` handler.
  * Provides a minimal health-check responder and routes requests.
  *
+ * Uses native Deno.serve() — no URL imports needed at boot time.
+ *
  * Issues: #1246
  */
 
-import { serve } from 'https://deno.land/std@0.208.0/http/server.ts';
-
-serve(async (req: Request): Promise<Response> => {
-  const url = new URL(req.url);
+Deno.serve((_req: Request): Response => {
+  const url = new URL(_req.url);
 
   // Health check for the edge-runtime itself
   if (url.pathname === '/health-check' || url.pathname === '/') {
