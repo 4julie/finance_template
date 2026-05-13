@@ -1,28 +1,23 @@
 # Privacy Policy
 
-> **⚠️ DRAFT — REQUIRES LEGAL COUNSEL REVIEW BEFORE PUBLICATION**
->
-> This privacy policy is a working draft for the Finance application and related
-> services. It is intended to describe the current and planned data practices of
-> the product in plain language, but it has not yet been approved by legal
-> counsel. Do not publish or rely on this document as final legal advice.
+> This document may be updated as Finance evolves. Check back for the latest
+> version at <https://finance.jrmoulckers.com/privacy>.
 
-**Effective date:** [TBD — set before publication]  
-**Last updated:** 2025-07-28  
-**Version:** Draft 0.9 (beta-ready)
+**Effective date:** 2026-06-01  
+**Last updated:** 2026-05-13  
+**Version:** 1.0 (Alpha)
 
 ## 1. Who we are
 
 Finance is a personal and household financial management application. For the
 purposes of data protection law, the data controller is:
 
-**[Company Name]**  
-[Registered Address]  
-[Privacy Contact Email]  
-[Support Contact URL]
+**J.R. Moulckers** (sole developer)  
+Email: privacy@jrmoulckers.com  
+Web: <https://finance.jrmoulckers.com/support>
 
-If required by applicable law, **[Company Name]** will designate a data
-protection contact or data protection officer and publish those details here.
+If required by applicable law, J.R. Moulckers will designate a data protection
+contact or data protection officer and publish those details here.
 
 ## 2. Scope of this policy
 
@@ -112,11 +107,11 @@ in the following circumstances:
 
 ### Sub-processors
 
-| Provider           | Role                                                                           | Data involved                                                                                     | Notes                                              |
-| ------------------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| Supabase           | Database hosting, authentication, and edge functions                           | Account data, profile data, financial sync data, passkey metadata, audit and export/deletion logs | Acts as a processor/service provider on our behalf |
-| PowerSync          | Data synchronization and replication path                                      | Application records required to sync your local data with backend systems                         | Acts as a processor/service provider on our behalf |
-| [Hosting Provider] | Application hosting, content delivery, uptime monitoring, and operational logs | Network metadata, service logs, and application delivery data                                     | Placeholder until final provider is confirmed      |
+| Provider         | Role                                                                           | Data involved                                                                                     | Notes                                              |
+| ---------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Supabase         | Database hosting, authentication, and edge functions                           | Account data, profile data, financial sync data, passkey metadata, audit and export/deletion logs | Acts as a processor/service provider on our behalf |
+| PowerSync        | Data synchronization and replication path                                      | Application records required to sync your local data with backend systems                         | Acts as a processor/service provider on our behalf |
+| Hosting provider | Application hosting, content delivery, uptime monitoring, and operational logs | Network metadata, service logs, and application delivery data                                     | <!-- TODO: confirm hosting provider before GA -->  |
 
 We expect our processors to operate under written agreements that include
 appropriate confidentiality, security, and data protection commitments.
@@ -140,8 +135,7 @@ features.
 
 We keep personal information only for as long as necessary for the purposes
 described in this policy, unless a longer retention period is required or
-permitted by law. The following schedule is the current draft retention model
-and must be validated by legal counsel and engineering before publication.
+permitted by law. The following schedule describes the current retention model.
 
 | Data type                                                                              | Typical retention period                                                                                                                                                                             |
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -204,7 +198,7 @@ Depending on where you live, you may have the right to:
 
 ### How to exercise your rights
 
-You can exercise privacy rights by contacting us at **[Privacy Contact Email]**
+You can exercise privacy rights by contacting us at **privacy@jrmoulckers.com**
 or through in-app privacy controls where available. We may need to verify your
 identity before completing a request. We will not discriminate against you for
 exercising your rights.
@@ -315,17 +309,17 @@ tracking technologies for targeted advertising. If we introduce non-essential
 cookies or trackers in the future, we will update this policy and request any
 required consent before using them.
 
-## 13. Children’s privacy
+## 14. Children’s privacy
 
 Finance is intended for users who are **13 years of age or older**. If local law
 requires a higher minimum age, that higher age applies. We do not knowingly
 collect personal information from children under 13.
 
 If you believe a child under 13 has provided personal information to Finance,
-please contact us at **[Privacy Contact Email]** so we can investigate and, where
+please contact us at **privacy@jrmoulckers.com** so we can investigate and, where
 required, delete the information.
 
-## 15. Do Not Sell or Share statement
+## 15. Do Not Sell or Share
 
 Finance does not sell personal information and does not share personal
 information for cross-context behavioral advertising. We do not broker,
@@ -349,10 +343,10 @@ We may provide notice by:
 If you have questions, requests, or complaints about this policy or our privacy
 practices, contact:
 
-**[Company Name]**  
-Attn: Privacy Team  
-[Privacy Contact Email]  
-[Support Contact URL]
+**J.R. Moulckers**  
+Attn: Privacy  
+Email: privacy@jrmoulckers.com  
+Web: <https://finance.jrmoulckers.com/support>
 
 If you are in the EEA, UK, or another jurisdiction with a supervisory authority,
 you may also have the right to lodge a complaint with your local data protection
@@ -360,5 +354,5 @@ regulator.
 
 ---
 
-**Reminder:** This policy is a **draft** and must be reviewed by qualified legal
-counsel before use in production, app stores, or any public-facing surface.
+_This privacy policy was last reviewed on 2026-05-13. For questions or concerns,
+contact privacy@jrmoulckers.com._
