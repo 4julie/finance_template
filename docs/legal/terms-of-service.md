@@ -1,13 +1,13 @@
 # Finance — Terms of Service
 
-**Effective Date:** [TBD]
+**Effective Date:** 2026-06-01
 
-> **⚠️ INTERNAL DRAFT — NOT LEGAL ADVICE**
-> This document is a working draft for internal review. It has not been reviewed by legal counsel and should not be published or relied on as final legal terms until approved by counsel.
+> This document may be updated as Finance evolves. Check back for the latest
+> version at <https://finance.jrmoulckers.com/terms>.
 
 ## 1. Acceptance of Terms
 
-These Terms of Service ("Terms") govern your use of Finance, a local-first personal financial tracking service operated by [Finance legal entity] ("Finance," "we," "us," or "our"). By downloading, accessing, or using Finance, you agree to these Terms. If you do not agree, do not use Finance.
+These Terms of Service ("Terms") govern your use of Finance, a local-first personal financial tracking application developed and operated by J.R. Moulckers ("the developer," "I," "me," or "my"). By downloading, accessing, or using Finance, you agree to these Terms. If you do not agree, do not use Finance.
 
 If you use Finance on behalf of a company, household, or other organization, you represent that you have authority to bind that entity to these Terms.
 
@@ -25,7 +25,7 @@ You are responsible for:
 
 - maintaining the confidentiality of your login credentials, passkeys, recovery methods, and devices;
 - all activity that occurs under your account; and
-- notifying us promptly at [support email] if you suspect unauthorized access to your account.
+- notifying me promptly at support@jrmoulckers.com if you suspect unauthorized access to your account.
 
 You must be at least 13 years old, or the minimum age required in your jurisdiction, to create and use an account.
 
@@ -93,11 +93,12 @@ Finance is not a payment processor and does not directly process card payments o
 
 Your use of Finance is also subject to our Privacy Policy, which explains what data we collect, how we use it, how we protect it, and what choices you have. Optional analytics, diagnostics, or crash reporting features, if enabled, are intended to be consent-based.
 
-Please review the Privacy Policy at [privacy policy URL].
+Please review the Privacy Policy at <https://finance.jrmoulckers.com/privacy>.
 
 ## 9. Disclaimers
 
-Finance is a financial tracking tool only.
+Finance is a financial tracking tool only. **Finance is currently in alpha and
+is provided on an "as-is" and "as-available" basis.**
 
 - Finance is **not financial, tax, legal, accounting, or investment advice**.
 - Finance is **not a bank, lender, broker, insurer, or payment processor**.
@@ -109,9 +110,9 @@ You are solely responsible for verifying your records and for any financial deci
 
 ## 10. Limitation of Liability
 
-To the fullest extent permitted by law, Finance and its affiliates, officers, employees, contractors, and licensors will not be liable for any indirect, incidental, special, consequential, exemplary, or punitive damages, or for any loss of profits, revenues, data, goodwill, or business opportunities arising out of or related to your use of the service.
+To the fullest extent permitted by law, J.R. Moulckers and any contributors, contractors, or licensors will not be liable for any indirect, incidental, special, consequential, exemplary, or punitive damages, or for any loss of profits, revenues, data, goodwill, or business opportunities arising out of or related to your use of the service.
 
-To the fullest extent permitted by law, our total liability for claims arising out of or related to these Terms or the service will not exceed the amount you paid us for Finance in the 12 months before the event giving rise to the claim, or USD $50 if you have not made any payment.
+To the fullest extent permitted by law, total liability for claims arising out of or related to these Terms or the service will not exceed the amount you paid for Finance in the 12 months before the event giving rise to the claim, or USD $50 if you have not made any payment.
 
 Some jurisdictions do not allow certain limitations of liability, so some of the limitations above may not apply to you.
 
@@ -121,22 +122,39 @@ You may stop using Finance at any time. If you have an account, you may request 
 
 Before terminating your account, you should export any data you want to keep. After deletion or termination, some data may remain for a limited period where required for security, fraud prevention, legal compliance, dispute resolution, backup integrity, or shared-data handling. Where household or shared data is involved, some records may remain visible to other authorized users depending on the sharing model in effect.
 
-We may suspend or terminate your access if you violate these Terms, create risk for other users or the service, or if we are required to do so by law.
+We may suspend or terminate your access if you violate these Terms, create risk for other users or the service, or if required to do so by law.
 
-## 12. Changes to Terms
+## 12. Alpha and Pre-Release Terms
+
+Finance is currently in **alpha**. During this phase:
+
+- features may change, break, or be removed without advance notice;
+- data loss is possible — you should maintain your own backups;
+- service availability is not guaranteed; and
+- the developer may reset accounts or databases during development.
+
+Your use of the alpha constitutes acceptance of these additional risks.
+
+## 13. Changes to Terms
 
 We may update these Terms from time to time. If we make material changes, we will post the updated Terms, update the effective date, and provide reasonable notice where required by law.
 
 Your continued use of Finance after updated Terms take effect means you accept the revised Terms.
 
-## 13. Governing Law
+## 14. Governing Law
 
-These Terms are governed by the laws of [jurisdiction], without regard to conflict-of-law rules. Any dispute arising from these Terms or your use of Finance will be brought in the courts located in [jurisdiction], unless applicable law requires otherwise.
+<!-- TODO: confirm jurisdiction before GA -->
 
-## 14. Contact
+These Terms are governed by applicable law in the jurisdiction where the developer resides. Any dispute arising from these Terms or your use of Finance will be resolved in accordance with applicable law.
+
+## 15. Contact
 
 If you have questions about these Terms, please contact:
 
-- **Entity:** [Finance legal entity]
-- **Email:** [support email]
-- **Mailing Address:** [registered address]
+- **Developer:** J.R. Moulckers
+- **Email:** support@jrmoulckers.com <!-- TODO: confirm support email -->
+- **Web:** <https://finance.jrmoulckers.com/support>
+
+---
+
+_Last updated: 2026-05-13 · Version 1.0 (Alpha)_
