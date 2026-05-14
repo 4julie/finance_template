@@ -106,9 +106,9 @@ jobs:
           NODE_ENV: production
           VITE_APP_VERSION: ${{ needs.pre-deploy-checks.outputs.sha_short }}
           VITE_ENVIRONMENT: staging
-          VITE_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
-          VITE_POWERSYNC_URL: ${{ secrets.STAGING_POWERSYNC_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          VITE_POWERSYNC_URL: ${{ secrets.POWERSYNC_URL }}
         run: npm run build -w apps/web
 
       - name: Deploy to Vercel (staging)
@@ -152,29 +152,30 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       # Staging backend deployment is SSH-based to the staging server.
-      # This step is a template — configure STAGING_SSH_KEY and STAGING_HOST.
+      # Secrets are scoped to the "staging" GitHub Environment.
       - name: Deploy to staging server
         env:
-          STAGING_HOST: ${{ secrets.STAGING_HOST }}
-          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
-          STAGING_USER: ${{ secrets.STAGING_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '~/finance' }}
         run: |
-          if [ -z "$STAGING_HOST" ]; then
-            echo "::warning::STAGING_HOST not configured — skipping backend deployment"
+          if [ -z "$DEPLOY_HOST" ]; then
+            echo "::warning::DEPLOY_HOST not configured — skipping backend deployment"
             echo "### ⚠️ Backend Staging Skipped" >> "$GITHUB_STEP_SUMMARY"
-            echo "Configure STAGING_HOST, STAGING_SSH_KEY, and STAGING_USER secrets." >> "$GITHUB_STEP_SUMMARY"
+            echo "Configure DEPLOY_HOST, DEPLOY_SSH_KEY, and DEPLOY_USER secrets." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
           # Set up SSH key
           mkdir -p ~/.ssh
-          echo "$STAGING_SSH_KEY" > ~/.ssh/deploy_key
+          echo "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "$STAGING_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
           # Deploy via SSH: pull latest, rebuild containers
-          ssh -i ~/.ssh/deploy_key "$STAGING_USER@$STAGING_HOST" << 'DEPLOY'
-            cd /opt/finance
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" << DEPLOY
+            cd $DEPLOY_PATH
             git pull origin main
             docker compose -f deploy/docker-compose.yml pull
             docker compose -f deploy/docker-compose.yml up -d --remove-orphans
@@ -183,7 +184,7 @@ jobs:
 
           echo "### 🐳 Backend Staging Deployed" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Host:** \`$STAGING_HOST\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Host:** \`$DEPLOY_HOST\`" >> "$GITHUB_STEP_SUMMARY"
           echo "**Commit:** \`${{ needs.pre-deploy-checks.outputs.sha_short }}\`" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Clean up SSH key
