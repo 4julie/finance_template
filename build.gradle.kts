@@ -40,6 +40,9 @@ detekt {
 }
 
 // Force vulnerable transitive dependencies to safe versions
+val bouncyCastleVersion = libs.versions.bouncy.castle.get()
+val jose4jVersion = libs.versions.jose4j.get()
+
 allprojects {
     configurations.all {
         resolutionStrategy.eachDependency {
@@ -62,6 +65,14 @@ allprojects {
             if (requested.group == "org.jdom" && requested.name == "jdom2") {
                 useVersion(libs.versions.jdom2.get())
                 because("Fix CVE-2021-33813 (XXE Injection in JDOM2)")
+            }
+            if (requested.group == "org.bouncycastle") {
+                useVersion(bouncyCastleVersion)
+                because("Fix 9 Dependabot alerts for Bouncy Castle CVEs (timing, crypto, DoS, LDAP injection)")
+            }
+            if (requested.group == "org.bitbucket.b_c" && requested.name == "jose4j") {
+                useVersion(jose4jVersion)
+                because("Fix 4 Dependabot alerts for jose4j CVEs (DoS, weak crypto, chosen ciphertext)")
             }
         }
     }
