@@ -3,15 +3,20 @@
 package com.finance.android.ui.snapshot
 
 import com.finance.android.ui.data.SampleData
+import com.finance.android.ui.data.setSampleDataNowForTests
+import com.finance.android.ui.data.resetSampleDataNowForTests
 import com.finance.android.ui.screens.AccountDetailScreen
 import com.finance.android.ui.screens.AccountsEmptyState
 import com.finance.android.ui.screens.AccountsList
 import com.finance.android.ui.viewmodel.AccountGroup
 import com.finance.models.AccountType
 import com.finance.models.types.Cents
+import org.junit.AfterClass
+import org.junit.BeforeClass
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import kotlinx.datetime.Instant
 
 /**
  * Paparazzi snapshot tests for the Accounts list and detail screens.
@@ -203,6 +208,20 @@ class AccountsSnapshotTest {
                     onBack = {},
                 )
             }
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        @BeforeClass
+        fun pinSampleDataNow() {
+            setSampleDataNowForTests(Instant.parse("2026-04-09T12:00:00Z"))
+        }
+
+        @JvmStatic
+        @AfterClass
+        fun resetSampleDataNow() {
+            resetSampleDataNowForTests()
         }
     }
 }
