@@ -320,9 +320,9 @@ services:
             'sync_rules:',
             '  path: /sync-rules/sync-rules.yaml'
           ].join('\n');
-          fs.writeFileSync('/app/powersync.yaml', lines);
-          console.log('Generated /app/powersync.yaml');
-        " && exec node service/lib/entry.js start
+          fs.writeFileSync('/tmp/powersync.yaml', lines);
+          console.log('Generated /tmp/powersync.yaml');
+        " && exec node service/lib/entry.js start --config-path /tmp/powersync.yaml
     volumes:
       - ${POWERSYNC_SYNC_RULES_PATH:-../services/api/powersync}:/sync-rules:ro
     healthcheck:
