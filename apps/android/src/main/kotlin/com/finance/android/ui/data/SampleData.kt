@@ -31,129 +31,143 @@ import kotlinx.datetime.toLocalDateTime
  */
 object SampleData {
 
-    private val now = Clock.System.now()
-    private val tz = TimeZone.currentSystemDefault()
-    private val today: LocalDate = now.toLocalDateTime(tz).date
+    private val tz: TimeZone
+        get() = TimeZone.currentSystemDefault()
+
+    // If tests set sampleDataTestNow (via SampleDataTestHooks), use that; otherwise use wall-clock.
+    private val now: kotlinx.datetime.Instant
+        get() = sampleDataTestNow ?: Clock.System.now()
+
+    private val today: LocalDate
+        get() = now.toLocalDateTime(tz).date
 
     // -- Categories -----------------------------------------------------------
 
-    val categories = listOf(
-        category("cat-groceries", "Groceries", "shopping_cart"),
-        category("cat-dining", "Dining Out", "restaurant"),
-        category("cat-transport", "Transportation", "directions_car"),
-        category("cat-entertainment", "Entertainment", "movie"),
-        category("cat-utilities", "Utilities", "bolt"),
-        category("cat-housing", "Housing", "home"),
-        category("cat-healthcare", "Healthcare", "local_hospital"),
-        category("cat-shopping", "Shopping", "shopping_bag"),
-        category("cat-subscriptions", "Subscriptions", "subscriptions"),
-        category("cat-salary", "Salary", "payments", isIncome = true),
-        category("cat-freelance", "Freelance", "work", isIncome = true),
-        category("cat-investments", "Investment Returns", "trending_up", isIncome = true),
-        category("cat-transfer", "Transfer", "swap_horiz"),
-    )
+    val categories: List<Category>
+        get() = listOf(
+            category("cat-groceries", "Groceries", "shopping_cart"),
+            category("cat-dining", "Dining Out", "restaurant"),
+            category("cat-transport", "Transportation", "directions_car"),
+            category("cat-entertainment", "Entertainment", "movie"),
+            category("cat-utilities", "Utilities", "bolt"),
+            category("cat-housing", "Housing", "home"),
+            category("cat-healthcare", "Healthcare", "local_hospital"),
+            category("cat-shopping", "Shopping", "shopping_bag"),
+            category("cat-subscriptions", "Subscriptions", "subscriptions"),
+            category("cat-salary", "Salary", "payments", isIncome = true),
+            category("cat-freelance", "Freelance", "work", isIncome = true),
+            category("cat-investments", "Investment Returns", "trending_up", isIncome = true),
+            category("cat-transfer", "Transfer", "swap_horiz"),
+        )
 
-    val categoryMap: Map<SyncId, Category> = categories.associateBy { it.id }
+    val categoryMap: Map<SyncId, Category>
+        get() = categories.associateBy { it.id }
 
     // -- Accounts -------------------------------------------------------------
 
-    val accounts = listOf(
-        account("acc-checking", "Main Checking", AccountType.CHECKING, 524_73L),
-        account("acc-savings", "Emergency Fund", AccountType.SAVINGS, 15_420_00L),
-        account("acc-savings-2", "Vacation Fund", AccountType.SAVINGS, 3_250_00L),
-        account("acc-credit", "Visa Rewards", AccountType.CREDIT_CARD, 1_847_32L),
-        account("acc-credit-2", "Amex Blue", AccountType.CREDIT_CARD, 523_19L),
-        account("acc-investment", "401(k)", AccountType.INVESTMENT, 87_650_00L),
-        account("acc-investment-2", "Brokerage", AccountType.INVESTMENT, 12_340_00L),
-        account("acc-cash", "Wallet", AccountType.CASH, 85_00L),
-    )
+    val accounts: List<Account>
+        get() = listOf(
+            account("acc-checking", "Main Checking", AccountType.CHECKING, 524_73L),
+            account("acc-savings", "Emergency Fund", AccountType.SAVINGS, 15_420_00L),
+            account("acc-savings-2", "Vacation Fund", AccountType.SAVINGS, 3_250_00L),
+            account("acc-credit", "Visa Rewards", AccountType.CREDIT_CARD, 1_847_32L),
+            account("acc-credit-2", "Amex Blue", AccountType.CREDIT_CARD, 523_19L),
+            account("acc-investment", "401(k)", AccountType.INVESTMENT, 87_650_00L),
+            account("acc-investment-2", "Brokerage", AccountType.INVESTMENT, 12_340_00L),
+            account("acc-cash", "Wallet", AccountType.CASH, 85_00L),
+        )
 
-    val accountMap: Map<SyncId, Account> = accounts.associateBy { it.id }
+    val accountMap: Map<SyncId, Account>
+        get() = accounts.associateBy { it.id }
 
     // -- Goals ----------------------------------------------------------------
 
-    val goals = listOf(
-        goal("goal-emergency", "Emergency Fund", 2_500_000L, 1_500_000L,
-            today.plus(6, DateTimeUnit.MONTH), icon = "savings", accountId = "acc-savings"),
-        goal("goal-vacation", "Vacation Fund", 500_000L, 175_000L,
-            today.plus(3, DateTimeUnit.MONTH), icon = "flight", accountId = "acc-savings-2"),
-        goal("goal-car", "New Car Down Payment", 1_200_000L, 180_000L,
-            today.plus(12, DateTimeUnit.MONTH), icon = "directions_car"),
-        goal("goal-credit-card", "Pay Off Credit Card", 250_000L, 250_000L,
-            today.minus(14, DateTimeUnit.DAY), status = GoalStatus.COMPLETED,
-            icon = "credit_card", accountId = "acc-credit"),
-        goal("goal-home", "Home Down Payment", 6_000_000L, 300_000L,
-            today.plus(24, DateTimeUnit.MONTH), icon = "home"),
-    )
+    val goals: List<Goal>
+        get() = listOf(
+            goal("goal-emergency", "Emergency Fund", 2_500_000L, 1_500_000L,
+                today.plus(6, DateTimeUnit.MONTH), icon = "savings", accountId = "acc-savings"),
+            goal("goal-vacation", "Vacation Fund", 500_000L, 175_000L,
+                today.plus(3, DateTimeUnit.MONTH), icon = "flight", accountId = "acc-savings-2"),
+            goal("goal-car", "New Car Down Payment", 1_200_000L, 180_000L,
+                today.plus(12, DateTimeUnit.MONTH), icon = "directions_car"),
+            goal("goal-credit-card", "Pay Off Credit Card", 250_000L, 250_000L,
+                today.minus(14, DateTimeUnit.DAY), status = GoalStatus.COMPLETED,
+                icon = "credit_card", accountId = "acc-credit"),
+            goal("goal-home", "Home Down Payment", 6_000_000L, 300_000L,
+                today.plus(24, DateTimeUnit.MONTH), icon = "home"),
+        )
 
     // -- Budgets --------------------------------------------------------------
 
-    val budgets = listOf(
-        budget("bud-groceries", "cat-groceries", "Groceries", 60_000L, BudgetPeriod.MONTHLY),
-        budget("bud-dining", "cat-dining", "Dining Out", 30_000L, BudgetPeriod.MONTHLY),
-        budget("bud-transport", "cat-transport", "Transportation", 20_000L, BudgetPeriod.MONTHLY),
-        budget("bud-entertainment", "cat-entertainment", "Entertainment", 15_000L, BudgetPeriod.MONTHLY),
-        budget("bud-shopping", "cat-shopping", "Shopping", 25_000L, BudgetPeriod.MONTHLY),
-        budget("bud-subscriptions", "cat-subscriptions", "Subscriptions", 8_000L, BudgetPeriod.MONTHLY),
-    )
+    val budgets: List<Budget>
+        get() = listOf(
+            budget("bud-groceries", "cat-groceries", "Groceries", 60_000L, BudgetPeriod.MONTHLY),
+            budget("bud-dining", "cat-dining", "Dining Out", 30_000L, BudgetPeriod.MONTHLY),
+            budget("bud-transport", "cat-transport", "Transportation", 20_000L, BudgetPeriod.MONTHLY),
+            budget("bud-entertainment", "cat-entertainment", "Entertainment", 15_000L, BudgetPeriod.MONTHLY),
+            budget("bud-shopping", "cat-shopping", "Shopping", 25_000L, BudgetPeriod.MONTHLY),
+            budget("bud-subscriptions", "cat-subscriptions", "Subscriptions", 8_000L, BudgetPeriod.MONTHLY),
+        )
 
     // -- Transactions ---------------------------------------------------------
 
-    val transactions: List<Transaction> = buildList {
-        add(expense("txn-1", "Whole Foods Market", 8_743L, "cat-groceries", "acc-checking", today))
-        add(expense("txn-2", "Starbucks", 5_85L, "cat-dining", "acc-credit", today))
-        add(expense("txn-3", "Uber", 14_50L, "cat-transport", "acc-credit", today))
+    val transactions: List<Transaction>
+        get() = buildList {
+            add(expense("txn-1", "Whole Foods Market", 8_743L, "cat-groceries", "acc-checking", today))
+            add(expense("txn-2", "Starbucks", 5_85L, "cat-dining", "acc-credit", today))
+            add(expense("txn-3", "Uber", 14_50L, "cat-transport", "acc-credit", today))
 
-        val yesterday = today.minus(1, DateTimeUnit.DAY)
-        add(expense("txn-4", "Target", 67_42L, "cat-shopping", "acc-credit", yesterday))
-        add(expense("txn-5", "Netflix", 15_99L, "cat-subscriptions", "acc-checking", yesterday))
-        add(expense("txn-6", "Chipotle", 12_35L, "cat-dining", "acc-credit", yesterday))
+            val yesterday = today.minus(1, DateTimeUnit.DAY)
+            add(expense("txn-4", "Target", 67_42L, "cat-shopping", "acc-credit", yesterday))
+            add(expense("txn-5", "Netflix", 15_99L, "cat-subscriptions", "acc-checking", yesterday))
+            add(expense("txn-6", "Chipotle", 12_35L, "cat-dining", "acc-credit", yesterday))
 
-        val twoDaysAgo = today.minus(2, DateTimeUnit.DAY)
-        add(expense("txn-7", "Shell Gas Station", 52_18L, "cat-transport", "acc-checking", twoDaysAgo))
-        add(expense("txn-8", "Trader Joe's", 43_87L, "cat-groceries", "acc-checking", twoDaysAgo))
-        add(income("txn-9", "Acme Corp", 3_250_00L, "cat-salary", "acc-checking", twoDaysAgo))
+            val twoDaysAgo = today.minus(2, DateTimeUnit.DAY)
+            add(expense("txn-7", "Shell Gas Station", 52_18L, "cat-transport", "acc-checking", twoDaysAgo))
+            add(expense("txn-8", "Trader Joe's", 43_87L, "cat-groceries", "acc-checking", twoDaysAgo))
+            add(income("txn-9", "Acme Corp", 3_250_00L, "cat-salary", "acc-checking", twoDaysAgo))
 
-        val threeDaysAgo = today.minus(3, DateTimeUnit.DAY)
-        add(expense("txn-10", "Amazon", 34_99L, "cat-shopping", "acc-credit", threeDaysAgo))
-        add(expense("txn-11", "CVS Pharmacy", 28_45L, "cat-healthcare", "acc-checking", threeDaysAgo))
+            val threeDaysAgo = today.minus(3, DateTimeUnit.DAY)
+            add(expense("txn-10", "Amazon", 34_99L, "cat-shopping", "acc-credit", threeDaysAgo))
+            add(expense("txn-11", "CVS Pharmacy", 28_45L, "cat-healthcare", "acc-checking", threeDaysAgo))
 
-        val fourDaysAgo = today.minus(4, DateTimeUnit.DAY)
-        add(expense("txn-12", "Electric Company", 142_30L, "cat-utilities", "acc-checking", fourDaysAgo))
-        add(expense("txn-13", "AMC Theatres", 18_50L, "cat-entertainment", "acc-credit", fourDaysAgo))
-        add(expense("txn-14", "Panera Bread", 11_24L, "cat-dining", "acc-credit", fourDaysAgo))
+            val fourDaysAgo = today.minus(4, DateTimeUnit.DAY)
+            add(expense("txn-12", "Electric Company", 142_30L, "cat-utilities", "acc-checking", fourDaysAgo))
+            add(expense("txn-13", "AMC Theatres", 18_50L, "cat-entertainment", "acc-credit", fourDaysAgo))
+            add(expense("txn-14", "Panera Bread", 11_24L, "cat-dining", "acc-credit", fourDaysAgo))
 
-        val fiveDaysAgo = today.minus(5, DateTimeUnit.DAY)
-        add(expense("txn-15", "Costco", 156_78L, "cat-groceries", "acc-checking", fiveDaysAgo))
-        add(expense("txn-16", "Spotify", 10_99L, "cat-subscriptions", "acc-checking", fiveDaysAgo))
+            val fiveDaysAgo = today.minus(5, DateTimeUnit.DAY)
+            add(expense("txn-15", "Costco", 156_78L, "cat-groceries", "acc-checking", fiveDaysAgo))
+            add(expense("txn-16", "Spotify", 10_99L, "cat-subscriptions", "acc-checking", fiveDaysAgo))
 
-        val sixDaysAgo = today.minus(6, DateTimeUnit.DAY)
-        add(expense("txn-17", "Lyft", 22_40L, "cat-transport", "acc-credit", sixDaysAgo))
-        add(expense("txn-18", "Olive Garden", 45_62L, "cat-dining", "acc-credit", sixDaysAgo))
+            val sixDaysAgo = today.minus(6, DateTimeUnit.DAY)
+            add(expense("txn-17", "Lyft", 22_40L, "cat-transport", "acc-credit", sixDaysAgo))
+            add(expense("txn-18", "Olive Garden", 45_62L, "cat-dining", "acc-credit", sixDaysAgo))
 
-        val sevenDaysAgo = today.minus(7, DateTimeUnit.DAY)
-        add(income("txn-19", "Freelance Project", 850_00L, "cat-freelance", "acc-checking", sevenDaysAgo))
-        add(expense("txn-20", "Home Depot", 89_34L, "cat-housing", "acc-checking", sevenDaysAgo))
+            val sevenDaysAgo = today.minus(7, DateTimeUnit.DAY)
+            add(income("txn-19", "Freelance Project", 850_00L, "cat-freelance", "acc-checking", sevenDaysAgo))
+            add(expense("txn-20", "Home Depot", 89_34L, "cat-housing", "acc-checking", sevenDaysAgo))
 
-        val payees = listOf("Kroger", "Walmart", "Best Buy", "Macy's", "Subway",
-            "Pizza Hut", "Walgreens", "GameStop", "Barnes Noble", "Apple Store",
-            "Nike", "Zara", "H and M", "Gap", "Nordstrom")
-        val amounts = listOf(42_15L, 78_93L, 249_99L, 89_00L, 8_75L,
-            24_99L, 15_67L, 59_99L, 32_45L, 199_00L,
-            120_00L, 55_80L, 39_99L, 28_50L, 67_00L)
-        val cats = listOf("cat-groceries", "cat-shopping", "cat-shopping", "cat-shopping",
-            "cat-dining", "cat-dining", "cat-healthcare", "cat-entertainment",
-            "cat-entertainment", "cat-shopping", "cat-shopping", "cat-shopping",
-            "cat-shopping", "cat-shopping", "cat-shopping")
-        for (i in payees.indices) {
-            add(expense("txn-old-${i + 1}", payees[i], amounts[i], cats[i],
-                if (i % 2 == 0) "acc-checking" else "acc-credit",
-                today.minus(8 + i, DateTimeUnit.DAY)))
+            val payees = listOf("Kroger", "Walmart", "Best Buy", "Macy's", "Subway",
+                "Pizza Hut", "Walgreens", "GameStop", "Barnes Noble", "Apple Store",
+                "Nike", "Zara", "H and M", "Gap", "Nordstrom")
+            val amounts = listOf(42_15L, 78_93L, 249_99L, 89_00L, 8_75L,
+                24_99L, 15_67L, 59_99L, 32_45L, 199_00L,
+                120_00L, 55_80L, 39_99L, 28_50L, 67_00L)
+            val cats = listOf("cat-groceries", "cat-shopping", "cat-shopping", "cat-shopping",
+                "cat-dining", "cat-dining", "cat-healthcare", "cat-entertainment",
+                "cat-entertainment", "cat-shopping", "cat-shopping", "cat-shopping",
+                "cat-shopping", "cat-shopping", "cat-shopping")
+            for (i in payees.indices) {
+                add(expense("txn-old-${i + 1}", payees[i], amounts[i], cats[i],
+                    if (i % 2 == 0) "acc-checking" else "acc-credit",
+                    today.minus(8 + i, DateTimeUnit.DAY)))
+            }
         }
-    }
 
     /** Payee history for autocomplete. */
-    val payeeHistory: List<String> = transactions.mapNotNull { it.payee }.distinct().sorted()
+    val payeeHistory: List<String>
+        get() = transactions.mapNotNull { it.payee }.distinct().sorted()
 
     // -- Factory helpers ------------------------------------------------------
 
