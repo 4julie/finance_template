@@ -154,9 +154,9 @@ jobs:
           NODE_ENV: production
           VITE_APP_VERSION: ${{ needs.prepare.outputs.version }}-canary
           VITE_ENVIRONMENT: canary
-          VITE_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.PROD_SUPABASE_ANON_KEY }}
-          VITE_POWERSYNC_URL: ${{ secrets.PROD_POWERSYNC_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          VITE_POWERSYNC_URL: ${{ secrets.POWERSYNC_URL }}
         run: |
           npm run build -w packages/design-tokens
           npm run build -w apps/web
@@ -419,22 +419,23 @@ jobs:
       - name: Promote backend to production
         if: needs.prepare.outputs.deploy_backend == 'true'
         env:
-          PROD_HOST: ${{ secrets.PROD_HOST }}
-          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
-          PROD_USER: ${{ secrets.PROD_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '~/finance' }}
         run: |
-          if [ -z "$PROD_HOST" ]; then
-            echo "::warning::PROD_HOST not configured — skipping backend promotion"
+          if [ -z "$DEPLOY_HOST" ]; then
+            echo "::warning::DEPLOY_HOST not configured — skipping backend promotion"
             exit 0
           fi
 
           mkdir -p ~/.ssh
-          echo "$PROD_SSH_KEY" > ~/.ssh/deploy_key
+          echo "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "$PROD_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-          ssh -i ~/.ssh/deploy_key "$PROD_USER@$PROD_HOST" << DEPLOY
-            cd /opt/finance
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" << DEPLOY
+            cd $DEPLOY_PATH
             git fetch origin
             git checkout ${{ needs.prepare.outputs.sha }}
             docker compose -f deploy/docker-compose.yml pull

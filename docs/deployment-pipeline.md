@@ -72,25 +72,29 @@ Manual re-deploy: **Actions → Deploy — Staging → Run workflow**
 
 ### Staging Server (Backend)
 
-| Secret                      | Description                 |
-| --------------------------- | --------------------------- |
-| `STAGING_HOST`              | Staging server hostname     |
-| `STAGING_SSH_KEY`           | SSH private key for staging |
-| `STAGING_USER`              | SSH username for staging    |
-| `STAGING_SUPABASE_URL`      | Staging Supabase URL        |
-| `STAGING_SUPABASE_ANON_KEY` | Staging Supabase anon key   |
-| `STAGING_POWERSYNC_URL`     | Staging PowerSync URL       |
+Scoped to the `staging` GitHub Environment:
+
+| Secret              | Description                              |
+| ------------------- | ---------------------------------------- |
+| `DEPLOY_HOST`       | Staging server hostname                  |
+| `DEPLOY_SSH_KEY`    | SSH private key for staging              |
+| `DEPLOY_USER`       | SSH username for staging                 |
+| `SUPABASE_URL`      | Supabase URL (e.g. `https://staging...`) |
+| `SUPABASE_ANON_KEY` | Supabase anon key                        |
+| `POWERSYNC_URL`     | PowerSync URL                            |
 
 ### Production Server (Backend)
 
-| Secret                   | Description                    |
-| ------------------------ | ------------------------------ |
-| `PROD_HOST`              | Production server hostname     |
-| `PROD_SSH_KEY`           | SSH private key for production |
-| `PROD_USER`              | SSH username for production    |
-| `PROD_SUPABASE_URL`      | Production Supabase URL        |
-| `PROD_SUPABASE_ANON_KEY` | Production Supabase anon key   |
-| `PROD_POWERSYNC_URL`     | Production PowerSync URL       |
+Scoped to the `production` GitHub Environment:
+
+| Secret              | Description                                 |
+| ------------------- | ------------------------------------------- |
+| `DEPLOY_HOST`       | Production server hostname                  |
+| `DEPLOY_SSH_KEY`    | SSH private key for production              |
+| `DEPLOY_USER`       | SSH username for production                 |
+| `SUPABASE_URL`      | Supabase URL (e.g. `https://finance.ex...`) |
+| `SUPABASE_ANON_KEY` | Supabase anon key                           |
+| `POWERSYNC_URL`     | PowerSync URL                               |
 
 ## GitHub Environment Setup
 
