@@ -1,0 +1,4 @@
+# MongoDB replica set keyfile — generated per-environment with:
+#   openssl rand -base64 756 > replica-keyfile
+# Must be 400 permissions and owned by mongodb user (handled by entrypoint).
+replica-keyfile

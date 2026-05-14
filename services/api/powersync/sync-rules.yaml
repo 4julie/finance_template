@@ -245,9 +245,9 @@ bucket_definitions:
   # on clients (only the server can insert/update via service_role).
   # ---------------------------------------------------------------------------
   exchange_rates:
-    parameters:
-      - SELECT id AS user_id FROM users WHERE id = token_parameters.user_id AND deleted_at IS NULL
-
+    # Global bucket (no parameters) — syncs to all authenticated clients.
+    # Exchange rate data is shared/read-only; authentication is enforced at
+    # the JWT level by PowerSync (only authenticated users get any sync data).
     data:
       # Exchange rates (global, read-only on clients)
       - >
@@ -255,12 +255,6 @@ bucket_definitions:
                rate_precision, source, valid_date,
                created_at, updated_at, deleted_at
         FROM exchange_rates
-        WHERE deleted_at IS NULL
-
-      # Price history (global, read-only)
-      - >
-        SELECT id, ticker_symbol, close_price_cents, currency_code, price_date, source, created_at, updated_at, deleted_at
-        FROM price_history
         WHERE deleted_at IS NULL
 
       # Price history (global, read-only on clients)
