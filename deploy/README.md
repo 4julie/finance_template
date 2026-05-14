@@ -93,7 +93,20 @@ or generate them manually:
 # Service role payload: {"role": "service_role", "iss": "supabase", "iat": <now>, "exp": <+10y>}
 ```
 
-### Step 3 — Start the stack
+### Step 3 — Generate deployment secrets
+
+```bash
+# MongoDB replica set keyfile (required for PowerSync)
+openssl rand -base64 756 > volumes/mongo/replica-keyfile
+chmod 444 volumes/mongo/replica-keyfile
+
+# URL-encode the Mongo password for the PowerSync connection URI
+MONGO_PASS_ENCODED=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$(grep MONGO_PASSWORD .env | cut -d= -f2)'))")
+# Update POWERSYNC_MONGO_URI in .env with the encoded password:
+#   POWERSYNC_MONGO_URI=mongodb://powersync:${MONGO_PASS_ENCODED}@mongo:27017/powersync?authSource=admin
+```
+
+### Step 4 — Start the stack
 
 ```bash
 docker compose up -d
@@ -106,7 +119,44 @@ docker compose ps       # All services should show "healthy"
 docker compose logs -f  # Watch logs for errors (Ctrl+C to exit)
 ```
 
-### Step 4 — Apply database migrations
+### Step 5 — First-deployment database setup
+
+These steps are required only on initial deployment (not on updates):
+
+```bash
+# 1. Set passwords for Supabase internal roles
+#    (The Supabase postgres image pre-creates these roles without passwords)
+docker compose exec db psql -U postgres -c "
+  ALTER USER authenticator WITH PASSWORD '$(grep POSTGRES_PASSWORD .env | cut -d= -f2)';
+  ALTER USER supabase_auth_admin WITH PASSWORD '$(grep POSTGRES_PASSWORD .env | cut -d= -f2)';
+  ALTER USER supabase_storage_admin WITH PASSWORD '$(grep POSTGRES_PASSWORD .env | cut -d= -f2)';
+"
+
+# 2. Fix auth schema ownership for GoTrue migrations
+docker compose exec db psql -U postgres -c "
+  ALTER SCHEMA auth OWNER TO supabase_auth_admin;
+  GRANT ALL ON ALL TABLES IN SCHEMA auth TO supabase_auth_admin;
+  GRANT ALL ON ALL SEQUENCES IN SCHEMA auth TO supabase_auth_admin;
+  GRANT ALL ON ALL FUNCTIONS IN SCHEMA auth TO supabase_auth_admin;
+  ALTER DEFAULT PRIVILEGES IN SCHEMA auth GRANT ALL ON TABLES TO supabase_auth_admin;
+"
+
+# 3. Create PowerSync replication slot and publication
+docker compose exec db psql -U postgres -c "
+  SELECT pg_create_logical_replication_slot('powersync', 'pgoutput');
+  CREATE PUBLICATION powersync FOR ALL TABLES;
+"
+
+# 4. Initialize MongoDB replica set
+docker compose exec mongo mongosh -u powersync -p "$(grep MONGO_PASSWORD .env | cut -d= -f2)" --eval '
+  rs.initiate({_id: "rs0", members: [{_id: 0, host: "mongo:27017"}]})
+'
+
+# 5. Restart auth and powersync to pick up the new configuration
+docker compose restart auth powersync
+```
+
+### Step 6 — Apply database migrations
 
 ```bash
 # Install the Supabase CLI (if not already installed)
@@ -132,7 +182,7 @@ docker compose exec -T db psql \
 # Repeat for each migration file in chronological order...
 ```
 
-### Step 5 — Verify the deployment
+### Step 7 — Verify the deployment
 
 ```bash
 # Check the health endpoint
