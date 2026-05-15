@@ -6,12 +6,14 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, useLocation } from 'react-router-dom';
 import { App } from './App';
 import { AuthProvider } from './auth/auth-context';
+import { ErrorBoundary } from './components/common';
 import { DatabaseProvider } from './db/DatabaseProvider';
 import { initMonitoring } from './lib/monitoring';
 import './theme/tokens.css';
 import './styles/responsive.css';
 import './styles/responsive-layout.css';
 import './styles/accessibility.css';
+import './styles/error-boundaries.css';
 
 const rootElement = document.getElementById('root');
 
@@ -108,12 +110,14 @@ const DatabaseGate: FC<{ children: ReactNode }> = ({ children }) => {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <AuthProvider config={authConfig}>
-      <BrowserRouter>
-        <DatabaseGate>
-          <App />
-        </DatabaseGate>
-      </BrowserRouter>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider config={authConfig}>
+        <BrowserRouter>
+          <DatabaseGate>
+            <App />
+          </DatabaseGate>
+        </BrowserRouter>
+      </AuthProvider>
+    </ErrorBoundary>
   </StrictMode>,
 );

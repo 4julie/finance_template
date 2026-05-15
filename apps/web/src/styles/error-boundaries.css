@@ -1,0 +1,233 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/**
+ * Styles for route-level and widget-level error boundaries.
+ *
+ * Uses only design-token CSS custom properties — no hardcoded values.
+ * Supports dark mode via semantic tokens and prefers-color-scheme.
+ * Supports reduced-motion and high-contrast preferences.
+ */
+
+/* =========================================================================
+   Route-Level Error Boundary
+   ========================================================================= */
+
+.route-error-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: var(--spacing-8);
+}
+
+.route-error-boundary__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+  max-width: 420px;
+  text-align: center;
+}
+
+.route-error-boundary__icon {
+  color: var(--semantic-status-negative);
+  flex-shrink: 0;
+}
+
+.route-error-boundary__title {
+  margin: 0;
+  font-size: var(--type-scale-title-font-size, 1.25rem);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--semantic-text-primary);
+  line-height: var(--type-scale-title-line-height, 1.4);
+}
+
+.route-error-boundary__title:focus {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--border-radius-sm, 4px);
+}
+
+.route-error-boundary__message {
+  margin: 0;
+  font-size: var(--type-scale-body-font-size, 1rem);
+  color: var(--semantic-text-secondary);
+  line-height: var(--type-scale-body-line-height, 1.5);
+}
+
+.route-error-boundary__details {
+  margin: 0;
+  padding: var(--spacing-3);
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-red-50, #fef2f2);
+  color: var(--semantic-status-negative);
+  font-size: var(--type-scale-caption-font-size, 0.875rem);
+  font-family: monospace;
+  word-break: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.route-error-boundary__actions {
+  display: flex;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.route-error-boundary__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--spacing-2) var(--spacing-5);
+  border-radius: var(--border-radius-md, 8px);
+  font-size: var(--type-scale-body-font-size, 1rem);
+  font-weight: var(--font-weight-medium, 500);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.route-error-boundary__btn--primary {
+  background: var(--semantic-interactive-default);
+  color: var(--color-white, #fff);
+  border: 1px solid var(--semantic-interactive-default);
+}
+
+.route-error-boundary__btn--primary:hover {
+  background: var(--semantic-interactive-hover);
+  border-color: var(--semantic-interactive-hover);
+}
+
+.route-error-boundary__btn--primary:active {
+  background: var(--semantic-interactive-pressed);
+  border-color: var(--semantic-interactive-pressed);
+}
+
+.route-error-boundary__btn--primary:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: 2px;
+}
+
+/* =========================================================================
+   Widget-Level Error Boundary
+   ========================================================================= */
+
+.widget-error-boundary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-6) var(--spacing-4);
+  text-align: center;
+  min-height: 120px;
+}
+
+.widget-error-boundary__icon {
+  color: var(--semantic-text-disabled);
+  flex-shrink: 0;
+}
+
+.widget-error-boundary__message {
+  margin: 0;
+  font-size: var(--type-scale-caption-font-size, 0.875rem);
+  color: var(--semantic-text-secondary);
+  line-height: var(--type-scale-caption-line-height, 1.4);
+}
+
+.widget-error-boundary__retry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: var(--spacing-1) var(--spacing-3);
+  border: 1px solid var(--semantic-border-default);
+  border-radius: var(--border-radius-md, 8px);
+  background: transparent;
+  color: var(--semantic-interactive-default);
+  font-size: var(--type-scale-caption-font-size, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.widget-error-boundary__retry:hover {
+  background: var(--semantic-background-secondary);
+  border-color: var(--semantic-interactive-default);
+}
+
+.widget-error-boundary__retry:active {
+  background: var(--semantic-background-elevated, var(--semantic-background-secondary));
+}
+
+.widget-error-boundary__retry:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: 2px;
+}
+
+/* =========================================================================
+   Dark Mode
+   ========================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .route-error-boundary__details {
+    background: var(--color-red-950, #450a0a);
+    color: var(--color-red-300, #fca5a5);
+  }
+}
+
+[data-theme='dark'] .route-error-boundary__details,
+[data-theme='dark-oled'] .route-error-boundary__details {
+  background: var(--color-red-950, #450a0a);
+  color: var(--color-red-300, #fca5a5);
+}
+
+/* =========================================================================
+   Reduced Motion
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .route-error-boundary__btn,
+  .widget-error-boundary__retry {
+    transition: none;
+  }
+}
+
+/* =========================================================================
+   High Contrast
+   ========================================================================= */
+
+@media (prefers-contrast: more) {
+  .route-error-boundary__btn--primary {
+    border-width: 2px;
+  }
+
+  .widget-error-boundary__retry {
+    border-width: 2px;
+  }
+
+  .route-error-boundary__title:focus {
+    outline-width: 3px;
+  }
+}
+
+/* =========================================================================
+   Mobile
+   ========================================================================= */
+
+@media (max-width: 480px) {
+  .route-error-boundary {
+    padding: var(--spacing-6) var(--spacing-4);
+    min-height: 200px;
+  }
+
+  .route-error-boundary__content {
+    gap: var(--spacing-3);
+  }
+}
