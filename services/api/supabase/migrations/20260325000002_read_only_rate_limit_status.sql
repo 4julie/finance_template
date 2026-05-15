@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- Migration: 20260325000001_read_only_rate_limit_status
+-- Migration: 20260325000002_read_only_rate_limit_status
 -- Description: Add read-only rate limit status RPC for abuse detection (#781)
 -- Issue: #781
 --

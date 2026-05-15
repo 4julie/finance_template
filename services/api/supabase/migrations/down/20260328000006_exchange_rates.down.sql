@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- DOWN Migration: 20260328000004_exchange_rates
+-- DOWN Migration: 20260328000006_exchange_rates
 -- Description: Drop exchange_rates table and all related objects
 -- Issues: #sprint-9
 

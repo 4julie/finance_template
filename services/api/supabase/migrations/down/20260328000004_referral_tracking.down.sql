@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- DOWN Migration: 20260328000002_referral_tracking
+-- DOWN Migration: 20260328000004_referral_tracking
 -- Description: Drop referrals table and all related objects
 -- Issues: #sprint-7
 

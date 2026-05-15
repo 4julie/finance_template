@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- Migration: 20260328000006_data_import_pipeline
+-- Migration: 20260328000008_data_import_pipeline
 -- Description: Create import_jobs table for tracking CSV import processing
 -- Issues: #sprint-11
 --
@@ -16,7 +16,7 @@
 --   - Only the import creator can view/manage their import jobs
 --   - Monetary values from imports stored as BIGINT (cents)
 --
--- DOWN migration: services/api/supabase/migrations/down/20260328000006_data_import_pipeline.down.sql
+-- DOWN migration: services/api/supabase/migrations/down/20260328000008_data_import_pipeline.down.sql
 
 -- =============================================================================
 -- UP

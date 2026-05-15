@@ -1,12 +1,16 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- Down migration for: 20260328000001_recurring_idempotency
--- Reverts idempotency tracking for recurring transaction generation (#1047)
+-- DOWN Migration: 20260326000006_sync_optimization
+-- Description: Remove sync optimization objects (schema version, materialized view, updated generate function)
+-- Issues: #1322
+--
+-- Reverts:
+--   1. Restores generate_recurring_transactions to the version from 20260323000002
+--      (without recurring_rule_id/owner_id population)
+--   2. Drops the household financial summary materialized view and refresh function
+--   3. Drops the schema version function
 
--- 3. Drop monitoring helper
-DROP FUNCTION IF EXISTS public.get_recurring_status();
-
--- 2. Restore previous generate_recurring_transactions (from 20260326000006)
+-- 4. Restore original generate_recurring_transactions (from 20260323000002)
 CREATE OR REPLACE FUNCTION public.generate_recurring_transactions(
     p_as_of_date DATE DEFAULT CURRENT_DATE
 )
@@ -33,14 +37,12 @@ BEGIN
             household_id, account_id, category_id,
             amount_cents, currency_code, type,
             payee, note, date,
-            is_recurring, status,
-            recurring_rule_id, owner_id
+            is_recurring, status
         ) VALUES (
             template.household_id, template.account_id, template.category_id,
             template.amount_cents, template.currency_code, template.type,
             template.payee, template.note, template.next_due_date,
-            true, 'CLEARED',
-            template.id, template.owner_id
+            true, 'CLEARED'
         );
 
         next_date := CASE template.frequency
@@ -78,5 +80,11 @@ $$;
 GRANT EXECUTE ON FUNCTION public.generate_recurring_transactions(DATE) TO service_role;
 REVOKE EXECUTE ON FUNCTION public.generate_recurring_transactions(DATE) FROM PUBLIC;
 
--- 1. Drop idempotency tracking table
-DROP TABLE IF EXISTS recurring_generation_log;
+-- 3. Drop refresh function
+DROP FUNCTION IF EXISTS public.refresh_household_summary();
+
+-- 2. Drop materialized view
+DROP MATERIALIZED VIEW IF EXISTS household_financial_summary;
+
+-- 1. Drop schema version function
+DROP FUNCTION IF EXISTS public.get_schema_version();

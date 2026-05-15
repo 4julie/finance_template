@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- DOWN Migration: 20260328000005_bill_detection
+-- DOWN Migration: 20260328000007_bill_detection
 -- Description: Drop detected_bills table and all related objects
 -- Issues: #sprint-10
 

@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- DOWN Migration: 20260316000001_fix_invitation_rls
+-- DOWN Migration: 20260316000002_fix_invitation_rls
 -- Description: Revert invitation RLS to the original permissive UPDATE policy
 -- Issues: #893
 

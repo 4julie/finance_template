@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- Migration: 20260328000003_report_generation
+-- Migration: 20260328000005_report_generation
 -- Description: Create report_configs and scheduled_reports tables for report generation service
 -- Issues: #sprint-8
 --
@@ -14,7 +14,7 @@
 --   - Report queries execute through RLS so users only see their household data
 --   - Config stored as JSONB with strict validation in Edge Function
 --
--- DOWN migration: services/api/supabase/migrations/down/20260328000003_report_generation.down.sql
+-- DOWN migration: services/api/supabase/migrations/down/20260328000005_report_generation.down.sql
 
 -- =============================================================================
 -- UP
