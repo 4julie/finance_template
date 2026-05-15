@@ -13,6 +13,7 @@ Protection Regulation (GDPR) and similar privacy frameworks.
 | [GDPR Right to Erasure Audit](gdpr-right-to-erasure-audit.md) | Art. 17 right to erasure audit and implementation status                        |
 | [GDPR Consent Management Audit](consent-management-audit.md)  | Current consent posture, Art. 7 gaps, and a recommended consent architecture    |
 | [GDPR Data Minimization Audit](data-minimization-audit.md)    | Field-level schema review, retention guidance, and minimization recommendations |
+| [Data Retention Schedule](data-retention-schedule.md)         | Authoritative retention periods for all data categories with purge job specs    |
 | [CCPA Rights Verification](ccpa-verification.md)              | CCPA/CPRA consumer rights verification against implementation                   |
 | [Web Storage Audit](web-storage-audit.md)                     | Inventory of all browser storage mechanisms and privacy impact                  |
 
