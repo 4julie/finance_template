@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- Migration: 20260316000001_fix_invitation_rls
+-- Migration: 20260316000002_fix_invitation_rls
 -- Description: Restrict household_invitations UPDATE to owner + invited-user accept
 -- Security Finding: H-2 (High) — API Security Audit v2
 -- Issues: #375

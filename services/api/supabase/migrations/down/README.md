@@ -1,6 +1,6 @@
 # Reverse (Down) Migrations
 
-**Issue:** #893
+**Issues:** #893, #1322, #1323
 
 ---
 
@@ -29,7 +29,7 @@ Apply down migrations in **reverse order**:
 
 ```bash
 # Example: roll back the last 3 migrations
-psql -f down/20260325000001_read_only_rate_limit_status.down.sql
+psql -f down/20260325000002_read_only_rate_limit_status.down.sql
 psql -f down/20260325000001_enhanced_cleanup_and_balance.down.sql
 psql -f down/20260324000004_webhook_infrastructure.down.sql
 ```
@@ -50,24 +50,66 @@ done
 
 Each down migration matches its up migration with a `.down.sql` suffix:
 
-| Up Migration                                      | Down Migration                                              |
-| ------------------------------------------------- | ----------------------------------------------------------- |
-| `20260306000001_initial_schema.sql`               | `down/20260306000001_initial_schema.down.sql`               |
-| `20260306000002_rls_policies.sql`                 | `down/20260306000002_rls_policies.down.sql`                 |
-| `20260306000003_auth_config.sql`                  | `down/20260306000003_auth_config.down.sql`                  |
-| `20260307000001_monitoring.sql`                   | `down/20260307000001_monitoring.down.sql`                   |
-| `20260315000001_export_audit_log.sql`             | `down/20260315000001_export_audit_log.down.sql`             |
-| `20260316000001_edge_function_security.sql`       | `down/20260316000001_edge_function_security.down.sql`       |
-| `20260316000001_fix_invitation_rls.sql`           | `down/20260316000001_fix_invitation_rls.down.sql`           |
-| `20260323000001_cleanup_and_balance_triggers.sql` | `down/20260323000001_cleanup_and_balance_triggers.down.sql` |
-| `20260323000002_recurring_transactions.sql`       | `down/20260323000002_recurring_transactions.down.sql`       |
-| `20260323000003_rate_limits.sql`                  | `down/20260323000003_rate_limits.down.sql`                  |
-| `20260324000001_notification_infrastructure.sql`  | `down/20260324000001_notification_infrastructure.down.sql`  |
-| `20260324000002_performance_indexes.sql`          | `down/20260324000002_performance_indexes.down.sql`          |
-| `20260324000003_automated_maintenance.sql`        | `down/20260324000003_automated_maintenance.down.sql`        |
-| `20260324000004_webhook_infrastructure.sql`       | `down/20260324000004_webhook_infrastructure.down.sql`       |
-| `20260325000001_enhanced_cleanup_and_balance.sql` | `down/20260325000001_enhanced_cleanup_and_balance.down.sql` |
-| `20260325000001_read_only_rate_limit_status.sql`  | `down/20260325000001_read_only_rate_limit_status.down.sql`  |
+| Up Migration                                                | Down Migration                                                        |
+| ----------------------------------------------------------- | --------------------------------------------------------------------- |
+| `20260306000001_initial_schema.sql`                         | `down/20260306000001_initial_schema.down.sql`                         |
+| `20260306000002_rls_policies.sql`                           | `down/20260306000002_rls_policies.down.sql`                           |
+| `20260306000003_auth_config.sql`                            | `down/20260306000003_auth_config.down.sql`                            |
+| `20260307000001_monitoring.sql`                             | `down/20260307000001_monitoring.down.sql`                             |
+| `20260315000001_export_audit_log.sql`                       | `down/20260315000001_export_audit_log.down.sql`                       |
+| `20260316000001_edge_function_security.sql`                 | `down/20260316000001_edge_function_security.down.sql`                 |
+| `20260316000002_fix_invitation_rls.sql`                     | `down/20260316000002_fix_invitation_rls.down.sql`                     |
+| `20260323000001_cleanup_and_balance_triggers.sql`           | `down/20260323000001_cleanup_and_balance_triggers.down.sql`           |
+| `20260323000002_recurring_transactions.sql`                 | `down/20260323000002_recurring_transactions.down.sql`                 |
+| `20260323000003_rate_limits.sql`                            | `down/20260323000003_rate_limits.down.sql`                            |
+| `20260324000001_notification_infrastructure.sql`            | `down/20260324000001_notification_infrastructure.down.sql`            |
+| `20260324000002_performance_indexes.sql`                    | `down/20260324000002_performance_indexes.down.sql`                    |
+| `20260324000003_automated_maintenance.sql`                  | `down/20260324000003_automated_maintenance.down.sql`                  |
+| `20260324000004_webhook_infrastructure.sql`                 | `down/20260324000004_webhook_infrastructure.down.sql`                 |
+| `20260325000001_enhanced_cleanup_and_balance.sql`           | `down/20260325000001_enhanced_cleanup_and_balance.down.sql`           |
+| `20260325000002_read_only_rate_limit_status.sql`            | `down/20260325000002_read_only_rate_limit_status.down.sql`            |
+| `20260326000001_production_readiness.sql`                   | `down/20260326000001_production_readiness.down.sql`                   |
+| `20260326000002_add_transfer_recurring_to_transactions.sql` | `down/20260326000002_add_transfer_recurring_to_transactions.down.sql` |
+| `20260326000003_add_rollover_to_budgets.sql`                | `down/20260326000003_add_rollover_to_budgets.down.sql`                |
+| `20260326000004_add_account_status_to_goals.sql`            | `down/20260326000004_add_account_status_to_goals.down.sql`            |
+| `20260326000005_standardize_owner_id.sql`                   | `down/20260326000005_standardize_owner_id.down.sql`                   |
+| `20260326000006_sync_optimization.sql`                      | `down/20260326000006_sync_optimization.down.sql`                      |
+| `20260327000001_launch_readiness_dashboard.sql`             | `down/20260327000001_launch_readiness_dashboard.down.sql`             |
+| `20260327000002_bank_connections.sql`                       | `down/20260327000002_bank_connections.down.sql`                       |
+| `20260327000003_spending_forecast.sql`                      | `down/20260327000003_spending_forecast.down.sql`                      |
+| `20260327000004_anomaly_detection.sql`                      | `down/20260327000004_anomaly_detection.down.sql`                      |
+| `20260328000001_family_plan_subscriptions.sql`              | `down/20260328000001_family_plan_subscriptions.down.sql`              |
+| `20260328000002_recurring_idempotency.sql`                  | `down/20260328000002_recurring_idempotency.down.sql`                  |
+| `20260328000003_notification_triggers.sql`                  | `down/20260328000003_notification_triggers.down.sql`                  |
+| `20260328000004_referral_tracking.sql`                      | `down/20260328000004_referral_tracking.down.sql`                      |
+| `20260328000005_report_generation.sql`                      | `down/20260328000005_report_generation.down.sql`                      |
+| `20260328000006_exchange_rates.sql`                         | `down/20260328000006_exchange_rates.down.sql`                         |
+| `20260328000007_bill_detection.sql`                         | `down/20260328000007_bill_detection.down.sql`                         |
+| `20260328000008_data_import_pipeline.sql`                   | `down/20260328000008_data_import_pipeline.down.sql`                   |
+| `20260329000001_gdpr_consent_capture.sql`                   | `down/20260329000001_gdpr_consent_capture.down.sql`                   |
+| `20260329000002_crypto_shredding.sql`                       | `down/20260329000002_crypto_shredding.down.sql`                       |
+| `20260329000003_rate_limit_enhancement.sql`                 | `down/20260329000003_rate_limit_enhancement.down.sql`                 |
+| `20260329000004_webhook_security_hardening.sql`             | `down/20260329000004_webhook_security_hardening.down.sql`             |
+| `20260330000001_investment_tables.sql`                      | `down/20260330000001_investment_tables.down.sql`                      |
+| `20260330000002_exchange_rates_enhancements.sql`            | `down/20260330000002_exchange_rates_enhancements.down.sql`            |
+| `20260330000003_bill_detection_enhancements.sql`            | `down/20260330000003_bill_detection_enhancements.down.sql`            |
+| `20260330000004_report_generation_enhancements.sql`         | `down/20260330000004_report_generation_enhancements.down.sql`         |
+
+## Timestamp Deduplication (#1323)
+
+The following migrations were renamed to resolve duplicate timestamps:
+
+| Original Name                                | New Name                                     | Reason                          |
+| -------------------------------------------- | -------------------------------------------- | ------------------------------- |
+| `20260316000001_fix_invitation_rls`          | `20260316000002_fix_invitation_rls`          | Collided with edge_fn_security  |
+| `20260325000001_read_only_rate_limit_status` | `20260325000002_read_only_rate_limit_status` | Collided with enhanced_cleanup  |
+| `20260328000001_recurring_idempotency`       | `20260328000002_recurring_idempotency`       | Collided with family_plan_subs  |
+| `20260328000002_notification_triggers`       | `20260328000003_notification_triggers`       | Cascade from above              |
+| `20260328000002_referral_tracking`           | `20260328000004_referral_tracking`           | Collided with notification_trig |
+| `20260328000003_report_generation`           | `20260328000005_report_generation`           | Cascade from above              |
+| `20260328000004_exchange_rates`              | `20260328000006_exchange_rates`              | Cascade from above              |
+| `20260328000005_bill_detection`              | `20260328000007_bill_detection`              | Cascade from above              |
+| `20260328000006_data_import_pipeline`        | `20260328000008_data_import_pipeline`        | Cascade from above              |
 
 ## Safety Notes
 

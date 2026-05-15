@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- DOWN Migration: 20260328000003_report_generation
+-- DOWN Migration: 20260328000005_report_generation
 -- Description: Drop report_configs and scheduled_reports tables
 -- Issues: #sprint-8
 

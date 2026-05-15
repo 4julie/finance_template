@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- Migration: 20260328000002_notification_triggers
+-- Migration: 20260328000003_notification_triggers
 -- Description: Add notifications table and trigger detection functions
 -- Issues: #1051
 --

@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- Migration: 20260328000005_bill_detection
+-- Migration: 20260328000007_bill_detection
 -- Description: Create detected_bills table for recurring bill detection
 -- Issues: #sprint-10
 --
@@ -15,7 +15,7 @@
 --   - Monetary values stored as BIGINT (cents) with ISO 4217 currency_code
 --   - owner_id tracks who triggered the detection
 --
--- DOWN migration: services/api/supabase/migrations/down/20260328000005_bill_detection.down.sql
+-- DOWN migration: services/api/supabase/migrations/down/20260328000007_bill_detection.down.sql
 
 -- =============================================================================
 -- UP

@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- DOWN Migration: 20260328000006_data_import_pipeline
+-- DOWN Migration: 20260328000008_data_import_pipeline
 -- Description: Drop import_jobs table and all related objects
 -- Issues: #sprint-11
 

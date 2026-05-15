@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- Migration: 20260328000004_exchange_rates
+-- Migration: 20260328000006_exchange_rates
 -- Description: Create exchange_rates table for multi-currency support
 -- Issues: #sprint-9
 --
@@ -22,7 +22,7 @@
 --   - Only service role can insert/update (Edge Function)
 --   - No household scoping needed — rates are global
 --
--- DOWN migration: services/api/supabase/migrations/down/20260328000004_exchange_rates.down.sql
+-- DOWN migration: services/api/supabase/migrations/down/20260328000006_exchange_rates.down.sql
 
 -- =============================================================================
 -- UP

@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- Down migration for: 20260328000002_notification_triggers
+-- Down migration for: 20260328000003_notification_triggers
 -- Reverts notification triggers and notifications table (#1051)
 
 DROP FUNCTION IF EXISTS public.detect_unusual_spending();

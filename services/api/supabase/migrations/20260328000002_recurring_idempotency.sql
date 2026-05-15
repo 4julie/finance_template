@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- Migration: 20260328000001_recurring_idempotency
+-- Migration: 20260328000002_recurring_idempotency
 -- Description: Add idempotency tracking for recurring transaction generation
 -- Issues: #1047
 --

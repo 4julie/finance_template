@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: BUSL-1.1
 
--- Migration: 20260328000002_referral_tracking
+-- Migration: 20260328000004_referral_tracking
 -- Description: Create referrals table for referral code generation, tracking, and rewards
 -- Issues: #sprint-7
 --
@@ -16,7 +16,7 @@
 --   - Duplicate referrals prevented by unique index
 --   - Monetary rewards stored as BIGINT cents
 --
--- DOWN migration: services/api/supabase/migrations/down/20260328000002_referral_tracking.down.sql
+-- DOWN migration: services/api/supabase/migrations/down/20260328000004_referral_tracking.down.sql
 
 -- =============================================================================
 -- UP
