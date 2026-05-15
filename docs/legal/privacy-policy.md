@@ -135,19 +135,23 @@ features.
 
 We keep personal information only for as long as necessary for the purposes
 described in this policy, unless a longer retention period is required or
-permitted by law. The following schedule describes the current retention model.
+permitted by law. The following schedule summarises the current retention model.
+For the authoritative, detailed retention schedule including purge job
+specifications and implementation status, see the
+[Data Retention Schedule](../compliance/data-retention-schedule.md).
 
 | Data type                                                                              | Typical retention period                                                                                                                                                                             |
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Account and profile data                                                               | For the life of your account, and then up to 30 days after deletion to complete account closure, fraud checks, backup rotation, and deletion workflows unless law requires longer retention          |
 | Household records, memberships, accounts, transactions, budgets, goals, and categories | Until you delete them or close your account; soft-deleted records may be retained for up to 30 days before hard deletion or equivalent erasure steps, unless legal obligations require a longer hold |
-| Household invitations                                                                  | Until accepted or expired; invitations are intended to expire after approximately 72 hours and may then be retained for up to 30 additional days for abuse prevention and troubleshooting            |
+| Household invitations                                                                  | Until accepted or expired; invitations expire after approximately 72 hours and are purged 7 days after expiry                                                                                        |
 | Passkey credentials                                                                    | Until removed by you or until account deletion                                                                                                                                                       |
 | WebAuthn challenge data                                                                | Up to 5 minutes or until the authentication ceremony completes or expires                                                                                                                            |
-| Session cookies and access tokens                                                      | For the session or token lifetime, unless revoked earlier                                                                                                                                            |
+| Session cookies and access tokens                                                      | For the session or token lifetime (24-hour timebox per GoTrue configuration), unless revoked earlier                                                                                                 |
 | Preferences and onboarding data                                                        | Until you change them, uninstall the app, reset the app, or delete your account                                                                                                                      |
 | Sync health logs                                                                       | Approximately 30 days, unless a longer period is required to investigate abuse or operational incidents                                                                                              |
-| Audit, security, export, and deletion logs                                             | Up to 12 months, or longer where required to establish, exercise, or defend legal claims or comply with legal obligations                                                                            |
+| Audit, security, and export logs                                                       | Up to 90 days, or longer where required to establish, exercise, or defend legal claims or comply with legal obligations                                                                              |
+| Deletion audit records                                                                 | Up to 1 year, for legal compliance and dispute resolution                                                                                                                                            |
 | Optional analytics and crash reporting data                                            | Until consent is withdrawn and no longer than 26 months from collection, unless aggregated or de-identified earlier                                                                                  |
 | Backups and disaster recovery copies                                                   | Rolling backup periods of up to 30 days, after which older encrypted backups are deleted or overwritten in the ordinary course                                                                       |
 
