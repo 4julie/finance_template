@@ -55,6 +55,42 @@ textarea:focus-visible {
     outline-width: 3px;
     outline-color: Highlight;
   }
+
+  /* Secondary buttons need visible borders (transparent bg otherwise invisible) */
+  button,
+  [role='button'] {
+    border: 2px solid currentColor;
+  }
+
+  /* Cards, inputs, navigation need heavier borders for element definition */
+  [role='article'],
+  [class*='card'],
+  [class*='Card'] {
+    border: 2px solid var(--semantic-border-default, #111827);
+    box-shadow: none;
+  }
+
+  input,
+  select,
+  textarea {
+    border-width: 2px;
+  }
+
+  /* Progress bars need distinct fill vs track */
+  [role='progressbar'] {
+    border: 1px solid var(--semantic-border-default, #111827);
+  }
+
+  /* Links need underlines — don't rely on color alone */
+  a:not([role='button']) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* SVG icons inherit high-contrast text color */
+  svg {
+    color: inherit;
+  }
 }
 
 /* -------------------------------------------------------------------
@@ -196,4 +232,44 @@ textarea {
 
 [data-theme='dark'] :focus-visible {
   outline-color: var(--color-blue-400, #60a5fa);
+}
+
+/* -------------------------------------------------------------------
+ * 7. High-contrast theme focus and component adjustments
+ *
+ * When [data-theme="high-contrast"] is explicitly set (via toggle),
+ * apply component-level enhancements beyond what the semantic token
+ * overrides provide.
+ * ------------------------------------------------------------------- */
+
+[data-theme='high-contrast'] :focus-visible {
+  outline-width: 3px;
+  outline-color: var(--color-blue-800, #1e40af);
+}
+
+[data-theme='high-contrast'] button,
+[data-theme='high-contrast'] [role='button'] {
+  border: 2px solid currentColor;
+}
+
+[data-theme='high-contrast'] [role='article'],
+[data-theme='high-contrast'] [class*='card'],
+[data-theme='high-contrast'] [class*='Card'] {
+  border: 2px solid var(--semantic-border-default, #111827);
+  box-shadow: none;
+}
+
+[data-theme='high-contrast'] input,
+[data-theme='high-contrast'] select,
+[data-theme='high-contrast'] textarea {
+  border-width: 2px;
+}
+
+[data-theme='high-contrast'] [role='progressbar'] {
+  border: 1px solid var(--semantic-border-default, #111827);
+}
+
+[data-theme='high-contrast'] a:not([role='button']) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
