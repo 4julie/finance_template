@@ -92,6 +92,72 @@ describe('Accessibility CSS', () => {
       expect(css).toContain('prefers-color-scheme: dark');
     });
   });
+
+  describe('High Contrast Mode (WCAG 1.4.3, 1.4.6, 1.4.11)', () => {
+    it('should enhance focus indicators in prefers-contrast: more', () => {
+      expect(css).toContain('prefers-contrast: more');
+      expect(css).toContain('outline-width: 3px');
+    });
+
+    it('should add visible borders to buttons in high contrast', () => {
+      // Secondary buttons have transparent bg — need borders for visibility
+      expect(css).toContain('border: 2px solid currentColor');
+    });
+
+    it('should add heavier borders to cards in high contrast', () => {
+      expect(css).toMatch(/\[class\*='card'\]/i);
+    });
+
+    it('should increase input border width in high contrast', () => {
+      expect(css).toContain('border-width: 2px');
+    });
+
+    it('should add borders to progress bars in high contrast', () => {
+      expect(css).toContain("[role='progressbar']");
+    });
+
+    it('should underline links in high contrast', () => {
+      expect(css).toContain('text-decoration: underline');
+    });
+
+    it('should support explicit high-contrast theme toggle', () => {
+      expect(css).toContain("[data-theme='high-contrast']");
+    });
+
+    it('should adjust focus color for explicit high-contrast theme', () => {
+      expect(css).toContain("[data-theme='high-contrast'] :focus-visible");
+    });
+  });
+});
+
+describe('High Contrast Token Integration', () => {
+  const tokensCss = readFileSync(resolve(__dirname, '../../../src/theme/tokens.css'), 'utf-8');
+
+  it('should import the high-contrast generated CSS', () => {
+    expect(tokensCss).toContain('tokens-high-contrast.css');
+  });
+
+  it('should apply all semantic tokens in prefers-contrast: more', () => {
+    expect(tokensCss).toContain('prefers-contrast: more');
+    // Must override ALL semantic categories, not just borders
+    expect(tokensCss).toContain('--semantic-text-primary');
+    expect(tokensCss).toContain('--semantic-interactive-default');
+    expect(tokensCss).toContain('--semantic-status-positive');
+    expect(tokensCss).toContain('--semantic-amount-positive');
+    expect(tokensCss).toContain('--semantic-background-primary');
+  });
+
+  it('should override chart colors for high contrast', () => {
+    expect(tokensCss).toContain('--color-chart-1');
+    expect(tokensCss).toContain('--color-chart-hc-1');
+  });
+
+  it('should handle dark + high contrast combination', () => {
+    expect(tokensCss).toContain('prefers-color-scheme: dark');
+    expect(tokensCss).toContain('prefers-contrast: more');
+    // Should have a combined dark+HC media query
+    expect(tokensCss).toMatch(/prefers-color-scheme:\s*dark\)\s*and\s*\(prefers-contrast:\s*more/);
+  });
 });
 
 describe('Service Worker Caching', () => {

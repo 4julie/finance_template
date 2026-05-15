@@ -80,7 +80,40 @@
       "3": { "$value": "#DC267F", "$type": "color", "$description": "IBM CVD-safe magenta" },
       "4": { "$value": "#FE6100", "$type": "color", "$description": "IBM CVD-safe orange" },
       "5": { "$value": "#FFB000", "$type": "color", "$description": "IBM CVD-safe gold" },
-      "6": { "$value": "#009E73", "$type": "color", "$description": "CVD-safe teal" }
+      "6": { "$value": "#009E73", "$type": "color", "$description": "CVD-safe teal" },
+      "hc": {
+        "$description": "High-contrast chart palette — darker CVD-safe variants for maximum contrast on white. All meet WCAG AA (4.5:1+) against #FFFFFF while preserving CVD-safe hue families.",
+        "1": {
+          "$value": "#0043CE",
+          "$type": "color",
+          "$description": "HC blue — 7.8:1 vs white (AAA)"
+        },
+        "2": {
+          "$value": "#6929C4",
+          "$type": "color",
+          "$description": "HC purple — 6.0:1 vs white (AA)"
+        },
+        "3": {
+          "$value": "#9F1853",
+          "$type": "color",
+          "$description": "HC magenta — 8.0:1 vs white (AAA)"
+        },
+        "4": {
+          "$value": "#BA4E00",
+          "$type": "color",
+          "$description": "HC orange — 5.0:1 vs white (AA)"
+        },
+        "5": {
+          "$value": "#8E6A00",
+          "$type": "color",
+          "$description": "HC gold — 5.0:1 vs white (AA)"
+        },
+        "6": {
+          "$value": "#005D5D",
+          "$type": "color",
+          "$description": "HC teal — 6.5:1 vs white (AA)"
+        }
+      }
     }
   }
 }

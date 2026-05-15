@@ -25,6 +25,9 @@
 /* OLED dark theme override — true black backgrounds for AMOLED battery savings */
 @import '../../../../packages/design-tokens/build/web/tokens-dark-oled.css';
 
+/* High-contrast theme — explicit toggle via [data-theme="high-contrast"] */
+@import '../../../../packages/design-tokens/build/web/tokens-high-contrast.css';
+
 /* Cognitive accessibility mode — simplified UI, larger targets, no motion */
 @import '../styles/cognitive.css';
 
@@ -72,14 +75,98 @@
 }
 
 /*
- * High contrast: increase border visibility when the user prefers more contrast.
+ * High contrast: apply all high-contrast semantic tokens when the user
+ * prefers more contrast (WCAG 1.4.3, 1.4.6, 1.4.11).
+ *
+ * Overrides ALL semantic color tokens — not just borders.
+ * Text pairings exceed WCAG AAA (7:1) where possible.
  */
 @media (prefers-contrast: more) {
-  :root {
+  html:not([data-theme='high-contrast']) {
+    /* Backgrounds */
+    --semantic-background-primary: var(--color-neutral-0);
+    --semantic-background-secondary: var(--color-neutral-100);
+    --semantic-background-elevated: var(--color-neutral-0);
+
+    /* Text */
+    --semantic-text-primary: var(--color-neutral-950);
+    --semantic-text-secondary: var(--color-neutral-700);
+    --semantic-text-disabled: var(--color-neutral-500);
+    --semantic-text-inverse: var(--color-neutral-0);
+
+    /* Borders */
     --semantic-border-default: var(--color-neutral-900);
+    --semantic-border-focus: var(--color-blue-800);
+    --semantic-border-error: var(--color-red-700);
+
+    /* Interactive */
+    --semantic-interactive-default: var(--color-blue-800);
+    --semantic-interactive-hover: var(--color-blue-900);
+    --semantic-interactive-pressed: var(--color-neutral-900);
+    --semantic-interactive-disabled: var(--color-neutral-400);
+
+    /* Status */
+    --semantic-status-positive: var(--color-green-700);
+    --semantic-status-negative: var(--color-red-700);
+    --semantic-status-warning: var(--color-amber-700);
+    --semantic-status-info: var(--color-blue-800);
+
+    /* Financial amounts */
+    --semantic-amount-positive: var(--color-green-700);
+    --semantic-amount-negative: var(--color-red-700);
+
+    /* Component borders — heavier for element definition */
     --card-border: var(--color-neutral-900);
     --input-border: var(--color-neutral-900);
     --navigation-border: var(--color-neutral-900);
+
+    /* Chart colors — darker CVD-safe variants for white background (all AA+) */
+    --color-chart-1: var(--color-chart-hc-1);
+    --color-chart-2: var(--color-chart-hc-2);
+    --color-chart-3: var(--color-chart-hc-3);
+    --color-chart-4: var(--color-chart-hc-4);
+    --color-chart-5: var(--color-chart-hc-5);
+    --color-chart-6: var(--color-chart-hc-6);
+  }
+}
+
+/*
+ * Dark + high contrast: for users in dark mode who also prefer more contrast.
+ * Uses brighter foreground colors and stronger borders on dark backgrounds.
+ */
+@media (prefers-color-scheme: dark) and (prefers-contrast: more) {
+  html:not([data-theme='light']):not([data-theme='high-contrast']):not([data-theme='dark-oled']) {
+    /* Brighter text for maximum contrast on dark backgrounds */
+    --semantic-text-primary: var(--color-neutral-0);
+    --semantic-text-secondary: var(--color-neutral-200);
+    --semantic-text-disabled: var(--color-neutral-400);
+    --semantic-text-inverse: var(--color-neutral-950);
+
+    /* Stronger borders */
+    --semantic-border-default: var(--color-neutral-300);
+    --semantic-border-focus: var(--color-blue-300);
+    --semantic-border-error: var(--color-red-300);
+
+    /* Brighter interactive colors */
+    --semantic-interactive-default: var(--color-blue-300);
+    --semantic-interactive-hover: var(--color-blue-200);
+    --semantic-interactive-pressed: var(--color-blue-100);
+    --semantic-interactive-disabled: var(--color-neutral-600);
+
+    /* Brighter status colors */
+    --semantic-status-positive: var(--color-green-500);
+    --semantic-status-negative: var(--color-red-400);
+    --semantic-status-warning: var(--color-amber-500);
+    --semantic-status-info: var(--color-blue-300);
+
+    /* Financial amounts */
+    --semantic-amount-positive: var(--color-green-500);
+    --semantic-amount-negative: var(--color-red-400);
+
+    /* Component borders */
+    --card-border: var(--color-neutral-300);
+    --input-border: var(--color-neutral-300);
+    --navigation-border: var(--color-neutral-300);
   }
 }
 
