@@ -57,3 +57,19 @@ export const LongMessage: Story = {
     onDismiss: fn(),
   },
 };
+
+/** Renders the banner against a dark-themed container to verify token adaptation. */
+export const DarkMode: Story = {
+  args: {
+    message: 'Failed to save budget changes.',
+    onRetry: fn(),
+    onDismiss: fn(),
+  },
+  decorators: [
+    (Story) => (
+      <div data-theme="dark" style={{ maxWidth: 600, padding: 24 }}>
+        <Story />
+      </div>
+    ),
+  ],
+};
