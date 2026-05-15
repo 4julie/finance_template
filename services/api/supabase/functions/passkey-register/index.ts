@@ -168,24 +168,64 @@ serve(async (req: Request): Promise<Response> => {
 
       const body = await req.json();
 
-      // Retrieve stored challenge
-      const { data: challenges, error: challengeError } = await supabaseAdmin
-        .from('webauthn_challenges')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('type', 'registration')
-        .gt('expires_at', new Date().toISOString())
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (challengeError || !challenges || challenges.length === 0) {
-        return new Response(JSON.stringify({ error: 'No valid challenge found' }), {
+      // ── Scoped challenge lookup (#1310, API-9) ─────────────────────
+      // Extract the challenge from clientDataJSON so we look up by exact
+      // value — never "the most recent challenge for this user".
+      if (!body.response?.clientDataJSON) {
+        return new Response(JSON.stringify({ error: 'Missing clientDataJSON in response' }), {
           status: 400,
           headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
         });
       }
 
-      const expectedChallenge = challenges[0].challenge;
+      const clientDataBytes = Uint8Array.from(
+        atob(
+          body.response.clientDataJSON
+            .replace(/-/g, '+')
+            .replace(/_/g, '/')
+            .padEnd(
+              body.response.clientDataJSON.length +
+                ((4 - (body.response.clientDataJSON.length % 4)) % 4),
+              '=',
+            ),
+        ),
+        (c: string) => c.charCodeAt(0),
+      );
+      const clientData = JSON.parse(new TextDecoder().decode(clientDataBytes));
+      const submittedChallenge = clientData.challenge as string | undefined;
+
+      if (!submittedChallenge) {
+        return new Response(JSON.stringify({ error: 'Missing challenge in client data' }), {
+          status: 400,
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Look up by exact challenge value + user + type + not-expired
+      const { data: challengeRow, error: challengeError } = await supabaseAdmin
+        .from('webauthn_challenges')
+        .select('*')
+        .eq('challenge', submittedChallenge)
+        .eq('user_id', user.id)
+        .eq('type', 'registration')
+        .gt('expires_at', new Date().toISOString())
+        .single();
+
+      if (challengeError || !challengeRow) {
+        return new Response(
+          JSON.stringify({ error: 'Challenge not found, expired, or already used' }),
+          {
+            status: 400,
+            headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
+          },
+        );
+      }
+
+      // Delete challenge immediately — one-time use regardless of
+      // whether verification succeeds (#1310, API-9).
+      await supabaseAdmin.from('webauthn_challenges').delete().eq('id', challengeRow.id);
+
+      const expectedChallenge = challengeRow.challenge as string;
 
       const verification: VerifiedRegistrationResponse = await verifyRegistrationResponse({
         response: body,
@@ -223,9 +263,6 @@ serve(async (req: Request): Promise<Response> => {
           headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
         });
       }
-
-      // Clean up used challenge
-      await supabaseAdmin.from('webauthn_challenges').delete().eq('id', challenges[0].id);
 
       logger.info('Passkey registration verified', {
         httpStatus: 201,
