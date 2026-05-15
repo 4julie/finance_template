@@ -50,26 +50,33 @@ bucket_definitions:
         WHERE household_id = bucket.household_id AND deleted_at IS NULL
 
       # Transactions (debits, credits, transfers)
+      # CHANGED (#1326): Added `tags` (needed by clients for tag display/filtering).
+      # CHANGED (#1326): Removed legacy `recurring_rule` column — `recurring_rule_id`
+      #   (the proper FK) is already present and is what clients use.
       - >
         SELECT id, household_id, account_id, category_id, amount_cents,
                currency_code, type, payee, note, date, is_recurring,
-               recurring_rule, transfer_account_id, status,
-               transfer_transaction_id, recurring_rule_id, owner_id,
+               transfer_account_id, status,
+               transfer_transaction_id, recurring_rule_id, tags, owner_id,
                created_at, updated_at, deleted_at
         FROM transactions
         WHERE household_id = bucket.household_id AND deleted_at IS NULL
 
       # Spending / income categories
+      # CHANGED (#1326): Added `is_system` (clients need to distinguish
+      #   system-provided categories from user-created ones).
       - >
         SELECT id, household_id, name, icon, color, parent_id, is_income,
-               sort_order, owner_id,
+               is_system, sort_order, owner_id,
                created_at, updated_at, deleted_at
         FROM categories
         WHERE household_id = bucket.household_id AND deleted_at IS NULL
 
       # Budget allocations per category/period
+      # CHANGED (#1326): Added `name` (Budget model has a name field that
+      #   clients need for display; was previously missing from allowlist).
       - >
-        SELECT id, household_id, category_id, amount_cents, currency_code,
+        SELECT id, household_id, category_id, name, amount_cents, currency_code,
                period, start_date, end_date, is_rollover, owner_id,
                created_at, updated_at, deleted_at
         FROM budgets
@@ -98,8 +105,12 @@ bucket_definitions:
       # SECURITY: invited_email is deliberately excluded — it is PII that
       # must not be synced to all household members (GDPR). Clients use
       # invitation_status and role to display invite state.
+      # SECURITY (#1326): invite_code removed — invite codes allow accepting
+      # invitations and must not be broadcast to all household members.
+      # Only the inviter (via Edge Function response) and the invitee (via
+      # the invitation link) should possess the code.
       - >
-        SELECT id, household_id, invited_by, invite_code,
+        SELECT id, household_id, invited_by,
                role, expires_at, accepted_at, accepted_by,
                created_at, updated_at, deleted_at
         FROM household_invitations
@@ -216,8 +227,11 @@ bucket_definitions:
       # Passkey credential metadata (for passkey management UI).
       # SECURITY: public_key is deliberately excluded — clients only need
       # device_type, transports, and timestamps to display credential info.
+      # SECURITY (#1326): counter removed — the WebAuthn signature counter
+      # is server-side clone-detection metadata. Leaking it to clients
+      # provides no UI value and exposes security internals.
       - >
-        SELECT id, user_id, credential_id, counter, device_type, backed_up,
+        SELECT id, user_id, credential_id, device_type, backed_up,
                transports,
                created_at, updated_at, deleted_at
         FROM passkey_credentials
