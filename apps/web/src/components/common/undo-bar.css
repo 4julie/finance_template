@@ -1,0 +1,178 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/**
+ * Undo Bar — floating toast with countdown for undoable actions.
+ *
+ * Stacks vertically when multiple undo bars are active.
+ * Uses design tokens for all visual values.
+ */
+
+/* ==========================================================================
+ * Container — stacks multiple bars from bottom
+ * ========================================================================== */
+
+.undo-bar-container {
+  position: fixed;
+  bottom: var(--spacing-6, 24px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--spacing-2, 8px);
+  max-width: 480px;
+  width: calc(100vw - var(--spacing-8, 32px));
+}
+
+/* ==========================================================================
+ * Individual Undo Bar
+ * ========================================================================== */
+
+.undo-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3, 12px);
+  padding: var(--spacing-3, 12px) var(--spacing-4, 16px);
+  background: var(--semantic-background-inverse, #1f2937);
+  color: var(--semantic-text-on-inverse, #f9fafb);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+  animation: undoBarSlideIn var(--duration-normal, 250ms) var(--easing-decelerate, ease-out);
+}
+
+@keyframes undoBarSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.undo-bar--exiting {
+  animation: undoBarSlideOut var(--duration-fast, 150ms) var(--easing-accelerate, ease-in) forwards;
+}
+
+@keyframes undoBarSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* ==========================================================================
+ * Content
+ * ========================================================================== */
+
+.undo-bar__message {
+  flex: 1;
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+}
+
+/* ==========================================================================
+ * Countdown Timer
+ * ========================================================================== */
+
+.undo-bar__countdown {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.undo-bar__countdown-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.undo-bar__countdown-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 3;
+}
+
+.undo-bar__countdown-fill {
+  fill: none;
+  stroke: var(--semantic-action-primary, #818cf8);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.undo-bar__countdown-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: var(--font-weight-bold, 700);
+  color: var(--semantic-text-on-inverse, #f9fafb);
+}
+
+/* ==========================================================================
+ * Undo Button
+ * ========================================================================== */
+
+.undo-bar__button {
+  padding: var(--spacing-1, 4px) var(--spacing-3, 12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-md, 8px);
+  background: transparent;
+  color: var(--semantic-text-on-inverse, #f9fafb);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-semibold, 600);
+  cursor: pointer;
+  transition: background var(--duration-fast, 150ms) var(--easing-standard, ease);
+  flex-shrink: 0;
+}
+
+.undo-bar__button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.undo-bar__button:focus-visible {
+  outline: 2px solid var(--semantic-focus-ring, #818cf8);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+ * Reduced Motion
+ * ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .undo-bar {
+    animation: none;
+  }
+
+  .undo-bar--exiting {
+    animation: none;
+    opacity: 0;
+  }
+
+  .undo-bar__countdown-fill {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+ * High Contrast
+ * ========================================================================== */
+
+@media (prefers-contrast: more) {
+  .undo-bar {
+    border: 2px solid var(--semantic-text-on-inverse, #f9fafb);
+  }
+
+  .undo-bar__button {
+    border-width: 2px;
+  }
+}

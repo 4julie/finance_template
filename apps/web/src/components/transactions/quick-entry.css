@@ -1,0 +1,250 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/**
+ * Quick Entry — floating action button + compact transaction form.
+ *
+ * Uses design tokens for all visual values. Respects prefers-reduced-motion
+ * and prefers-color-scheme. See tokens.css for available custom properties.
+ */
+
+/* ==========================================================================
+ * FAB — Floating Action Button
+ * ========================================================================== */
+
+.quick-entry-fab {
+  position: fixed;
+  bottom: var(--spacing-6, 24px);
+  right: var(--spacing-6, 24px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--semantic-action-primary, #6366f1);
+  color: var(--semantic-text-on-primary, #fff);
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+  transition:
+    transform var(--duration-fast, 150ms) var(--easing-standard, ease),
+    box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+
+.quick-entry-fab:hover {
+  transform: scale(1.08);
+  box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.1));
+}
+
+.quick-entry-fab:focus-visible {
+  outline: 2px solid var(--semantic-focus-ring, #818cf8);
+  outline-offset: 2px;
+}
+
+.quick-entry-fab[aria-expanded='true'] {
+  transform: rotate(45deg);
+}
+
+/* ==========================================================================
+ * Backdrop
+ * ========================================================================== */
+
+.quick-entry-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.3);
+  animation: fadeIn var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+
+/* ==========================================================================
+ * Form Panel
+ * ========================================================================== */
+
+.quick-entry-panel {
+  position: fixed;
+  bottom: var(--spacing-6, 24px);
+  right: var(--spacing-6, 24px);
+  z-index: 1001;
+  width: 340px;
+  max-width: calc(100vw - var(--spacing-8, 32px));
+  background: var(--semantic-background-primary, #fff);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.1));
+  padding: var(--spacing-5, 20px);
+  animation: slideInUp var(--duration-normal, 250ms) var(--easing-decelerate, ease-out);
+}
+
+.quick-entry-panel__title {
+  margin: 0 0 var(--spacing-4, 16px);
+  font-size: var(--font-size-lg, 1.125rem);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--semantic-text-primary, #111);
+}
+
+/* ==========================================================================
+ * Form Fields
+ * ========================================================================== */
+
+.quick-entry-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1, 4px);
+  margin-bottom: var(--spacing-3, 12px);
+}
+
+.quick-entry-field label {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--semantic-text-secondary, #555);
+}
+
+.quick-entry-field input,
+.quick-entry-field select {
+  padding: var(--spacing-2, 8px) var(--spacing-3, 12px);
+  border: 1px solid var(--semantic-border-primary, #d1d5db);
+  border-radius: var(--radius-md, 8px);
+  font-size: var(--font-size-base, 1rem);
+  background: var(--semantic-background-primary, #fff);
+  color: var(--semantic-text-primary, #111);
+  transition: border-color var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+
+.quick-entry-field input:focus,
+.quick-entry-field select:focus {
+  outline: none;
+  border-color: var(--semantic-action-primary, #6366f1);
+  box-shadow: 0 0 0 2px var(--semantic-focus-ring, rgba(99, 102, 241, 0.3));
+}
+
+.quick-entry-field input[aria-invalid='true'],
+.quick-entry-field select[aria-invalid='true'] {
+  border-color: var(--semantic-error, #ef4444);
+}
+
+.quick-entry-field__error {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--semantic-error, #ef4444);
+}
+
+/* ==========================================================================
+ * Action Buttons
+ * ========================================================================== */
+
+.quick-entry-actions {
+  display: flex;
+  gap: var(--spacing-2, 8px);
+  justify-content: flex-end;
+  margin-top: var(--spacing-4, 16px);
+}
+
+.quick-entry-actions button {
+  padding: var(--spacing-2, 8px) var(--spacing-4, 16px);
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+  cursor: pointer;
+  transition: background var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+
+.quick-entry-actions button:focus-visible {
+  outline: 2px solid var(--semantic-focus-ring, #818cf8);
+  outline-offset: 2px;
+}
+
+.quick-entry-btn--cancel {
+  background: var(--semantic-background-secondary, #f3f4f6);
+  color: var(--semantic-text-secondary, #555);
+}
+
+.quick-entry-btn--cancel:hover {
+  background: var(--semantic-background-tertiary, #e5e7eb);
+}
+
+.quick-entry-btn--save {
+  background: var(--semantic-action-primary, #6366f1);
+  color: var(--semantic-text-on-primary, #fff);
+}
+
+.quick-entry-btn--save:hover {
+  background: var(--semantic-action-primary-hover, #4f46e5);
+}
+
+.quick-entry-btn--save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+ * Save Feedback Animation
+ * ========================================================================== */
+
+@keyframes quickEntrySavePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.quick-entry-panel--saving {
+  animation: quickEntrySavePulse var(--duration-normal, 250ms) var(--easing-standard, ease);
+}
+
+/* ==========================================================================
+ * Reduced Motion
+ * ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-entry-fab {
+    transition: none;
+  }
+
+  .quick-entry-backdrop {
+    animation: none;
+  }
+
+  .quick-entry-panel {
+    animation: none;
+  }
+
+  .quick-entry-panel--saving {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+ * Dark Mode
+ * ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  .quick-entry-backdrop {
+    background: rgba(0, 0, 0, 0.5);
+  }
+}
+
+[data-theme='dark'] .quick-entry-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+ * High Contrast
+ * ========================================================================== */
+
+@media (prefers-contrast: more) {
+  .quick-entry-field input,
+  .quick-entry-field select {
+    border-width: 2px;
+  }
+
+  .quick-entry-fab {
+    border: 2px solid var(--semantic-text-on-primary, #fff);
+  }
+}
