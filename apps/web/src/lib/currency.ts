@@ -79,7 +79,8 @@ export function formatCurrency(
     signDisplay = 'auto',
   } = options;
 
-  const amountInMajorUnits = amountInCents / 100;
+  // Normalize −0 to +0 so Intl.NumberFormat doesn't render "-$0.00"
+  const amountInMajorUnits = amountInCents / 100 || 0;
 
   return new Intl.NumberFormat(locale, {
     style: 'currency',
