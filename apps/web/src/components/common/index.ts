@@ -56,6 +56,9 @@ export type { EntityEmptyStateProps, WelcomeScreenProps } from './EntityEmptySta
 export { BrowserWarning } from './BrowserWarning';
 export type { BrowserWarningProps } from './BrowserWarning';
 
+export { UndoBar } from './UndoBar';
+export type { UndoBarProps } from './UndoBar';
+
 // Animations
 export {
   ConfettiAnimation,

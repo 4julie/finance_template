@@ -106,3 +106,12 @@ export { useDebouncedSearch } from './useDebouncedSearch';
 export type { UseDebouncedSearchResult, UseDebouncedSearchOptions } from './useDebouncedSearch';
 export { useBrowserSupport } from './useBrowserSupport';
 export type { UseBrowserSupportResult } from './useBrowserSupport';
+export { useMilestones } from './useMilestones';
+export type {
+  UseMilestonesResult,
+  MilestoneProgress,
+  Milestone,
+  MilestoneType,
+} from './useMilestones';
+export { useUndo } from './useUndo';
+export type { UseUndoResult, UseUndoOptions, UndoableAction, UndoExecuteInput } from './useUndo';
