@@ -1,0 +1,112 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/**
+ * ErrorBanner — theme-aware styles for error alert banners.
+ *
+ * Uses semantic tokens so the component adapts automatically to light,
+ * dark, and high-contrast modes. The error-banner background is derived
+ * from the raw palette because no semantic "surface-error" token exists
+ * yet; dark-mode overrides remap it to a dark-appropriate tint.
+ */
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--color-red-50);
+  border: 1px solid var(--semantic-status-negative);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-4);
+}
+
+.error-banner__icon {
+  flex-shrink: 0;
+  stroke: var(--semantic-status-negative);
+  stroke-width: 2;
+}
+
+.error-banner__message {
+  flex: 1;
+  margin: 0;
+  color: var(--semantic-status-negative);
+  font-size: var(--type-scale-body-font-size);
+  line-height: var(--type-scale-body-line-height);
+}
+
+.error-banner__retry {
+  padding: var(--spacing-1) var(--spacing-3);
+  border: 1px solid var(--semantic-status-negative);
+  border-radius: var(--border-radius-md);
+  background: none;
+  color: var(--semantic-status-negative);
+  cursor: pointer;
+  font-size: var(--type-scale-label-font-size);
+  font-weight: var(--type-scale-label-font-weight);
+}
+
+.error-banner__retry:hover {
+  background: var(--semantic-status-negative);
+  color: var(--semantic-text-inverse);
+}
+
+.error-banner__retry:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: 2px;
+}
+
+.error-banner__dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  background: none;
+  color: var(--semantic-status-negative);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  line-height: 1;
+}
+
+.error-banner__dismiss:hover {
+  background: var(--semantic-status-negative);
+  color: var(--semantic-text-inverse);
+}
+
+.error-banner__dismiss:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: 2px;
+}
+
+/*
+ * Dark mode — remap the banner background to a dark-red tint that
+ * keeps WCAG AA contrast against --semantic-status-negative text
+ * (red-500 #ef4444 on dark red bg ≈ 5.2:1 contrast ratio).
+ */
+[data-theme='dark'] .error-banner {
+  background: color-mix(in srgb, var(--color-red-700) 25%, var(--semantic-background-primary));
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']):not([data-theme='dark']) .error-banner {
+    background: color-mix(in srgb, var(--color-red-700) 25%, var(--semantic-background-primary));
+  }
+}
+
+/*
+ * OLED dark theme — true-black-friendly error surface.
+ */
+[data-theme='dark-oled'] .error-banner {
+  background: color-mix(in srgb, var(--color-red-700) 20%, #000000);
+}
+
+/*
+ * High contrast — thicker border for visibility.
+ */
+@media (prefers-contrast: more) {
+  .error-banner {
+    border-width: 2px;
+  }
+}
