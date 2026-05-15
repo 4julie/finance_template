@@ -259,58 +259,38 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
     [config.loginEndpoint],
   );
 
-  const loginWithPasskey = useCallback(
-    async (email?: string): Promise<void> => {
-      setError(null);
-      setIsLoading(true);
+  const loginWithPasskey = useCallback(async (email?: string): Promise<void> => {
+    setError(null);
+    setIsLoading(true);
 
-      try {
-        const result = await authenticateWithPasskey(email);
+    try {
+      const result = await authenticateWithPasskey(email);
 
-        // After passkey verification, exchange for a session token.
-        // The backend returns a session via Set-Cookie + access_token.
-        const sessionResponse = await fetch(
-          `${config.supabaseUrl}/functions/v1/passkey-authenticate?step=session`,
-          {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-              apikey: config.supabaseAnonKey,
-            },
-            body: JSON.stringify({ user_id: result.userId }),
-          },
-        );
-
-        if (sessionResponse.ok) {
-          const sessionData = (await sessionResponse.json()) as {
-            access_token: string;
-            user: { id: string; email: string };
-          };
-          setAccessToken(sessionData.access_token);
-          setUser({
-            id: sessionData.user.id,
-            email: sessionData.user.email,
-            hasPasskey: true,
-          });
-        } else {
-          // Fallback: use the user_id from the passkey result
-          setUser({
-            id: result.userId,
-            email: email ?? '',
-            hasPasskey: true,
-          });
-        }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Passkey authentication failed';
-        setError(message);
-        throw err;
-      } finally {
-        setIsLoading(false);
+      // The verify step returns a full Supabase session (access_token,
+      // refresh_token, user). No separate session-minting call is needed —
+      // binding session issuance to the WebAuthn ceremony eliminates the
+      // CSRF risk of a detached session endpoint (#1310).
+      if (result.accessToken) {
+        setAccessToken(result.accessToken);
+        setUser({
+          id: result.userId,
+          email: result.email ?? email ?? '',
+          hasPasskey: true,
+        });
+      } else {
+        // Defensive fallback — should not occur with a correctly
+        // configured server, but avoids a blank screen if the server
+        // response shape changes.
+        throw new Error('Passkey verification succeeded but no session token was returned.');
       }
-    },
-    [config.supabaseUrl, config.supabaseAnonKey],
-  );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Passkey authentication failed';
+      setError(message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   const registerNewPasskey = useCallback(async (): Promise<void> => {
     setError(null);

@@ -39,6 +39,14 @@ export interface RegistrationResult {
 export interface AuthenticationResult {
   verified: boolean;
   userId: string;
+  /** Access token from the minted session (set when the server returns a full session). */
+  accessToken?: string;
+  /** Refresh token from the minted session. */
+  refreshToken?: string;
+  /** Token expiry in seconds. */
+  expiresIn?: number;
+  /** User email from the minted session. */
+  email?: string;
 }
 
 /** Registration options returned by the server (PublicKeyCredentialCreationOptionsJSON). */
@@ -386,18 +394,28 @@ export async function authenticateWithPasskey(email?: string): Promise<Authentic
     clientExtensionResults: credential.getClientExtensionResults(),
   };
 
-  // Step 5: Send assertion to server for verification
+  // Step 5: Send assertion to server for verification.
+  // The verify step returns a full Supabase session (access_token,
+  // refresh_token, user) — no separate session-minting call is needed.
   const result = await callEdgeFunction<{
     verified: boolean;
     user_id: string;
+    access_token?: string;
+    refresh_token?: string;
+    expires_in?: number;
+    user?: { id: string; email?: string };
   }>('passkey-authenticate', 'verify', assertionBody);
 
-  if (!result.verified) {
+  if (!result.verified && !result.access_token) {
     throw new Error('Server rejected the authentication.');
   }
 
   return {
-    verified: result.verified,
-    userId: result.user_id,
+    verified: result.verified ?? true,
+    userId: result.user?.id ?? result.user_id,
+    accessToken: result.access_token,
+    refreshToken: result.refresh_token,
+    expiresIn: result.expires_in,
+    email: result.user?.email,
   };
 }
