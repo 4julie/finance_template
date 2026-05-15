@@ -12,6 +12,7 @@
 
 import type { FC, ReactNode } from 'react';
 
+import { WidgetErrorBoundary } from '../common';
 import type { WidgetSize } from './widget-types';
 
 // ---------------------------------------------------------------------------
@@ -49,6 +50,10 @@ export const WidgetContainer: FC<WidgetContainerProps> = ({ id, title, size, chi
     <div className="widget__header">
       <h3 className="widget__title">{title}</h3>
     </div>
-    <div className="widget__body">{children}</div>
+    <div className="widget__body">
+      <WidgetErrorBoundary widgetId={id} widgetName={title}>
+        {children}
+      </WidgetErrorBoundary>
+    </div>
   </article>
 );

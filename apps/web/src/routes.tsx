@@ -5,6 +5,7 @@ import type { FC, ReactNode } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
 import { ProtectedRoute, useAuth } from './auth/auth-context';
+import { RouteErrorBoundary } from './components/common';
 
 /*
  * Lazy-loaded route pages - each is code-split into its own chunk.
@@ -43,6 +44,18 @@ const PageLoader: FC = () => (
   <div role="status" aria-live="polite" aria-label="Loading page">
     <p>Loading...</p>
   </div>
+);
+
+/**
+ * Wraps a lazy-loaded page in Suspense and a RouteErrorBoundary.
+ *
+ * This ensures each route is independently isolated — a crash in one
+ * page does not take down the entire app or other routes.
+ */
+const RouteBoundary: FC<{ name: string; children: ReactNode }> = ({ name, children }) => (
+  <RouteErrorBoundary routeName={name}>
+    <Suspense fallback={<PageLoader />}>{children}</Suspense>
+  </RouteErrorBoundary>
 );
 
 interface AuthenticatedRouteProps {
@@ -86,17 +99,17 @@ export const AppRoutes: FC = () => (
     <Route
       path="/login"
       element={
-        <Suspense fallback={<PageLoader />}>
+        <RouteBoundary name="Login">
           <Login />
-        </Suspense>
+        </RouteBoundary>
       }
     />
     <Route
       path="/signup"
       element={
-        <Suspense fallback={<PageLoader />}>
+        <RouteBoundary name="Sign Up">
           <Signup />
-        </Suspense>
+        </RouteBoundary>
       }
     />
 
@@ -104,9 +117,9 @@ export const AppRoutes: FC = () => (
       path="/dashboard"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Dashboard">
             <Dashboard />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -114,9 +127,9 @@ export const AppRoutes: FC = () => (
       path="/accounts"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Accounts">
             <Accounts />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -124,9 +137,9 @@ export const AppRoutes: FC = () => (
       path="/accounts/:id"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Account Detail">
             <AccountDetail />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -134,9 +147,9 @@ export const AppRoutes: FC = () => (
       path="/transactions"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Transactions">
             <Transactions />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -144,9 +157,9 @@ export const AppRoutes: FC = () => (
       path="/transactions/:id"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Transaction Detail">
             <TransactionDetail />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -154,9 +167,9 @@ export const AppRoutes: FC = () => (
       path="/budgets"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Budgets">
             <Budgets />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -164,9 +177,9 @@ export const AppRoutes: FC = () => (
       path="/budgets/:id"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Budget Detail">
             <BudgetDetail />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -174,9 +187,9 @@ export const AppRoutes: FC = () => (
       path="/goals"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Goals">
             <Goals />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -184,9 +197,9 @@ export const AppRoutes: FC = () => (
       path="/goals/:id"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Goal Detail">
             <GoalDetail />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -194,9 +207,9 @@ export const AppRoutes: FC = () => (
       path="/import"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Import">
             <Import />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -204,9 +217,9 @@ export const AppRoutes: FC = () => (
       path="/insights"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Insights">
             <Insights />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -214,9 +227,9 @@ export const AppRoutes: FC = () => (
       path="/achievements"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Achievements">
             <Achievements />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -224,9 +237,9 @@ export const AppRoutes: FC = () => (
       path="/settings"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Settings">
             <Settings />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -234,9 +247,9 @@ export const AppRoutes: FC = () => (
       path="/watchlists"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Watchlists">
             <Watchlists />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -244,9 +257,9 @@ export const AppRoutes: FC = () => (
       path="/investments"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Investments">
             <Investments />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -254,9 +267,9 @@ export const AppRoutes: FC = () => (
       path="/investments/:id"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Investment Detail">
             <InvestmentDetail />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -264,9 +277,9 @@ export const AppRoutes: FC = () => (
       path="/bills"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Bills">
             <Bills />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -274,9 +287,9 @@ export const AppRoutes: FC = () => (
       path="/bills/new"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Create Bill">
             <CreateBill />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -284,9 +297,9 @@ export const AppRoutes: FC = () => (
       path="/bills/:id"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Bill Detail">
             <BillDetail />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -294,9 +307,9 @@ export const AppRoutes: FC = () => (
       path="/import/wizard"
       element={
         <AuthenticatedRoute>
-          <Suspense fallback={<PageLoader />}>
+          <RouteBoundary name="Data Import Wizard">
             <DataImportWizard />
-          </Suspense>
+          </RouteBoundary>
         </AuthenticatedRoute>
       }
     />
@@ -304,9 +317,9 @@ export const AppRoutes: FC = () => (
     <Route
       path="*"
       element={
-        <Suspense fallback={<PageLoader />}>
+        <RouteBoundary name="Page">
           <NotFound />
-        </Suspense>
+        </RouteBoundary>
       }
     />
   </Routes>
