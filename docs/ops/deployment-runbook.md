@@ -21,7 +21,7 @@ This runbook describes the steps for deploying the Finance monorepo to productio
 ## Database Migrations
 
 - Apply migrations using the approved tool (SQLDelight, Supabase CLI, etc.).
-- Always backup before applying migrations.
+- **Always backup before applying migrations** — see [Backup and Disaster Recovery](backup-disaster-recovery.md).
 
 ## Smoke Tests
 
@@ -31,7 +31,7 @@ This runbook describes the steps for deploying the Finance monorepo to productio
 ## Rollback
 
 - Revert the deployment commit and re-run the workflow.
-- For database, use migration tool rollback.
+- For database, use migration tool rollback or restore from backup — see [Backup and Disaster Recovery](backup-disaster-recovery.md).
 
 ## Monitoring & Handoff
 
