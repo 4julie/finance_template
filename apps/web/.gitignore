@@ -1,1 +1,4 @@
 .vercel
+
+# sql.js WASM binary — copied from node_modules by vite.config.ts plugin
+public/assets/sql-wasm/
