@@ -28,6 +28,7 @@ export const LoginPage: React.FC = () => {
     isLoading,
     error,
     webAuthnSupported,
+    isDemoMode,
   } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -125,6 +126,12 @@ export const LoginPage: React.FC = () => {
             Secure financial tracking for you and your household
           </p>
         </header>
+
+        {isDemoMode && (
+          <div className="auth-demo-banner" role="status">
+            🧪 Demo Mode — No backend configured. Data is stored locally.
+          </div>
+        )}
 
         {error && (
           <div

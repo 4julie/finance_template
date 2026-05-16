@@ -46,6 +46,8 @@ import {
   setAccessToken,
 } from './token-storage';
 
+import { demoLogin, demoRefreshToken, demoSignup, isDemoMode } from './demo-auth';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -93,6 +95,8 @@ export interface AuthContextValue extends AuthActions {
   error: string | null;
   /** Whether WebAuthn is supported in the current browser. */
   webAuthnSupported: boolean;
+  /** Whether the app is running in demo mode (no backend configured). */
+  isDemoMode: boolean;
 }
 
 /** Configuration for the AuthProvider. */
@@ -147,6 +151,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
   const [error, setError] = useState<string | null>(null);
   const [webAuthnSupported] = useState(() => isWebAuthnSupported());
 
+  const demoModeActive = isDemoMode(config.supabaseUrl);
   const isAuthenticated = user !== null && hasValidToken();
 
   // -----------------------------------------------------------------------
@@ -154,6 +159,20 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
   // -----------------------------------------------------------------------
 
   useEffect(() => {
+    if (demoModeActive) {
+      // In demo mode, use a no-op refresh endpoint and skip WebAuthn
+      initTokenManager({
+        refreshEndpoint: '',
+        onSessionExpired: () => {
+          setUser(null);
+          clearTokens();
+          config.onUnauthenticated?.();
+        },
+      });
+      setIsLoading(false);
+      return;
+    }
+
     // Initialise token manager
     initTokenManager({
       refreshEndpoint: config.refreshEndpoint,
@@ -223,6 +242,17 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       setIsLoading(true);
 
       try {
+        if (demoModeActive) {
+          const result = demoLogin(email, password);
+          setAccessToken(result.accessToken);
+          setUser({
+            id: result.user.id,
+            email: result.user.email,
+            hasPasskey: false,
+          });
+          return;
+        }
+
         const response = await fetch(config.loginEndpoint, {
           method: 'POST',
           credentials: 'include', // Receive Set-Cookie
@@ -256,7 +286,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
         setIsLoading(false);
       }
     },
-    [config.loginEndpoint],
+    [config.loginEndpoint, demoModeActive],
   );
 
   const loginWithPasskey = useCallback(async (email?: string): Promise<void> => {
@@ -316,7 +346,9 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
     setError(null);
 
     try {
-      await revokeRefreshToken(config.logoutEndpoint);
+      if (!demoModeActive) {
+        await revokeRefreshToken(config.logoutEndpoint);
+      }
     } catch {
       // Best-effort — clear local state regardless
     } finally {
@@ -324,9 +356,20 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       setUser(null);
       config.onUnauthenticated?.();
     }
-  }, [config]);
+  }, [config, demoModeActive]);
 
   const refresh = useCallback(async (): Promise<void> => {
+    if (demoModeActive) {
+      // In demo mode, generate a fresh token if we have a user
+      if (user?.email) {
+        const newToken = demoRefreshToken(user.email);
+        if (newToken) {
+          setAccessToken(newToken);
+        }
+      }
+      return;
+    }
+
     try {
       const token = await refreshAccessToken();
       if (!token) {
@@ -337,7 +380,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       setUser(null);
       config.onUnauthenticated?.();
     }
-  }, [config]);
+  }, [config, demoModeActive, user?.email]);
 
   const signupWithEmail = useCallback(
     async (email: string, password: string): Promise<void> => {
@@ -345,6 +388,11 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       setIsLoading(true);
 
       try {
+        if (demoModeActive) {
+          demoSignup(email, password);
+          return;
+        }
+
         const endpoint = config.signupEndpoint ?? '/api/auth/signup';
         const response = await fetch(endpoint, {
           method: 'POST',
@@ -366,12 +414,18 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
         setIsLoading(false);
       }
     },
-    [config.signupEndpoint],
+    [config.signupEndpoint, demoModeActive],
   );
 
   const loginWithOAuth = useCallback(
     async (provider: OAuthProvider): Promise<void> => {
       setError(null);
+
+      if (demoModeActive) {
+        setError(`OAuth (${provider}) is not available in demo mode. Use email/password instead.`);
+        return;
+      }
+
       setIsLoading(true);
 
       try {
@@ -386,7 +440,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
         throw err;
       }
     },
-    [config.supabaseUrl],
+    [config.supabaseUrl, demoModeActive],
   );
 
   // -----------------------------------------------------------------------
@@ -400,6 +454,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       user,
       error,
       webAuthnSupported,
+      isDemoMode: demoModeActive,
       loginWithEmail,
       loginWithPasskey,
       loginWithOAuth,
@@ -414,6 +469,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       user,
       error,
       webAuthnSupported,
+      demoModeActive,
       loginWithEmail,
       loginWithPasskey,
       loginWithOAuth,
