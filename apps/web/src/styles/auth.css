@@ -256,3 +256,24 @@
     background: rgba(59, 130, 246, 0.12);
   }
 }
+
+/* ─── Demo mode banner ───────────────────────────────────────────────────── */
+
+.auth-demo-banner {
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--border-radius-md);
+  background: var(--color-amber-50, #fffbeb);
+  border: 1px solid var(--color-amber-200, #fde68a);
+  color: var(--color-amber-800, #92400e);
+  font-size: var(--type-scale-caption-font-size, 0.875rem);
+  text-align: center;
+  margin-bottom: var(--spacing-4);
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .auth-demo-banner {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: var(--color-amber-300, #fcd34d);
+  }
+}

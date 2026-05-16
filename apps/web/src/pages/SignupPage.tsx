@@ -44,7 +44,7 @@ interface SubmitMessage {
  */
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signupWithEmail, error: authError, isLoading } = useAuth();
+  const { signupWithEmail, error: authError, isLoading, isDemoMode: demoMode } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -174,6 +174,12 @@ export const SignupPage: React.FC = () => {
           <h1 className="auth-brand__name">Finance</h1>
           <p className="auth-brand__tagline">Create your account</p>
         </header>
+
+        {demoMode && (
+          <div className="auth-demo-banner" role="status">
+            🧪 Demo Mode — No backend configured. Data is stored locally.
+          </div>
+        )}
 
         {displayMessage && (
           <div

@@ -1,13 +1,43 @@
 // SPDX-License-Identifier: BUSL-1.1
 
+import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
+
+/**
+ * Vite plugin that copies sql.js WASM binary to the public assets directory.
+ *
+ * sql.js uses `locateFile` to fetch its WASM binary at runtime via a network
+ * request. The binary must be served as a static asset at the path specified
+ * in `initIndexedDbBackend()` (`/assets/sql-wasm/sql-wasm.wasm`).
+ */
+function copySqlJsWasm(): Plugin {
+  const srcPath = resolve(__dirname, '../../node_modules/sql.js/dist/sql-wasm.wasm');
+  const destDir = resolve(__dirname, 'public/assets/sql-wasm');
+  const destPath = resolve(destDir, 'sql-wasm.wasm');
+
+  return {
+    name: 'copy-sql-js-wasm',
+    buildStart() {
+      if (!existsSync(srcPath)) {
+        this.warn('sql.js WASM binary not found — IndexedDB fallback will fail at runtime.');
+        return;
+      }
+      if (!existsSync(destDir)) {
+        mkdirSync(destDir, { recursive: true });
+      }
+      if (!existsSync(destPath)) {
+        copyFileSync(srcPath, destPath);
+      }
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), copySqlJsWasm()],
 
   resolve: {
     alias: {
