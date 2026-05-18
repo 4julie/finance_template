@@ -6,7 +6,11 @@ export { useCategories } from './useCategories';
 export { useDashboardData } from './useDashboardData';
 export { useGoals } from './useGoals';
 export { useKeyboardShortcuts } from './useKeyboardShortcuts';
-export type { UseKeyboardShortcutsResult } from './useKeyboardShortcuts';
+export type {
+  UseKeyboardShortcutsResult,
+  UseKeyboardShortcutsOptions,
+  ShortcutCategory,
+} from './useKeyboardShortcuts';
 export { useMutationQueue } from './useMutationQueue';
 export { useOfflineStatus } from './useOfflineStatus';
 export { useServiceWorkerUpdate } from './useServiceWorkerUpdate';

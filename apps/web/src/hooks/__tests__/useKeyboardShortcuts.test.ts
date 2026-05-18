@@ -55,6 +55,13 @@ describe('useKeyboardShortcuts', () => {
     expect(result.current.showHelp).toBe(false);
   });
 
+  it('exposes shortcutCategories for the help dialog', () => {
+    const { result } = renderHook(() => useKeyboardShortcuts());
+
+    expect(result.current.shortcutCategories.length).toBeGreaterThan(0);
+    expect(result.current.shortcutCategories[0].title).toBe('Navigation');
+  });
+
   // -----------------------------------------------------------------------
   // Key event registration
   // -----------------------------------------------------------------------
@@ -238,5 +245,114 @@ describe('useKeyboardShortcuts', () => {
     });
 
     expect(result.current.showHelp).toBe(false);
+  });
+
+  // -----------------------------------------------------------------------
+  // Two-key G sequences
+  // -----------------------------------------------------------------------
+
+  it('navigates to dashboard with G then D', () => {
+    const onNavigate = vi.fn();
+    renderHook(() => useKeyboardShortcuts({ onNavigate }));
+
+    act(() => {
+      fireKeyDown('g');
+    });
+    act(() => {
+      fireKeyDown('d');
+    });
+
+    expect(onNavigate).toHaveBeenCalledWith('/');
+  });
+
+  it('navigates to transactions with G then T', () => {
+    const onNavigate = vi.fn();
+    renderHook(() => useKeyboardShortcuts({ onNavigate }));
+
+    act(() => {
+      fireKeyDown('g');
+    });
+    act(() => {
+      fireKeyDown('t');
+    });
+
+    expect(onNavigate).toHaveBeenCalledWith('/transactions');
+  });
+
+  it('does not navigate if second key is unrecognised', () => {
+    const onNavigate = vi.fn();
+    renderHook(() => useKeyboardShortcuts({ onNavigate }));
+
+    act(() => {
+      fireKeyDown('g');
+    });
+    act(() => {
+      fireKeyDown('z');
+    });
+
+    expect(onNavigate).not.toHaveBeenCalled();
+  });
+
+  // -----------------------------------------------------------------------
+  // Single key actions
+  // -----------------------------------------------------------------------
+
+  it('calls onNewTransaction when N is pressed', () => {
+    const onNewTransaction = vi.fn();
+    renderHook(() => useKeyboardShortcuts({ onNewTransaction }));
+
+    act(() => {
+      fireKeyDown('n');
+    });
+
+    expect(onNewTransaction).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onFocusSearch when / is pressed without shift', () => {
+    const onFocusSearch = vi.fn();
+    renderHook(() => useKeyboardShortcuts({ onFocusSearch }));
+
+    act(() => {
+      fireKeyDown('/');
+    });
+
+    expect(onFocusSearch).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onListNavigate(1) when J is pressed', () => {
+    const onListNavigate = vi.fn();
+    renderHook(() => useKeyboardShortcuts({ onListNavigate }));
+
+    act(() => {
+      fireKeyDown('j');
+    });
+
+    expect(onListNavigate).toHaveBeenCalledWith(1);
+  });
+
+  it('calls onListNavigate(-1) when K is pressed', () => {
+    const onListNavigate = vi.fn();
+    renderHook(() => useKeyboardShortcuts({ onListNavigate }));
+
+    act(() => {
+      fireKeyDown('k');
+    });
+
+    expect(onListNavigate).toHaveBeenCalledWith(-1);
+  });
+
+  it('does not call onNewTransaction when N is pressed in an input', () => {
+    const onNewTransaction = vi.fn();
+    renderHook(() => useKeyboardShortcuts({ onNewTransaction }));
+
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+
+    act(() => {
+      fireKeyDown('n', {}, input);
+    });
+
+    expect(onNewTransaction).not.toHaveBeenCalled();
+    document.body.removeChild(input);
   });
 });

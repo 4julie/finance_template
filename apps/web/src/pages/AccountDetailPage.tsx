@@ -10,6 +10,7 @@ import { useAccounts, useTransactions } from '../hooks';
 import type { Account } from '../kmp/bridge';
 import '../components/navigation/breadcrumb.css';
 import '../styles/pages.css';
+import { formatDate } from '../utils/formatDate';
 
 const ACCOUNT_TYPE_LABELS: Record<string, string> = {
   CHECKING: 'Checking',
@@ -159,7 +160,7 @@ export const AccountDetailPage: React.FC = () => {
                     >
                       <div className="list-item__content">
                         <p className="list-item__primary">{label}</p>
-                        <p className="list-item__secondary">{transaction.date}</p>
+                        <p className="list-item__secondary">{formatDate(transaction.date)}</p>
                       </div>
                       <div className="list-item__trailing">
                         <CurrencyDisplay

@@ -62,6 +62,7 @@ describe('AppLayout', () => {
     vi.mocked(useKeyboardShortcuts).mockReturnValue({
       showHelp: false,
       setShowHelp: mockSetShowHelp,
+      shortcutCategories: [],
     });
     mockSetShowHelp.mockClear();
   });
