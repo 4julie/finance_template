@@ -44,9 +44,7 @@ vi.mock('../common', () => ({
   SyncStatusBar: () => <div data-testid="sync-status-bar">Sync Status</div>,
 }));
 
-vi.mock('../OfflineBanner', () => ({
-  OfflineBanner: () => <div data-testid="offline-banner">Offline Banner</div>,
-}));
+// OfflineBanner removed — SyncStatusBar handles offline state
 
 vi.mock('../common/InstallBanner', () => ({
   InstallBanner: () => <div data-testid="install-banner">Install Banner</div>,
@@ -160,10 +158,10 @@ describe('AppLayout', () => {
     expect(screen.getByTestId('update-banner')).toBeInTheDocument();
   });
 
-  it('renders the OfflineBanner', () => {
+  it('renders without the removed OfflineBanner (offline state handled by SyncStatusBar)', () => {
     render(<AppLayout {...defaultProps} />);
 
-    expect(screen.getByTestId('offline-banner')).toBeInTheDocument();
+    expect(screen.queryByTestId('offline-banner')).not.toBeInTheDocument();
   });
 
   it('renders the InstallBanner', () => {
