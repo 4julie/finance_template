@@ -12,6 +12,10 @@ vi.mock('../hooks', () => ({
   useCategories: vi.fn(),
 }));
 
+vi.mock('../components/forms', () => ({
+  BudgetForm: () => null,
+}));
+
 const mockedUseBudgets = vi.mocked(useBudgets);
 const mockedUseCategories = vi.mocked(useCategories);
 

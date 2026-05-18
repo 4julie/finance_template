@@ -11,6 +11,10 @@ vi.mock('../hooks', () => ({
   useGoals: vi.fn(),
 }));
 
+vi.mock('../components/forms', () => ({
+  GoalForm: () => null,
+}));
+
 const mockedUseGoals = vi.mocked(useGoals);
 
 const syncMetadata = {
