@@ -42,7 +42,9 @@ Created (Triage) → Shaping → Ready → In Progress → In Review → Done
 
 ### Platform
 
-`ios`, `android`, `web`, `windows`, `shared`, `backend`
+`platform:ios`, `platform:android`, `platform:web`, `platform:windows`, `platform:shared`, `platform:backend`
+
+> See `issue-management` skill for the full decision tree on when to use each label and when to create platform-specific duplicate issues.
 
 ### Effort (T-shirt)
 
@@ -267,3 +269,14 @@ Every sprint includes at least 1 business task:
 3. One issue per concern
 4. Acceptance criteria before Ready
 5. Cross-reference related issues with `Refs #N`
+6. Cross-platform issues need proper scoping (see `issue-management` skill)
+7. Platform-specific duplicates required when fix implementation differs by platform
+
+## Related Skills
+
+| Skill                 | Scope                                                         |
+| --------------------- | ------------------------------------------------------------- |
+| `issue-management`    | Issue creation quality, platform scoping, duplicate decisions |
+| `ux-testing`          | Testing methodology, bug investigation, session orchestration |
+| `sprint-planning`     | Sprint sizing, workload balancing, agent dispatch             |
+| `fleet-orchestration` | Parallel agent execution, worktree coordination               |
