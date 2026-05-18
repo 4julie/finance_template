@@ -5,6 +5,7 @@ import React, { useCallback, useState } from 'react';
 import { useAuth } from '../auth/auth-context';
 import { DataExport } from '../components/DataExport';
 import { PrivacySettings } from '../components/gdpr';
+import { SettingInfoWidget } from '../components/settings';
 import { useOfflineStatus } from '../hooks/useOfflineStatus';
 import { useTheme } from '../hooks/useTheme';
 import type { ThemeValue } from '../hooks/useTheme';
@@ -153,72 +154,80 @@ export const SettingsPage: React.FC = () => {
       <section aria-label="Preferences" className="page-section">
         <div className="settings-group">
           <h3 className="settings-group__title">Preferences</h3>
-          <div className="settings-item settings-item--static">
-            <label className="settings-item__label" htmlFor="settings-currency">
-              Currency
-            </label>
-            <div className="settings-item__control">
-              <select
-                id="settings-currency"
-                aria-label="Currency"
-                className="settings-item__select"
-                value={currency}
-                onChange={handleCurrencyChange}
-              >
-                {currencyOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+          <SettingInfoWidget settingKey="currency">
+            <div className="settings-item settings-item--static">
+              <label className="settings-item__label" htmlFor="settings-currency">
+                Currency
+              </label>
+              <div className="settings-item__control">
+                <select
+                  id="settings-currency"
+                  aria-label="Currency"
+                  className="settings-item__select"
+                  value={currency}
+                  onChange={handleCurrencyChange}
+                >
+                  {currencyOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
-          <div className="settings-item settings-item--static">
-            <label className="settings-item__label" htmlFor="settings-theme">
-              Theme
-            </label>
-            <div className="settings-item__control">
-              <select
-                id="settings-theme"
-                aria-label="Theme"
-                className="settings-item__select"
-                value={theme}
-                onChange={handleThemeChange}
-              >
-                {themes.map((themeOption) => (
-                  <option key={themeOption} value={themeOption}>
-                    {THEME_LABELS[themeOption]}
-                  </option>
-                ))}
-              </select>
+          </SettingInfoWidget>
+          <SettingInfoWidget settingKey="theme">
+            <div className="settings-item settings-item--static">
+              <label className="settings-item__label" htmlFor="settings-theme">
+                Theme
+              </label>
+              <div className="settings-item__control">
+                <select
+                  id="settings-theme"
+                  aria-label="Theme"
+                  className="settings-item__select"
+                  value={theme}
+                  onChange={handleThemeChange}
+                >
+                  {themes.map((themeOption) => (
+                    <option key={themeOption} value={themeOption}>
+                      {THEME_LABELS[themeOption]}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
-          <div className="settings-item settings-item--static">
-            <label className="settings-item__label" htmlFor="s-notif">
-              Notifications
-            </label>
-            <input
-              type="checkbox"
-              id="s-notif"
-              checked={notificationsEnabled}
-              onChange={handleNotificationsChange}
-              aria-label="Notifications"
-              className="settings-item__checkbox"
-            />
-          </div>
-          <div className="settings-item settings-item--static">
-            <label className="settings-item__label" htmlFor="s-monitoring">
-              Error Reporting
-            </label>
-            <input
-              type="checkbox"
-              id="s-monitoring"
-              checked={monitoringEnabled}
-              onChange={handleMonitoringChange}
-              aria-label="Send anonymous error reports to help improve the app"
-              className="settings-item__checkbox"
-            />
-          </div>
+          </SettingInfoWidget>
+          <SettingInfoWidget settingKey="notifications">
+            <div className="settings-item settings-item--static">
+              <label className="settings-item__label" htmlFor="s-notif">
+                Notifications
+              </label>
+              <input
+                type="checkbox"
+                id="s-notif"
+                checked={notificationsEnabled}
+                onChange={handleNotificationsChange}
+                aria-label="Notifications"
+                className="settings-item__checkbox"
+              />
+            </div>
+          </SettingInfoWidget>
+          <SettingInfoWidget settingKey="monitoring">
+            <div className="settings-item settings-item--static">
+              <label className="settings-item__label" htmlFor="s-monitoring">
+                Error Reporting
+              </label>
+              <input
+                type="checkbox"
+                id="s-monitoring"
+                checked={monitoringEnabled}
+                onChange={handleMonitoringChange}
+                aria-label="Send anonymous error reports to help improve the app"
+                className="settings-item__checkbox"
+              />
+            </div>
+          </SettingInfoWidget>
         </div>
       </section>
       <section aria-label="Security" className="page-section">
@@ -230,33 +239,37 @@ export const SettingsPage: React.FC = () => {
               {isAuthenticated ? (user?.email ?? 'Not signed in') : 'Not signed in'}
             </span>
           </div>
-          <button
-            type="button"
-            className="settings-item settings-item--button"
-            disabled
-            aria-disabled="true"
-            aria-label="Biometric lock — available in a future update"
-          >
-            <span className="settings-item__label">Biometric Lock</span>
-            <span className="settings-item__value settings-item__value--muted">Coming soon</span>
-          </button>
-          {!demoModeActive && (
+          <SettingInfoWidget settingKey="biometricLock">
             <button
               type="button"
               className="settings-item settings-item--button"
-              onClick={() => {
-                void handlePasskeyRegistration();
-              }}
-              disabled={!isAuthenticated || isPasskeyLoading}
-              aria-label={
-                user?.hasPasskey ? 'Passkeys — registered' : 'Passkeys — set up a passkey'
-              }
+              disabled
+              aria-disabled="true"
+              aria-label="Biometric lock — available in a future update"
             >
-              <span className="settings-item__label">Passkeys</span>
-              <span className="settings-item__value">
-                {isPasskeyLoading ? 'Registering…' : user?.hasPasskey ? '✓ Registered' : 'Set up'}
-              </span>
+              <span className="settings-item__label">Biometric Lock</span>
+              <span className="settings-item__value settings-item__value--muted">Coming soon</span>
             </button>
+          </SettingInfoWidget>
+          {!demoModeActive && (
+            <SettingInfoWidget settingKey="passkeys">
+              <button
+                type="button"
+                className="settings-item settings-item--button"
+                onClick={() => {
+                  void handlePasskeyRegistration();
+                }}
+                disabled={!isAuthenticated || isPasskeyLoading}
+                aria-label={
+                  user?.hasPasskey ? 'Passkeys — registered' : 'Passkeys — set up a passkey'
+                }
+              >
+                <span className="settings-item__label">Passkeys</span>
+                <span className="settings-item__value">
+                  {isPasskeyLoading ? 'Registering…' : user?.hasPasskey ? '✓ Registered' : 'Set up'}
+                </span>
+              </button>
+            </SettingInfoWidget>
           )}
           {!demoModeActive && passkeyMessage && (
             <div className="settings-item settings-item--static" role="status" aria-live="polite">
@@ -280,19 +293,23 @@ export const SettingsPage: React.FC = () => {
       <section aria-label="Data" className="page-section">
         <div className="settings-group">
           <h3 className="settings-group__title">Data</h3>
-          <DataExport />
-          <div className="settings-item settings-item--static" aria-live="polite">
-            <span className="settings-item__label">Sync Status</span>
-            <span className="settings-item__status">
-              <span
-                aria-hidden="true"
-                className={`settings-item__status-dot ${isOffline ? 'settings-item__status-dot--offline' : 'settings-item__status-dot--online'}`}
-              />
-              <span className="settings-item__value">
-                {isOffline ? 'Offline — changes saved locally' : 'Online — synced'}
+          <SettingInfoWidget settingKey="dataExport">
+            <DataExport />
+          </SettingInfoWidget>
+          <SettingInfoWidget settingKey="syncStatus">
+            <div className="settings-item settings-item--static" aria-live="polite">
+              <span className="settings-item__label">Sync Status</span>
+              <span className="settings-item__status">
+                <span
+                  aria-hidden="true"
+                  className={`settings-item__status-dot ${isOffline ? 'settings-item__status-dot--offline' : 'settings-item__status-dot--online'}`}
+                />
+                <span className="settings-item__value">
+                  {isOffline ? 'Offline — changes saved locally' : 'Online — synced'}
+                </span>
               </span>
-            </span>
-          </div>
+            </div>
+          </SettingInfoWidget>
         </div>
       </section>
       <section aria-label="About" className="page-section">

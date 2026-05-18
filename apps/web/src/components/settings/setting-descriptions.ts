@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: BUSL-1.1
+
+/**
+ * Map of setting keys to human-readable descriptions.
+ *
+ * Each entry provides context about what the setting controls,
+ * how it affects data, and recommended defaults. Structured for
+ * future i18n extraction (keys can map to translation IDs).
+ */
+
+export interface SettingDescription {
+  /** Brief summary of what this setting controls. */
+  summary: string;
+  /** How this setting affects user data or privacy. */
+  impact?: string;
+  /** Recommended value or guidance. */
+  recommendation?: string;
+}
+
+/** Setting descriptions keyed by setting identifier. */
+export const SETTING_DESCRIPTIONS: Record<string, SettingDescription> = {
+  currency: {
+    summary: 'Sets the default display currency for all accounts and transactions.',
+    impact:
+      'Changing this does not convert existing transaction amounts — it only affects how new transactions are displayed by default.',
+    recommendation: 'Choose the currency you use most frequently for daily spending.',
+  },
+  theme: {
+    summary: 'Controls the visual appearance of the app (light, dark, or system preference).',
+    impact:
+      'No effect on data. The OLED Dark option uses a pure black background to save battery on OLED screens.',
+    recommendation: 'Use "System" to follow your device settings automatically.',
+  },
+  notifications: {
+    summary: 'Enables browser notifications for bill reminders, budget alerts, and sync status.',
+    impact:
+      'When enabled, the app may request notification permission from your browser. No data is sent to external servers.',
+    recommendation: 'Enable for timely bill reminders and budget warnings.',
+  },
+  monitoring: {
+    summary: 'Sends anonymous error reports to help improve app stability.',
+    impact:
+      'Only crash data and performance metrics are collected — never financial data, account names, or transaction details.',
+    recommendation:
+      'Enable to help the development team fix bugs faster. Disable if you prefer maximum privacy.',
+  },
+  biometricLock: {
+    summary: 'Requires biometric authentication (fingerprint, face) to open the app.',
+    impact:
+      'Adds a security layer so others cannot access your financial data even if they have your device unlocked.',
+    recommendation: 'Enable on shared devices for additional security.',
+  },
+  passkeys: {
+    summary: 'Passwordless sign-in using device biometrics or security keys (WebAuthn).',
+    impact:
+      'Passkeys are stored securely on your device. They replace passwords and cannot be phished.',
+    recommendation: 'Register at least one passkey for secure, convenient sign-in.',
+  },
+  syncStatus: {
+    summary: 'Shows whether your data is synced to the cloud or stored locally only.',
+    impact:
+      'When offline, all changes are saved locally and will sync automatically when connectivity returns.',
+  },
+  dataExport: {
+    summary: 'Export all your financial data in a portable format (CSV or JSON).',
+    impact:
+      'Exported files contain all your transactions, accounts, and budgets. Store exports securely.',
+    recommendation: 'Export periodically as a backup, especially before major changes.',
+  },
+};

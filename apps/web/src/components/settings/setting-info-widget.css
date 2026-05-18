@@ -1,0 +1,111 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/* SettingInfoWidget styles */
+
+.setting-info-widget {
+  width: 100%;
+}
+
+.setting-info-widget__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+}
+
+.setting-info-widget__row > *:first-child {
+  flex: 1;
+}
+
+.setting-info-widget__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease;
+}
+
+.setting-info-widget__trigger:hover {
+  background-color: var(--semantic-background-secondary);
+}
+
+.setting-info-widget__trigger:focus-visible {
+  outline: 2px solid var(--semantic-focus);
+  outline-offset: 2px;
+}
+
+.setting-info-widget__icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.setting-info-widget__content {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height 0.25s ease,
+    opacity 0.2s ease,
+    padding 0.2s ease;
+  padding: 0 var(--spacing-3);
+}
+
+.setting-info-widget__content--expanded {
+  max-height: 300px;
+  opacity: 1;
+  padding: var(--spacing-3);
+}
+
+.setting-info-widget__content[hidden] {
+  display: block;
+  visibility: hidden;
+  max-height: 0;
+  opacity: 0;
+  padding: 0 var(--spacing-3);
+}
+
+.setting-info-widget__content--expanded[hidden] {
+  display: block;
+  visibility: visible;
+}
+
+.setting-info-widget__content--expanded {
+  visibility: visible;
+}
+
+.setting-info-widget__summary {
+  margin: 0 0 var(--spacing-2);
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+}
+
+.setting-info-widget__impact {
+  margin: 0 0 var(--spacing-2);
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+}
+
+.setting-info-widget__recommendation {
+  margin: 0;
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .setting-info-widget__content {
+    transition: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .setting-info-widget__trigger {
+    border: 2px solid var(--semantic-text-primary);
+  }
+}

@@ -1,0 +1,74 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/* AccountDeleteDialog styles */
+
+.account-delete-dialog__panel {
+  max-width: 480px;
+}
+
+.account-delete-dialog__section {
+  margin-bottom: var(--spacing-4);
+}
+
+.account-delete-dialog__warning {
+  font-size: var(--type-scale-body-font-size);
+  font-weight: 600;
+  color: var(--semantic-text-primary);
+  margin: 0 0 var(--spacing-2);
+}
+
+.account-delete-dialog__info {
+  font-size: var(--type-scale-body-font-size);
+  color: var(--semantic-text-secondary);
+  margin: 0;
+}
+
+.account-delete-dialog__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--type-scale-body-font-size);
+  cursor: pointer;
+}
+
+.account-delete-dialog__checkbox-label input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--semantic-error);
+}
+
+.account-delete-dialog__cascade-warning {
+  margin: var(--spacing-2) 0 0;
+  min-height: 1.5em;
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-error);
+}
+
+.account-delete-dialog__confirm-label {
+  display: block;
+  font-size: var(--type-scale-body-font-size);
+  color: var(--semantic-text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.account-delete-dialog__confirm-input {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--semantic-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--type-scale-body-font-size);
+}
+
+.account-delete-dialog__confirm-input[aria-invalid='true'] {
+  border-color: var(--semantic-error);
+}
+
+.account-delete-dialog__actions {
+  margin-top: var(--spacing-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-delete-dialog__panel {
+    animation: none;
+  }
+}
