@@ -128,10 +128,10 @@ export function DataImportWizardPage() {
   const currentStepIndex = steps.indexOf(step);
 
   return (
-    <main className="import-wizard" aria-labelledby="import-wizard-title">
-      <h1 id="import-wizard-title" className="import-wizard__title">
+    <div className="import-wizard" aria-labelledby="import-wizard-title">
+      <h2 id="import-wizard-title" className="import-wizard__title">
         Import Transactions
-      </h1>
+      </h2>
 
       {/* Step indicator */}
       <nav className="import-wizard__steps" aria-label="Import wizard progress">
@@ -430,7 +430,7 @@ export function DataImportWizardPage() {
           </button>
         </section>
       )}
-    </main>
+    </div>
   );
 }
 

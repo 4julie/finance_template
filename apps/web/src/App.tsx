@@ -22,6 +22,8 @@ const PAGE_TITLES: Record<string, string> = {
   '/achievements': 'Achievements',
   '/watchlists': 'Watchlists',
   '/settings': 'Settings',
+  '/import': 'Import',
+  '/import/wizard': 'Import Wizard',
 };
 
 /** Routes that are wrapped in AppLayout (authenticated main app pages). */
@@ -40,6 +42,8 @@ const AUTHENTICATED_ROUTES = new Set([
   '/achievements',
   '/watchlists',
   '/settings',
+  '/import',
+  '/import/wizard',
 ]);
 
 /**

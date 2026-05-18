@@ -42,9 +42,50 @@ function copySqlJsWasm(): Plugin {
   };
 }
 
+/**
+ * Vite plugin that injects a precache manifest into the service worker.
+ *
+ * During production builds, this plugin collects all generated JS and CSS
+ * asset paths from the Rollup bundle and defines `__PRECACHE_MANIFEST__`
+ * as a global constant in the service worker entry, enabling offline-first
+ * precaching of all route chunks during SW installation.
+ */
+function swPrecacheManifest(): Plugin {
+  return {
+    name: 'sw-precache-manifest',
+    apply: 'build',
+    generateBundle(_options, bundle) {
+      // Collect all JS and CSS asset paths from the build output
+      const assetPaths: string[] = [];
+      for (const [fileName, chunk] of Object.entries(bundle)) {
+        if (fileName === 'sw.js') continue; // Don't precache the SW itself
+        if (fileName.endsWith('.js') || fileName.endsWith('.css')) {
+          assetPaths.push(`/${fileName}`);
+        }
+        // Also include CSS assets referenced by chunks
+        if (chunk.type === 'chunk' && chunk.viteMetadata?.importedCss) {
+          for (const css of chunk.viteMetadata.importedCss) {
+            const cssPath = `/${css}`;
+            if (!assetPaths.includes(cssPath)) {
+              assetPaths.push(cssPath);
+            }
+          }
+        }
+      }
+
+      // Inject the manifest into the service worker bundle
+      const swEntry = bundle['sw.js'];
+      if (swEntry && swEntry.type === 'chunk') {
+        const manifest = JSON.stringify(assetPaths);
+        swEntry.code = `var __PRECACHE_MANIFEST__ = ${manifest};\n${swEntry.code}`;
+      }
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), copySqlJsWasm()],
+  plugins: [react(), copySqlJsWasm(), swPrecacheManifest()],
 
   resolve: {
     alias: {

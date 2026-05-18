@@ -6,6 +6,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
 import { ProtectedRoute, useAuth } from './auth/auth-context';
 import { RouteErrorBoundary } from './components/common';
+import './styles/route-loader.css';
 
 /*
  * Lazy-loaded route pages - each is code-split into its own chunk.
@@ -39,12 +40,27 @@ const CreateBill = lazy(() => import('./pages/CreateBillPage'));
 
 /**
  * Loading fallback shown while a lazy route chunk is being fetched.
- * Uses a semantic element and ARIA live region so screen readers
- * announce the loading state.
+ * Renders a shimmer skeleton layout matching the app shell structure.
+ * Uses CSS-only animations (no JS deps) and ARIA live region for
+ * screen reader announcements.
  */
 const PageLoader: FC = () => (
-  <div role="status" aria-live="polite" aria-label="Loading page">
-    <p>Loading...</p>
+  <div
+    className="route-loader"
+    role="status"
+    aria-live="polite"
+    aria-label="Loading page"
+    aria-busy="true"
+  >
+    <div className="route-loader__header" />
+    <div className="route-loader__content">
+      <div className="route-loader__line route-loader__line--wide" />
+      <div className="route-loader__line route-loader__line--medium" />
+      <div className="route-loader__line route-loader__line--narrow" />
+      <div className="route-loader__block" />
+      <div className="route-loader__line route-loader__line--wide" />
+      <div className="route-loader__line route-loader__line--medium" />
+    </div>
   </div>
 );
 
