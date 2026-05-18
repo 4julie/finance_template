@@ -37,12 +37,15 @@ const STATIC_CACHE = `finance-static-${CACHE_VERSION}`;
 const API_CACHE = `finance-api-${CACHE_VERSION}`;
 
 /**
- * App-shell resources to pre-cache during installation.
+ * Build-time precache manifest.
  *
- * These URLs are cache-first and guarantee the app loads offline.
- * Update this list whenever the build output changes.
+ * At build time, Vite injects __PRECACHE_MANIFEST__ with all generated
+ * JS/CSS chunk paths (populated by the sw-precache-manifest plugin).
+ * This ensures lazy route chunks are available offline even before first visit.
  */
-const APP_SHELL: string[] = ['/', '/index.html', '/manifest.json'];
+declare const __PRECACHE_MANIFEST__: string[];
+const PRECACHE_MANIFEST: string[] =
+  typeof __PRECACHE_MANIFEST__ !== 'undefined' ? __PRECACHE_MANIFEST__ : [];
 
 /**
  * File-extension patterns that qualify for cache-first treatment.
@@ -55,7 +58,21 @@ const STATIC_EXTENSIONS = /\.(js|css|woff2?|ttf|otf|eot|png|jpe?g|gif|svg|ico|we
 // ---------------------------------------------------------------------------
 
 self.addEventListener('install', (event: ExtendableEvent) => {
-  event.waitUntil(caches.open(STATIC_CACHE).then((cache) => cache.addAll(APP_SHELL)));
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then(async (cache) => {
+      // Always precache core app shell
+      await cache.addAll(['/', '/index.html', '/manifest.json']);
+      // Precache build chunks individually — a single failure should not
+      // block installation (e.g. dev mode without manifest).
+      await Promise.allSettled(
+        PRECACHE_MANIFEST.map((url) =>
+          cache.add(url).catch(() => {
+            /* non-critical: chunk will be cached on first visit */
+          }),
+        ),
+      );
+    }),
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -109,9 +126,9 @@ self.addEventListener('fetch', (event: FetchEvent) => {
     return;
   }
 
-  // Navigation requests (HTML) -> cache-first (SPA)
+  // Navigation requests (HTML) -> network-first with app-shell fallback (SPA)
   if (request.mode === 'navigate') {
-    event.respondWith(cacheFirst(request, '/index.html'));
+    event.respondWith(navigationHandler(request));
     return;
   }
 
@@ -185,6 +202,33 @@ self.addEventListener('message', (event: ExtendableMessageEvent) => {
 // ---------------------------------------------------------------------------
 // Caching strategies
 // ---------------------------------------------------------------------------
+
+/**
+ * **Navigation handler**: try network first for HTML navigations,
+ * fall back to the cached app shell (`/index.html`) for offline SPA routing.
+ */
+async function navigationHandler(request: Request): Promise<Response> {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    // Offline — serve the cached app shell so the SPA router can handle the path
+    const cache = await caches.open(STATIC_CACHE);
+    const cached = await cache.match('/index.html');
+    if (cached) {
+      return cached;
+    }
+    return new Response('Offline -- app shell not cached', {
+      status: 503,
+      statusText: 'Service Unavailable',
+      headers: { 'Content-Type': 'text/plain' },
+    });
+  }
+}
 
 /**
  * **Cache-first**: serve from cache if available, otherwise fetch from

@@ -3,7 +3,6 @@
 import React, { useCallback, useState } from 'react';
 
 import { KeyboardShortcutsModal, UpdateBanner, SyncStatusBar } from '../common';
-import { OfflineBanner } from '../OfflineBanner';
 import { ConflictResolutionDialog } from '../common/ConflictResolutionDialog';
 import { useKeyboardShortcuts } from '../../hooks';
 import { useEscapeBack } from '../../hooks/useEscapeBack';
@@ -64,7 +63,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       />
       <div className="app-shell">
         <UpdateBanner />
-        <OfflineBanner />
         <SyncStatusBar />
         <header className="app-header" aria-label="App header">
           <h1 className="app-header__title">{pageTitle}</h1>

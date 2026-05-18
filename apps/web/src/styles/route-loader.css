@@ -1,0 +1,93 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/**
+ * Route-level loading skeleton shown in Suspense fallback.
+ * CSS-only shimmer animation with design token integration.
+ */
+
+.route-loader {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-4, 16px);
+  min-height: 300px;
+  gap: var(--spacing-4, 16px);
+}
+
+.route-loader__header {
+  height: 32px;
+  width: 40%;
+  border-radius: var(--border-radius-sm, 4px);
+  background: linear-gradient(
+    90deg,
+    var(--semantic-background-secondary, #e5e7eb) 25%,
+    var(--semantic-background-elevated, #f3f4f6) 50%,
+    var(--semantic-background-secondary, #e5e7eb) 75%
+  );
+  background-size: 200% 100%;
+  animation: route-loader-shimmer 1.5s ease-in-out infinite;
+}
+
+.route-loader__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3, 12px);
+}
+
+.route-loader__line {
+  height: 16px;
+  border-radius: var(--border-radius-sm, 4px);
+  background: linear-gradient(
+    90deg,
+    var(--semantic-background-secondary, #e5e7eb) 25%,
+    var(--semantic-background-elevated, #f3f4f6) 50%,
+    var(--semantic-background-secondary, #e5e7eb) 75%
+  );
+  background-size: 200% 100%;
+  animation: route-loader-shimmer 1.5s ease-in-out infinite;
+}
+
+.route-loader__line--wide {
+  width: 80%;
+}
+
+.route-loader__line--medium {
+  width: 55%;
+}
+
+.route-loader__line--narrow {
+  width: 30%;
+}
+
+.route-loader__block {
+  height: 120px;
+  width: 100%;
+  border-radius: var(--border-radius-md, 8px);
+  background: linear-gradient(
+    90deg,
+    var(--semantic-background-secondary, #e5e7eb) 25%,
+    var(--semantic-background-elevated, #f3f4f6) 50%,
+    var(--semantic-background-secondary, #e5e7eb) 75%
+  );
+  background-size: 200% 100%;
+  animation: route-loader-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes route-loader-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .route-loader__header,
+  .route-loader__line,
+  .route-loader__block {
+    animation: none;
+    background: var(--semantic-background-secondary, #e5e7eb);
+    background-size: auto;
+  }
+}
