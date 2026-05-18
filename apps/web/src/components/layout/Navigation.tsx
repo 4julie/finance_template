@@ -133,6 +133,7 @@ export interface NavigationProps {
   activePath: string;
   onNavigate: (path: string) => void;
   onOpenShortcuts?: () => void;
+  onOpenFeedback?: () => void;
 }
 
 /** Bottom navigation for mobile viewports. */
@@ -162,6 +163,7 @@ export const SidebarNavigation: React.FC<NavigationProps> = ({
   activePath,
   onNavigate,
   onOpenShortcuts,
+  onOpenFeedback,
 }) => {
   const { logout } = useAuth();
   const [moreExpanded, setMoreExpanded] = useState(false);
@@ -260,13 +262,125 @@ export const SidebarNavigation: React.FC<NavigationProps> = ({
             aria-keyshortcuts="Shift+/"
             onClick={onOpenShortcuts}
           >
-            <span
-              className="sidebar-nav__item-icon sidebar-nav__item-icon--glyph"
-              aria-hidden="true"
-            >
-              ?
+            <span className="sidebar-nav__item-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <rect
+                  x="2"
+                  y="4"
+                  width="20"
+                  height="16"
+                  rx="2"
+                  ry="2"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="6"
+                  y1="8"
+                  x2="6"
+                  y2="8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="10"
+                  y1="8"
+                  x2="10"
+                  y2="8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="14"
+                  y1="8"
+                  x2="14"
+                  y2="8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="18"
+                  y1="8"
+                  x2="18"
+                  y2="8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="6"
+                  y1="12"
+                  x2="6"
+                  y2="12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="10"
+                  y1="12"
+                  x2="10"
+                  y2="12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="14"
+                  y1="12"
+                  x2="14"
+                  y2="12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="18"
+                  y1="12"
+                  x2="18"
+                  y2="12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="8"
+                  y1="16"
+                  x2="16"
+                  y2="16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
             </span>
             <span>Shortcuts</span>
+          </button>
+        ) : null}
+        {onOpenFeedback ? (
+          <button
+            type="button"
+            className="sidebar-nav__item"
+            aria-label="Send feedback"
+            onClick={onOpenFeedback}
+          >
+            <span className="sidebar-nav__item-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path
+                  d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+            <span>Feedback</span>
           </button>
         ) : null}
         <button
