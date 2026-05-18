@@ -273,9 +273,7 @@ describe('AccountDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /delete primary checking/i }));
 
     expect(screen.getByRole('alertdialog', { name: /delete account/i })).toBeInTheDocument();
-    expect(
-      screen.getByText(/are you sure you want to delete primary checking/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/this account has 1 transaction/i)).toBeInTheDocument();
   });
 
   it('calls deleteAccount when deletion is confirmed', () => {

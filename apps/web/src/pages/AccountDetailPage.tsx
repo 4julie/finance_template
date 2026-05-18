@@ -3,7 +3,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { ConfirmDialog, CurrencyDisplay, ErrorBanner, LoadingSpinner } from '../components/common';
+import { CurrencyDisplay, ErrorBanner, LoadingSpinner } from '../components/common';
+import { AccountDeleteDialog } from '../components/accounts';
 import { AccountForm } from '../components/forms';
 import { Breadcrumb } from '../components/navigation';
 import { useAccounts, useTransactions } from '../hooks';
@@ -33,12 +34,14 @@ export const AccountDetailPage: React.FC = () => {
   const { accounts, loading, error, refresh, updateAccount, deleteAccount } = useAccounts();
 
   const recentFilters = useMemo(() => (id ? { accountId: id, limit: 5 } : {}), [id]);
+  const allAccountFilters = useMemo(() => (id ? { accountId: id } : {}), [id]);
   const {
     transactions: recentTransactions,
     loading: recentTransactionsLoading,
     error: recentTransactionsError,
     refresh: refreshRecentTransactions,
   } = useTransactions(recentFilters);
+  const { transactions: allAccountTransactions } = useTransactions(allAccountFilters);
 
   const account = id ? (accounts.find((a) => a.id === id) ?? null) : null;
 
@@ -198,16 +201,14 @@ export const AccountDetailPage: React.FC = () => {
         }}
       />
 
-      <ConfirmDialog
+      <AccountDeleteDialog
         isOpen={deletingAccount !== null}
-        title="Delete account"
-        message={
-          deletingAccount !== null ? `Are you sure you want to delete ${deletingAccount.name}?` : ''
-        }
-        confirmLabel="Delete"
+        accountName={deletingAccount?.name ?? ''}
+        transactionCount={allAccountTransactions.length}
         onCancel={() => setDeletingAccount(null)}
-        onConfirm={() => {
+        onConfirm={(_deleteTransactions) => {
           if (deletingAccount === null) return;
+          // TODO: If _deleteTransactions is true, cascade delete via hook
           const deleted = deleteAccount(deletingAccount.id);
           if (deleted) {
             setDeletingAccount(null);
