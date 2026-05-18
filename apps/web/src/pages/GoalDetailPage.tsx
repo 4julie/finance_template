@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-import React from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useCallback, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { CurrencyDisplay, ErrorBanner, LoadingSpinner } from '../components/common';
+import { ConfirmDialog, CurrencyDisplay, ErrorBanner, LoadingSpinner } from '../components/common';
+import { GoalForm } from '../components/forms';
+import type { CreateGoalInput } from '../db/repositories/goals';
 import { useGoals } from '../hooks';
+import type { Goal } from '../kmp/bridge';
+import '../styles/pages.css';
 
 function getGoalIcon(iconName: string | null | undefined): string {
   switch (iconName) {
@@ -24,10 +28,39 @@ function getGoalIcon(iconName: string | null | undefined): string {
 /** Detail view for a single goal route. */
 export const GoalDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
-  const { goals, loading, error, refresh } = useGoals();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [deletingGoal, setDeletingGoal] = useState<Goal | null>(null);
+
+  const { goals, loading, error, refresh, updateGoal, deleteGoal } = useGoals();
 
   const goal = id ? (goals.find((g) => g.id === id) ?? null) : null;
+
+  const handleCloseForm = useCallback(() => {
+    setIsFormOpen(false);
+  }, []);
+
+  const handleFormSubmit = useCallback(
+    async (data: CreateGoalInput) => {
+      if (!goal) return;
+      const updated = updateGoal(goal.id, data);
+      if (updated === null) {
+        throw new Error('Failed to update goal.');
+      }
+      setIsFormOpen(false);
+    },
+    [goal, updateGoal],
+  );
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (!deletingGoal) return;
+    const deleted = deleteGoal(deletingGoal.id);
+    if (deleted) {
+      setDeletingGoal(null);
+      navigate('/goals', { replace: true });
+    }
+  }, [deleteGoal, deletingGoal, navigate]);
 
   if (loading) {
     return (
@@ -115,16 +148,28 @@ export const GoalDetailPage: React.FC = () => {
         ← Back to Goals
       </Link>
 
-      <div style={{ marginBottom: 'var(--spacing-4)' }}>
-        <h2
-          style={{
-            fontSize: 'var(--type-scale-headline-font-size)',
-            fontWeight: 'var(--type-scale-headline-font-weight)',
-            margin: 0,
-          }}
-        >
+      <div className="page-header">
+        <h2 className="page-heading">
           <span aria-hidden="true">{getGoalIcon(goal.icon)}</span> {goal.name}
         </h2>
+        <div className="page-actions">
+          <button
+            type="button"
+            className="form-button form-button--secondary"
+            onClick={() => setIsFormOpen(true)}
+            aria-label={`Edit ${goal.name}`}
+          >
+            ✏️ Edit
+          </button>
+          <button
+            type="button"
+            className="form-button confirm-dialog__confirm confirm-dialog__confirm--danger"
+            onClick={() => setDeletingGoal(goal)}
+            aria-label={`Delete ${goal.name}`}
+          >
+            🗑️ Delete
+          </button>
+        </div>
       </div>
 
       <article
@@ -226,6 +271,26 @@ export const GoalDetailPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <GoalForm
+        isOpen={isFormOpen}
+        onCancel={handleCloseForm}
+        onSubmit={handleFormSubmit}
+        initialData={goal}
+      />
+
+      <ConfirmDialog
+        isOpen={deletingGoal !== null}
+        title="Delete Goal"
+        message={
+          deletingGoal
+            ? `Are you sure you want to delete this goal? This will remove "${deletingGoal.name}" from your goals list.`
+            : ''
+        }
+        confirmLabel="Delete"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeletingGoal(null)}
+      />
     </>
   );
 };

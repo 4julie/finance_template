@@ -2,6 +2,10 @@
 
 /**
  * CategoryPieChart — custom D3.js pie chart for category breakdowns.
+ *
+ * Renders a pie chart with a responsive legend (side on desktop, below on
+ * mobile) instead of inline text labels which overlap with many categories.
+ *
  * @module components/charts/CategoryPieChart
  */
 import { type FC, useCallback, useEffect, useId, useRef } from 'react';
@@ -30,6 +34,7 @@ export const CategoryPieChart: FC<CategoryPieChartProps> = ({
   const chartId = useId();
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const total = data.reduce((sum, d) => sum + d.value, 0);
   const description = buildChartDescription(
     'Pie chart',
     data.map((d) => ({ label: d.name, value: d.value })),
@@ -54,7 +59,6 @@ export const CategoryPieChart: FC<CategoryPieChartProps> = ({
       .sort(null)
       .padAngle(0.02);
     const arc = d3.arc<d3.PieArcDatum<CategorySlice>>().innerRadius(0).outerRadius(radius);
-    const total = data.reduce((sum, d) => sum + d.value, 0);
     const slices = g
       .selectAll<SVGPathElement, d3.PieArcDatum<CategorySlice>>('path')
       .data(pie(data))
@@ -95,23 +99,7 @@ export const CategoryPieChart: FC<CategoryPieChartProps> = ({
           return (t: number) => arc(i(t)) ?? '';
         });
     }
-    const labelArc = d3
-      .arc<d3.PieArcDatum<CategorySlice>>()
-      .innerRadius(radius * 0.6)
-      .outerRadius(radius * 0.6);
-    g.selectAll<SVGTextElement, d3.PieArcDatum<CategorySlice>>('text')
-      .data(pie(data))
-      .enter()
-      .append('text')
-      .attr('transform', (d) => `translate(${labelArc.centroid(d)})`)
-      .attr('text-anchor', 'middle')
-      .attr('dy', '0.35em')
-      .attr('fill', 'var(--semantic-text-primary, #111827)')
-      .attr('font-size', '11px')
-      .attr('font-weight', '500')
-      .attr('aria-hidden', 'true')
-      .text((d) => (d.data.value / total > 0.05 ? d.data.name : ''));
-  }, [data, currency, width, height, reducedMotion]);
+  }, [data, currency, width, height, reducedMotion, total]);
 
   useEffect(() => {
     renderChart();
@@ -146,16 +134,36 @@ export const CategoryPieChart: FC<CategoryPieChartProps> = ({
       <p id={`${chartId}-desc`} className="sr-only">
         {description}
       </p>
-      <svg
-        ref={svgRef}
-        width={width}
-        height={height}
-        viewBox={`0 0 ${width} ${height}`}
-        role="img"
-        aria-labelledby={`${chartId}-title`}
-        aria-describedby={`${chartId}-desc`}
-        onKeyDown={handleKeyDown}
-      />
+      <div className="pie-chart-layout">
+        <svg
+          ref={svgRef}
+          width={width}
+          height={height}
+          viewBox={`0 0 ${width} ${height}`}
+          role="img"
+          aria-labelledby={`${chartId}-title`}
+          aria-describedby={`${chartId}-desc`}
+          onKeyDown={handleKeyDown}
+        />
+        <ul className="pie-chart-legend" aria-label="Category legend">
+          {data.map((slice, i) => {
+            const percent = total > 0 ? ((slice.value / total) * 100).toFixed(1) : '0.0';
+            return (
+              <li key={slice.name} className="pie-chart-legend__item">
+                <span
+                  className="pie-chart-legend__swatch"
+                  style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
+                  aria-hidden="true"
+                />
+                <span className="pie-chart-legend__name">{slice.name}</span>
+                <span className="pie-chart-legend__value">
+                  {formatChartCurrency(slice.value, currency)} ({percent}%)
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 };

@@ -1,10 +1,14 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-import React, { useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { CurrencyDisplay, ErrorBanner, LoadingSpinner } from '../components/common';
+import { ConfirmDialog, CurrencyDisplay, ErrorBanner, LoadingSpinner } from '../components/common';
+import { BudgetForm } from '../components/forms';
+import type { CreateBudgetInput } from '../db/repositories/budgets';
 import { useBudgets, useCategories } from '../hooks';
+import type { Budget } from '../kmp/bridge';
+import '../styles/pages.css';
 
 const PERIOD_LABELS: Record<string, string> = {
   WEEKLY: 'Weekly',
@@ -34,8 +38,12 @@ function getBudgetIcon(iconName: string | null | undefined): string {
 /** Detail view for a single budget route. */
 export const BudgetDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
-  const { budgets, loading, error, refresh } = useBudgets();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null);
+
+  const { budgets, loading, error, refresh, updateBudget, deleteBudget } = useBudgets();
   const { categories, loading: categoriesLoading } = useCategories();
 
   const isLoading = loading || categoriesLoading;
@@ -46,6 +54,31 @@ export const BudgetDetailPage: React.FC = () => {
     () => (budget ? (categories.find((c) => c.id === budget.categoryId) ?? null) : null),
     [budget, categories],
   );
+
+  const handleCloseForm = useCallback(() => {
+    setIsFormOpen(false);
+  }, []);
+
+  const handleFormSubmit = useCallback(
+    async (data: CreateBudgetInput) => {
+      if (!budget) return;
+      const updated = updateBudget(budget.id, data);
+      if (updated === null) {
+        throw new Error('Failed to update budget.');
+      }
+      setIsFormOpen(false);
+    },
+    [budget, updateBudget],
+  );
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (!deletingBudget) return;
+    const deleted = deleteBudget(deletingBudget.id);
+    if (deleted) {
+      setDeletingBudget(null);
+      navigate('/budgets', { replace: true });
+    }
+  }, [deleteBudget, deletingBudget, navigate]);
 
   if (isLoading) {
     return (
@@ -111,16 +144,28 @@ export const BudgetDetailPage: React.FC = () => {
         ← Back to Budgets
       </Link>
 
-      <div style={{ marginBottom: 'var(--spacing-4)' }}>
-        <h2
-          style={{
-            fontSize: 'var(--type-scale-headline-font-size)',
-            fontWeight: 'var(--type-scale-headline-font-weight)',
-            margin: 0,
-          }}
-        >
+      <div className="page-header">
+        <h2 className="page-heading">
           <span aria-hidden="true">{getBudgetIcon(category?.icon)}</span> {budget.name}
         </h2>
+        <div className="page-actions">
+          <button
+            type="button"
+            className="form-button form-button--secondary"
+            onClick={() => setIsFormOpen(true)}
+            aria-label={`Edit ${budget.name}`}
+          >
+            ✏️ Edit
+          </button>
+          <button
+            type="button"
+            className="form-button confirm-dialog__confirm confirm-dialog__confirm--danger"
+            onClick={() => setDeletingBudget(budget)}
+            aria-label={`Delete ${budget.name}`}
+          >
+            🗑️ Delete
+          </button>
+        </div>
       </div>
 
       <article
@@ -265,6 +310,27 @@ export const BudgetDetailPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <BudgetForm
+        isOpen={isFormOpen}
+        onCancel={handleCloseForm}
+        onSubmit={handleFormSubmit}
+        categories={categories}
+        initialData={budget}
+      />
+
+      <ConfirmDialog
+        isOpen={deletingBudget !== null}
+        title="Delete Budget"
+        message={
+          deletingBudget
+            ? `Are you sure you want to delete this budget? This will remove "${deletingBudget.name}" from your budgets list.`
+            : ''
+        }
+        confirmLabel="Delete"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeletingBudget(null)}
+      />
     </>
   );
 };
