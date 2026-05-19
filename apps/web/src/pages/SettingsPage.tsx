@@ -7,6 +7,8 @@ import { CurrencyDisplay } from '../components/common/CurrencyDisplay';
 import { DataExport } from '../components/DataExport';
 import { PrivacySettings } from '../components/gdpr';
 import { SettingInfoWidget } from '../components/settings';
+import { CurrencyRatesSettings } from '../components/settings/CurrencyRatesSettings';
+import '../components/settings/currency-rates-settings.css';
 import { useOfflineStatus } from '../hooks/useOfflineStatus';
 import { useTheme } from '../hooks/useTheme';
 import type { ThemeValue } from '../hooks/useTheme';
@@ -500,6 +502,7 @@ export const SettingsPage: React.FC = () => {
           </SettingInfoWidget>
         </div>
       </section>
+      <CurrencyRatesSettings baseCurrency={currency} />
       <section aria-label="About" className="page-section">
         <div className="settings-group">
           <h3 className="settings-group__title">About</h3>

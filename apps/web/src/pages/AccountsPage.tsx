@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CurrencyDisplay, EmptyState, ErrorBanner, LoadingSpinner } from '../components/common';
 import { AccountForm } from '../components/forms';
 import { useAccounts } from '../hooks';
+import { useExchangeRates } from '../hooks/useExchangeRates';
 import type { AccountType } from '../kmp/bridge';
 import {
   detectMixedCurrencies,
@@ -12,6 +13,7 @@ import {
   getSingleCurrency,
   groupByCurrency,
 } from '../lib/currency-utils';
+import { formatCurrencyValue } from '../lib/currency';
 import '../styles/pages.css';
 
 const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
@@ -78,6 +80,8 @@ const MultiCurrencyTotal: React.FC<{
 export const AccountsPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { accounts, loading, error, refresh, createAccount } = useAccounts();
+  const { convert, providerName } = useExchangeRates('USD');
+  const [convertedTotal, setConvertedTotal] = useState<number | null>(null);
 
   const accountGroups = useMemo(
     () =>
@@ -89,6 +93,42 @@ export const AccountsPage: React.FC = () => {
     [accounts],
   );
 
+  // Check if accounts use multiple currencies
+  const currencyCodes = useMemo(
+    () => [...new Set(accounts.map((a) => a.currency.code))],
+    [accounts],
+  );
+  const isMultiCurrency = currencyCodes.length > 1;
+
+  // Compute converted total when multi-currency
+  const computeConvertedTotal = useCallback(async () => {
+    if (!isMultiCurrency || accounts.length === 0) {
+      setConvertedTotal(null);
+      return;
+    }
+    try {
+      let total = 0;
+      for (const account of accounts) {
+        if (account.currency.code === 'USD') {
+          total += account.currentBalance.amount;
+        } else {
+          const converted = await convert(
+            account.currentBalance.amount,
+            account.currency.code,
+            'USD',
+          );
+          total += converted;
+        }
+      }
+      setConvertedTotal(total);
+    } catch {
+      setConvertedTotal(null);
+    }
+  }, [accounts, convert, isMultiCurrency]);
+
+  useEffect(() => {
+    void computeConvertedTotal();
+  }, [computeConvertedTotal]);
   const handleCloseForm = () => {
     setIsFormOpen(false);
   };
@@ -160,6 +200,20 @@ export const AccountsPage: React.FC = () => {
       {pageHeader}
       <p className="page-summary" aria-live="polite">
         Net worth: <MultiCurrencyTotal accounts={accounts} colorize />
+        {isMultiCurrency && convertedTotal !== null && (
+          <span
+            className="page-summary__converted"
+            title={`Using approximate ${providerName.toLowerCase()}. Connect an exchange rate provider in Settings for live rates.`}
+            aria-label={`Approximately ${formatCurrencyValue(convertedTotal / 100)} USD converted at ${providerName.toLowerCase()}`}
+          >
+            {' '}
+            ≈ {formatCurrencyValue(convertedTotal / 100)} USD
+            <span className="page-summary__converted-hint">
+              {' '}
+              (converted at {providerName.toLowerCase()})
+            </span>
+          </span>
+        )}
       </p>
       {accountGroups.map((group) => (
         <section key={group.type} className="page-section" aria-label={group.label}>

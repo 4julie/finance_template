@@ -1,0 +1,188 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/* -------------------------------------------------------------------
+ * Currency Rates Settings styles
+ *
+ * Table layout for exchange rate display with override controls.
+ * Uses design tokens for all visual values.
+ * ------------------------------------------------------------------- */
+
+.currency-rates-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--semantic-border-primary, #e0e0e0);
+  border-radius: var(--radius-2, 8px);
+  overflow: hidden;
+  margin-top: var(--spacing-3, 12px);
+  margin-bottom: var(--spacing-3, 12px);
+}
+
+.currency-rates-table__header {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr 1.5fr;
+  gap: var(--spacing-2, 8px);
+  padding: var(--spacing-3, 12px) var(--spacing-4, 16px);
+  background: var(--semantic-background-secondary, #f5f5f5);
+  font-weight: var(--type-scale-label-font-weight, 600);
+  font-size: var(--type-scale-caption-font-size, 0.75rem);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--semantic-text-secondary, #666);
+}
+
+.currency-rates-table__row {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr 1.5fr;
+  gap: var(--spacing-2, 8px);
+  padding: var(--spacing-2, 8px) var(--spacing-4, 16px);
+  border-top: 1px solid var(--semantic-border-primary, #e0e0e0);
+  align-items: center;
+  font-size: var(--type-scale-body-font-size, 0.875rem);
+}
+
+.currency-rates-table__row:hover {
+  background: var(--semantic-background-hover, rgba(0, 0, 0, 0.02));
+}
+
+.currency-rates-table__cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1, 4px);
+  min-width: 0;
+}
+
+.currency-rates-table__input {
+  width: 100%;
+  max-width: 120px;
+  padding: var(--spacing-1, 4px) var(--spacing-2, 8px);
+  border: 1px solid var(--semantic-border-focus, #4a90d9);
+  border-radius: var(--radius-1, 4px);
+  font-size: var(--type-scale-body-font-size, 0.875rem);
+  background: var(--semantic-background-primary, #fff);
+  color: var(--semantic-text-primary, #111);
+}
+
+.currency-rates-table__input:focus {
+  outline: 2px solid var(--semantic-border-focus, #4a90d9);
+  outline-offset: 1px;
+}
+
+.currency-rates-table__action {
+  padding: var(--spacing-1, 4px) var(--spacing-2, 8px);
+  border: 1px solid var(--semantic-border-primary, #e0e0e0);
+  border-radius: var(--radius-1, 4px);
+  background: var(--semantic-background-primary, #fff);
+  color: var(--semantic-text-primary, #111);
+  font-size: var(--type-scale-caption-font-size, 0.75rem);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.currency-rates-table__action:hover {
+  background: var(--semantic-background-hover, #f0f0f0);
+}
+
+.currency-rates-table__action:focus-visible {
+  outline: 2px solid var(--semantic-border-focus, #4a90d9);
+  outline-offset: 1px;
+}
+
+.currency-rates-table__action--reset {
+  color: var(--semantic-text-danger, #d32f2f);
+  border-color: var(--semantic-text-danger, #d32f2f);
+}
+
+.currency-rates-table__action--reset:hover {
+  background: var(--semantic-background-danger, #fde8e8);
+}
+
+/* Source badges */
+.currency-rates-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--spacing-2, 8px);
+  border-radius: var(--radius-1, 4px);
+  font-size: var(--type-scale-caption-font-size, 0.75rem);
+  font-weight: var(--type-scale-label-font-weight, 600);
+  white-space: nowrap;
+}
+
+.currency-rates-badge--static {
+  background: var(--semantic-background-secondary, #f0f0f0);
+  color: var(--semantic-text-secondary, #666);
+}
+
+.currency-rates-badge--api {
+  background: var(--semantic-background-success, #e8f5e9);
+  color: var(--semantic-text-success, #2e7d32);
+}
+
+.currency-rates-badge--user-override {
+  background: var(--semantic-background-warning, #fff3e0);
+  color: var(--semantic-text-warning, #e65100);
+}
+
+/* Responsive: stack on mobile */
+@media (max-width: 480px) {
+  .currency-rates-table__header {
+    display: none;
+  }
+
+  .currency-rates-table__row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: var(--spacing-1, 4px);
+  }
+
+  .currency-rates-table__cell:nth-child(1)::before {
+    content: '';
+    font-weight: var(--type-scale-label-font-weight, 600);
+  }
+}
+
+/* Dark mode */
+[data-theme='dark'] .currency-rates-table {
+  border-color: var(--semantic-border-primary, #333);
+}
+
+[data-theme='dark'] .currency-rates-table__header {
+  background: var(--semantic-background-secondary, #1a1a1a);
+}
+
+[data-theme='dark'] .currency-rates-table__row {
+  border-color: var(--semantic-border-primary, #333);
+}
+
+[data-theme='dark'] .currency-rates-table__input {
+  background: var(--semantic-background-primary, #121212);
+  color: var(--semantic-text-primary, #eee);
+}
+
+[data-theme='dark'] .currency-rates-table__action {
+  background: var(--semantic-background-primary, #121212);
+  color: var(--semantic-text-primary, #eee);
+  border-color: var(--semantic-border-primary, #333);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .currency-rates-table__row {
+    transition: none;
+  }
+}
+
+/* High contrast */
+@media (prefers-contrast: more) {
+  .currency-rates-table {
+    border-width: 2px;
+  }
+
+  .currency-rates-table__row {
+    border-width: 2px;
+  }
+
+  .currency-rates-table__action:focus-visible {
+    outline-width: 3px;
+  }
+}

@@ -93,6 +93,15 @@ vi.mock('../lib/display-settings', () => ({
   MoneyDisplayProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
+// Mock the CurrencyRatesSettings to avoid pulling in exchange rate logic
+vi.mock('../components/settings/CurrencyRatesSettings', () => ({
+  CurrencyRatesSettings: () => (
+    <section aria-label="Currency Rates">
+      <div>Currency Rates Mock</div>
+    </section>
+  ),
+}));
+
 import { SettingsPage } from './SettingsPage';
 
 describe('SettingsPage', () => {
