@@ -175,6 +175,7 @@ describe('TransactionForm', () => {
       externalReferenceId: null,
       customFields: null,
       extraNotes: null,
+      counterpartyName: null,
     });
   });
 

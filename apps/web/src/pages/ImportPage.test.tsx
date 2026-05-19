@@ -430,6 +430,8 @@ describe('ImportPage', () => {
                 statementDescription: null,
                 customFields: null,
                 extraNotes: null,
+                counterpartyName: null,
+                counterpartyAccountId: null,
                 ...syncMetadata,
               },
               matchScore: 0.85,

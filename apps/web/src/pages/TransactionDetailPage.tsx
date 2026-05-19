@@ -270,6 +270,13 @@ export const TransactionDetailPage: React.FC = () => {
               <dd>{transaction.note}</dd>
             </div>
           )}
+          {transaction.counterpartyName !== null &&
+            transaction.counterpartyName.trim().length > 0 && (
+              <div>
+                <dt className="card__title">Counterparty</dt>
+                <dd>{transaction.counterpartyName}</dd>
+              </div>
+            )}
           {transaction.tags.length > 0 && (
             <div style={{ gridColumn: '1 / -1' }}>
               <dt className="card__title">Tags</dt>

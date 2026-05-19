@@ -34,6 +34,7 @@ import { useFocusTrap } from '../../accessibility/aria';
 import type { CreateTransactionInput } from '../../db/repositories/transactions';
 import { useAutoCategory } from '../../hooks/useAutoCategory';
 import { useAmountInput } from '../../hooks/useAmountInput';
+import { useMerchants } from '../../hooks/useMerchants';
 import type {
   Account,
   Category,
@@ -42,7 +43,9 @@ import type {
   TransactionType,
 } from '../../kmp/bridge';
 import type { CategorySuggestion } from '../../lib/categorization';
+import type { MerchantMatchResult } from '../../lib/merchants';
 import { transactionSchema } from '../../lib/validation';
+import { CounterpartyInput } from '../transactions/CounterpartyInput';
 
 import './forms.css';
 
@@ -197,6 +200,8 @@ export function TransactionForm({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [suggestion, setSuggestion] = useState<CategorySuggestion | null>(null);
+  const [counterpartyName, setCounterpartyName] = useState('');
+  const [merchantMatch, setMerchantMatch] = useState<MerchantMatchResult | null>(null);
 
   // -- additional details state ---------------------------------------------
   const [additionalOpen, setAdditionalOpen] = useState(false);
@@ -213,6 +218,9 @@ export function TransactionForm({
 
   // -- auto-categorisation --------------------------------------------------
   const { suggestCategory: autoSuggest, learnCorrection } = useAutoCategory(categories);
+
+  // -- merchant matching ----------------------------------------------------
+  const { merchants, matchDescription, recordMatch } = useMerchants();
 
   // -- focus trap -----------------------------------------------------------
   useFocusTrap(panelRef, { active: isOpen, restoreFocus: true });
@@ -246,6 +254,8 @@ export function TransactionForm({
     setDate(initialData?.date ?? todayISO());
     setNotes(initialData?.note ?? '');
     setTagsInput(initialData ? tagsToString(initialData.tags) : '');
+    setCounterpartyName(initialData?.counterpartyName ?? '');
+    setMerchantMatch(null);
     setErrors({});
     setSubmitting(false);
     setSubmitError(null);
@@ -279,6 +289,22 @@ export function TransactionForm({
     setSuggestion(result);
   }, [description, amountInput.cents, isOpen, autoSuggest]);
 
+  // -- auto-match merchant when description changes -------------------------
+  useEffect(() => {
+    if (!isOpen || !description.trim()) {
+      setMerchantMatch(null);
+      return;
+    }
+
+    const result = matchDescription(description);
+    setMerchantMatch(result);
+
+    // Auto-fill counterparty name if matched and counterparty is empty
+    if (result && !counterpartyName.trim()) {
+      setCounterpartyName(result.merchant.displayName ?? result.merchant.name);
+    }
+  }, [description, isOpen, matchDescription]);
+
   // -- handlers ------------------------------------------------------------
 
   const handleCancel = useCallback(() => {
@@ -309,6 +335,23 @@ export function TransactionForm({
       setCategoryId(suggestion.categoryId);
     }
   }, [suggestion]);
+
+  /** Handle merchant selection from CounterpartyInput. */
+  const handleMerchantMatch = useCallback(
+    (result: MerchantMatchResult | null) => {
+      setMerchantMatch(result);
+      if (result?.merchant.categoryDefault && !categoryId) {
+        // Auto-fill category if the merchant has a default and none is selected
+        const matchedCategory = categories.find(
+          (c) => c.name.toLowerCase() === result.merchant.categoryDefault?.toLowerCase(),
+        );
+        if (matchedCategory) {
+          setCategoryId(matchedCategory.id);
+        }
+      }
+    },
+    [categories, categoryId],
+  );
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
@@ -363,11 +406,17 @@ export function TransactionForm({
         externalReferenceId: externalReferenceId.trim() || null,
         customFields: Object.keys(customFields).length > 0 ? customFields : null,
         extraNotes: extraNotes.trim() || null,
+        counterpartyName: counterpartyName.trim() || null,
       };
 
       // Learn from user's category choice if it differs from the suggestion.
       if (categoryId && description.trim() && suggestion && categoryId !== suggestion.categoryId) {
         learnCorrection(description, categoryId);
+      }
+
+      // Record merchant match for ranking
+      if (merchantMatch) {
+        recordMatch(merchantMatch.merchant.id);
       }
 
       setSubmitting(true);
@@ -385,6 +434,8 @@ export function TransactionForm({
         setDate(todayISO());
         setNotes('');
         setTagsInput('');
+        setCounterpartyName('');
+        setMerchantMatch(null);
         setErrors({});
         setSuggestion(null);
         setMerchantCity('');
@@ -421,10 +472,13 @@ export function TransactionForm({
       externalReferenceId,
       customFieldEntries,
       extraNotes,
+      counterpartyName,
+      merchantMatch,
       onSubmit,
       submitFailureMessage,
       suggestion,
       learnCorrection,
+      recordMatch,
     ],
   );
 
@@ -553,6 +607,22 @@ export function TransactionForm({
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Counterparty */}
+            <div className="form-group">
+              <label htmlFor="txn-counterparty" className="form-group__label">
+                Counterparty
+              </label>
+              <CounterpartyInput
+                id="txn-counterparty"
+                value={counterpartyName}
+                onChange={setCounterpartyName}
+                merchants={merchants}
+                matchResult={merchantMatch}
+                onMerchantMatch={handleMerchantMatch}
+                placeholder="e.g. Walgreens, Amazon"
+              />
             </div>
 
             {/* Category */}

@@ -128,3 +128,5 @@ export { useTagSuggestions } from './useTagSuggestions';
 export type { UseTagSuggestionsResult } from './useTagSuggestions';
 export { useExchangeRates } from './useExchangeRates';
 export type { UseExchangeRatesResult } from './useExchangeRates';
+export { useMerchants } from './useMerchants';
+export type { UseMerchantsResult } from './useMerchants';

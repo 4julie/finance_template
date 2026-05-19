@@ -102,6 +102,8 @@ describe('TransactionsPage', () => {
           statementDescription: null,
           customFields: null,
           extraNotes: null,
+          counterpartyName: null,
+          counterpartyAccountId: null,
           ...syncMetadata,
         },
         {
@@ -130,6 +132,8 @@ describe('TransactionsPage', () => {
           statementDescription: null,
           customFields: null,
           extraNotes: null,
+          counterpartyName: null,
+          counterpartyAccountId: null,
           ...syncMetadata,
         },
         {
@@ -158,6 +162,8 @@ describe('TransactionsPage', () => {
           statementDescription: null,
           customFields: null,
           extraNotes: null,
+          counterpartyName: null,
+          counterpartyAccountId: null,
           ...syncMetadata,
         },
       ],

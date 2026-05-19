@@ -45,6 +45,8 @@ function makeTx(overrides: {
     statementDescription: null,
     customFields: null,
     extraNotes: null,
+    counterpartyName: null,
+    counterpartyAccountId: null,
     ...syncMetadata,
     type: overrides.type,
     amount: { amount: overrides.amount },

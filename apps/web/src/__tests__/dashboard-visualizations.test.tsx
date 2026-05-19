@@ -139,6 +139,8 @@ function setupDefaultMocks() {
           statementDescription: null,
           customFields: null,
           extraNotes: null,
+          counterpartyName: null,
+          counterpartyAccountId: null,
           ...syncMetadata,
         },
         {
@@ -167,6 +169,8 @@ function setupDefaultMocks() {
           statementDescription: null,
           customFields: null,
           extraNotes: null,
+          counterpartyName: null,
+          counterpartyAccountId: null,
           ...syncMetadata,
         },
       ],
