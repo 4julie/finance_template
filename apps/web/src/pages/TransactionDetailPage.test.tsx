@@ -77,6 +77,15 @@ describe('TransactionDetailPage', () => {
           isRecurring: false,
           recurringRuleId: null,
           tags: ['food', 'essentials'],
+          merchantAddress: null,
+          merchantCity: null,
+          merchantState: null,
+          merchantZip: null,
+          merchantCountry: null,
+          externalReferenceId: null,
+          statementDescription: null,
+          customFields: null,
+          extraNotes: null,
           ...syncMetadata,
         },
       ],
@@ -309,6 +318,15 @@ describe('TransactionDetailPage', () => {
           isRecurring: false,
           recurringRuleId: null,
           tags: [],
+          merchantAddress: null,
+          merchantCity: null,
+          merchantState: null,
+          merchantZip: null,
+          merchantCountry: null,
+          externalReferenceId: null,
+          statementDescription: null,
+          customFields: null,
+          extraNotes: null,
           ...syncMetadata,
         },
       ],
@@ -386,5 +404,88 @@ describe('TransactionDetailPage', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
 
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  // ---------------------------------------------------------------------------
+  // Additional details section
+  // ---------------------------------------------------------------------------
+
+  it('does not show additional details section when all additional fields are null', () => {
+    renderWithRoute();
+
+    expect(
+      screen.queryByRole('article', { name: /additional transaction details/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows additional details section when merchant city is present', () => {
+    mockedUseTransactions.mockReturnValue({
+      transactions: [
+        {
+          id: 'transaction-1',
+          householdId: 'household-1',
+          accountId: 'account-1',
+          categoryId: 'category-food',
+          type: 'EXPENSE',
+          status: 'CLEARED',
+          amount: { amount: 6742 },
+          currency: { code: 'USD', decimalPlaces: 2 },
+          payee: 'Grocery Store',
+          note: null,
+          date: '2025-03-06',
+          transferAccountId: null,
+          transferTransactionId: null,
+          isRecurring: false,
+          recurringRuleId: null,
+          tags: [],
+          merchantAddress: null,
+          merchantCity: 'Austin',
+          merchantState: 'TX',
+          merchantZip: '78701',
+          merchantCountry: 'US',
+          externalReferenceId: 'REF-123456',
+          statementDescription: 'GROCERY STORE #42',
+          customFields: { 'Card Type': 'Visa', Terminal: 'POS-7' },
+          extraNotes: 'Imported from Chase CSV',
+          ...syncMetadata,
+        },
+      ],
+      loading: false,
+      error: null,
+      refresh: refreshTransactionsMock,
+      createTransaction: vi.fn(),
+      updateTransaction: updateTransactionMock,
+      deleteTransaction: deleteTransactionMock,
+    });
+
+    renderWithRoute();
+
+    // Section exists but is collapsed by default
+    const section = screen.getByRole('article', { name: /additional transaction details/i });
+    expect(section).toBeInTheDocument();
+
+    // Expand it
+    fireEvent.click(screen.getByRole('button', { name: /additional details/i }));
+
+    // Verify merchant location is formatted
+    expect(screen.getByText(/Austin, TX 78701, US/)).toBeInTheDocument();
+
+    // Verify external reference ID
+    expect(screen.getByText('REF-123456')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /copy reference id to clipboard/i }),
+    ).toBeInTheDocument();
+
+    // Verify statement description
+    expect(screen.getByText('GROCERY STORE #42')).toBeInTheDocument();
+
+    // Verify custom fields table
+    expect(screen.getByText('Card Type')).toBeInTheDocument();
+    expect(screen.getByText('Visa')).toBeInTheDocument();
+    expect(screen.getByText('Terminal')).toBeInTheDocument();
+    expect(screen.getByText('POS-7')).toBeInTheDocument();
+
+    // Verify extra notes
+    expect(screen.getByText('Imported from Chase CSV')).toBeInTheDocument();
   });
 });

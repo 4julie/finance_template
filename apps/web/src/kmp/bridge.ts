@@ -119,6 +119,21 @@ export interface Transaction extends SyncMetadata {
   readonly isRecurring: boolean;
   readonly recurringRuleId: SyncId | null;
   readonly tags: readonly string[];
+
+  // Merchant location (all optional)
+  readonly merchantAddress: string | null;
+  readonly merchantCity: string | null;
+  readonly merchantState: string | null;
+  readonly merchantZip: string | null;
+  readonly merchantCountry: string | null;
+
+  // Import metadata
+  readonly externalReferenceId: string | null;
+  readonly statementDescription: string | null;
+
+  // Flexible fields
+  readonly customFields: Readonly<Record<string, string>> | null;
+  readonly extraNotes: string | null;
 }
 
 /** Maps to KMP `com.finance.models.BudgetPeriod`. */
