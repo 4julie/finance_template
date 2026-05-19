@@ -9,6 +9,7 @@ import { AuthProvider } from './auth/auth-context';
 import { ErrorBoundary } from './components/common';
 import { ScrollToTop } from './components/navigation/ScrollToTop';
 import { DatabaseProvider } from './db/DatabaseProvider';
+import { MoneyDisplayProvider } from './lib/display-settings';
 import { initMonitoring } from './lib/monitoring';
 import './theme/tokens.css';
 import './styles/responsive.css';
@@ -113,12 +114,14 @@ createRoot(rootElement).render(
   <StrictMode>
     <ErrorBoundary>
       <AuthProvider config={authConfig}>
-        <BrowserRouter>
-          <ScrollToTop />
-          <DatabaseGate>
-            <App />
-          </DatabaseGate>
-        </BrowserRouter>
+        <MoneyDisplayProvider>
+          <BrowserRouter>
+            <ScrollToTop />
+            <DatabaseGate>
+              <App />
+            </DatabaseGate>
+          </BrowserRouter>
+        </MoneyDisplayProvider>
       </AuthProvider>
     </ErrorBoundary>
   </StrictMode>,

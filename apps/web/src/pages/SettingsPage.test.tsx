@@ -56,6 +56,43 @@ vi.mock('../components/gdpr', () => ({
   ),
 }));
 
+// Mock display settings hook to avoid localStorage side-effects
+const mockUpdateSettings = vi.fn();
+const mockResetSettings = vi.fn();
+vi.mock('../lib/display-settings', () => ({
+  useMoneyDisplay: () => ({
+    positiveColor: '#22c55e',
+    negativeColor: '#ef4444',
+    zeroColor: '#6b7280',
+    showDecimals: true,
+    negativeFormat: 'minus',
+    currencyDisplay: 'symbol',
+    updateSettings: mockUpdateSettings,
+    resetSettings: mockResetSettings,
+  }),
+  // Re-export what CurrencyDisplay needs
+  formatAmountWithSettings: (amount: number) => {
+    const abs = Math.abs(amount) / 100;
+    const formatted = `$${abs.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    if (amount < 0) return `-${formatted}`;
+    return formatted;
+  },
+  getAmountColor: (amount: number) => {
+    if (amount > 0) return '#22c55e';
+    if (amount < 0) return '#ef4444';
+    return '#6b7280';
+  },
+  DEFAULT_DISPLAY_SETTINGS: {
+    positiveColor: 'var(--semantic-amount-positive, var(--color-success))',
+    negativeColor: 'var(--semantic-amount-negative, var(--color-danger))',
+    zeroColor: 'var(--semantic-text-secondary, var(--color-text-secondary))',
+    showDecimals: true,
+    negativeFormat: 'minus',
+    currencyDisplay: 'symbol',
+  },
+  MoneyDisplayProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 import { SettingsPage } from './SettingsPage';
 
 describe('SettingsPage', () => {
@@ -64,6 +101,8 @@ describe('SettingsPage', () => {
     logoutMock.mockReset();
     deleteAccountMock.mockReset();
     setThemeMock.mockReset();
+    mockUpdateSettings.mockReset();
+    mockResetSettings.mockReset();
     logoutMock.mockResolvedValue(undefined);
     deleteAccountMock.mockResolvedValue(undefined);
     offlineStatusMock.isOffline = false;
@@ -142,10 +181,67 @@ describe('SettingsPage', () => {
     render(<SettingsPage />);
 
     expect(screen.getByRole('region', { name: /preferences/i })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /display/i })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: /security/i })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: /about/i })).toBeInTheDocument();
     // "Data" and "Privacy & Data" sections both exist
     const dataRegions = screen.getAllByRole('region', { name: /data/i });
     expect(dataRegions.length).toBeGreaterThanOrEqual(2);
+  });
+
+  describe('Display settings section', () => {
+    it('renders the Display section with all controls', () => {
+      render(<SettingsPage />);
+
+      expect(screen.getByText('Display')).toBeInTheDocument();
+      expect(screen.getByLabelText('Positive amount color')).toBeInTheDocument();
+      expect(screen.getByLabelText('Negative amount color')).toBeInTheDocument();
+      expect(screen.getByLabelText('Zero amount color')).toBeInTheDocument();
+      expect(screen.getByLabelText('Show cents (decimal places)')).toBeInTheDocument();
+      expect(screen.getByLabelText('Negative number format')).toBeInTheDocument();
+      expect(screen.getByLabelText('Currency display mode')).toBeInTheDocument();
+    });
+
+    it('renders a live preview section', () => {
+      render(<SettingsPage />);
+
+      expect(screen.getByText('Preview')).toBeInTheDocument();
+    });
+
+    it('calls updateSettings when show decimals is toggled', () => {
+      render(<SettingsPage />);
+
+      const checkbox = screen.getByLabelText('Show cents (decimal places)');
+      fireEvent.click(checkbox);
+
+      expect(mockUpdateSettings).toHaveBeenCalledWith({ showDecimals: false });
+    });
+
+    it('calls updateSettings when negative format changes', () => {
+      render(<SettingsPage />);
+
+      const select = screen.getByLabelText('Negative number format');
+      fireEvent.change(select, { target: { value: 'parentheses' } });
+
+      expect(mockUpdateSettings).toHaveBeenCalledWith({ negativeFormat: 'parentheses' });
+    });
+
+    it('calls updateSettings when currency display changes', () => {
+      render(<SettingsPage />);
+
+      const select = screen.getByLabelText('Currency display mode');
+      fireEvent.change(select, { target: { value: 'code' } });
+
+      expect(mockUpdateSettings).toHaveBeenCalledWith({ currencyDisplay: 'code' });
+    });
+
+    it('calls resetSettings when reset button is clicked', () => {
+      render(<SettingsPage />);
+
+      const resetBtn = screen.getByRole('button', { name: /reset display settings/i });
+      fireEvent.click(resetBtn);
+
+      expect(mockResetSettings).toHaveBeenCalledTimes(1);
+    });
   });
 });

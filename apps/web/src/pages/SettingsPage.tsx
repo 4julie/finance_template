@@ -3,12 +3,15 @@
 import React, { useCallback, useState } from 'react';
 
 import { useAuth } from '../auth/auth-context';
+import { CurrencyDisplay } from '../components/common/CurrencyDisplay';
 import { DataExport } from '../components/DataExport';
 import { PrivacySettings } from '../components/gdpr';
 import { SettingInfoWidget } from '../components/settings';
 import { useOfflineStatus } from '../hooks/useOfflineStatus';
 import { useTheme } from '../hooks/useTheme';
 import type { ThemeValue } from '../hooks/useTheme';
+import type { CurrencyDisplayMode, NegativeFormat } from '../lib/display-settings';
+import { useMoneyDisplay } from '../lib/display-settings';
 import { initMonitoring } from '../lib/monitoring';
 
 const APP_VERSION = '0.1.0';
@@ -36,6 +39,33 @@ const THEME_LABELS: Record<ThemeValue, string> = {
 };
 
 /**
+ * Resolve a CSS color value to a hex string suitable for `<input type="color">`.
+ *
+ * When the stored color is a CSS variable reference (e.g. `var(--color-success)`),
+ * the picker cannot interpret it, so we fall back to the provided default hex.
+ */
+function resolveColorForPicker(color: string, fallback: string): string {
+  if (color.startsWith('#') && (color.length === 4 || color.length === 7)) {
+    return color;
+  }
+  return fallback;
+}
+
+/** Labels for negative format options. */
+const NEGATIVE_FORMAT_OPTIONS: Array<{ value: NegativeFormat; label: string }> = [
+  { value: 'minus', label: 'Minus sign (−$1,234.56)' },
+  { value: 'parentheses', label: 'Parentheses (($1,234.56))' },
+  { value: 'color-only', label: 'Color only ($1,234.56)' },
+];
+
+/** Labels for currency display mode options. */
+const CURRENCY_DISPLAY_OPTIONS: Array<{ value: CurrencyDisplayMode; label: string }> = [
+  { value: 'symbol', label: 'Symbol ($)' },
+  { value: 'code', label: 'Code (USD)' },
+  { value: 'name', label: 'Name (US Dollar)' },
+];
+
+/**
  * Settings page for managing local web-app preferences and account actions.
  */
 export const SettingsPage: React.FC = () => {
@@ -61,6 +91,7 @@ export const SettingsPage: React.FC = () => {
     isDemoMode: demoModeActive,
   } = useAuth();
   const { isOffline } = useOfflineStatus();
+  const displaySettings = useMoneyDisplay();
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false);
   const [passkeyMessage, setPasskeyMessage] = useState<string | null>(null);
 
@@ -228,6 +259,163 @@ export const SettingsPage: React.FC = () => {
               />
             </div>
           </SettingInfoWidget>
+        </div>
+      </section>
+      <section aria-label="Display" className="page-section">
+        <div className="settings-group">
+          <h3 className="settings-group__title">Display</h3>
+          <p
+            className="settings-group__description"
+            style={{
+              fontSize: 'var(--font-size-sm, 0.875rem)',
+              color: 'var(--semantic-text-secondary)',
+              marginBottom: 'var(--spacing-4, 1rem)',
+            }}
+          >
+            Customize how monetary amounts appear throughout the app.
+          </p>
+
+          <div className="settings-item settings-item--static">
+            <label className="settings-item__label" htmlFor="settings-positive-color">
+              Positive amount color
+            </label>
+            <div className="settings-item__control">
+              <input
+                type="color"
+                id="settings-positive-color"
+                aria-label="Positive amount color"
+                value={resolveColorForPicker(displaySettings.positiveColor, '#22c55e')}
+                onChange={(e) => displaySettings.updateSettings({ positiveColor: e.target.value })}
+                className="settings-item__color-input"
+              />
+            </div>
+          </div>
+
+          <div className="settings-item settings-item--static">
+            <label className="settings-item__label" htmlFor="settings-negative-color">
+              Negative amount color
+            </label>
+            <div className="settings-item__control">
+              <input
+                type="color"
+                id="settings-negative-color"
+                aria-label="Negative amount color"
+                value={resolveColorForPicker(displaySettings.negativeColor, '#ef4444')}
+                onChange={(e) => displaySettings.updateSettings({ negativeColor: e.target.value })}
+                className="settings-item__color-input"
+              />
+            </div>
+          </div>
+
+          <div className="settings-item settings-item--static">
+            <label className="settings-item__label" htmlFor="settings-zero-color">
+              Zero amount color
+            </label>
+            <div className="settings-item__control">
+              <input
+                type="color"
+                id="settings-zero-color"
+                aria-label="Zero amount color"
+                value={resolveColorForPicker(displaySettings.zeroColor, '#6b7280')}
+                onChange={(e) => displaySettings.updateSettings({ zeroColor: e.target.value })}
+                className="settings-item__color-input"
+              />
+            </div>
+          </div>
+
+          <div className="settings-item settings-item--static">
+            <label className="settings-item__label" htmlFor="s-show-decimals">
+              Show cents
+            </label>
+            <input
+              type="checkbox"
+              id="s-show-decimals"
+              checked={displaySettings.showDecimals}
+              onChange={(e) => displaySettings.updateSettings({ showDecimals: e.target.checked })}
+              aria-label="Show cents (decimal places)"
+              className="settings-item__checkbox"
+            />
+          </div>
+
+          <div className="settings-item settings-item--static">
+            <label className="settings-item__label" htmlFor="settings-negative-format">
+              Negative format
+            </label>
+            <div className="settings-item__control">
+              <select
+                id="settings-negative-format"
+                aria-label="Negative number format"
+                className="settings-item__select"
+                value={displaySettings.negativeFormat}
+                onChange={(e) =>
+                  displaySettings.updateSettings({
+                    negativeFormat: e.target.value as NegativeFormat,
+                  })
+                }
+              >
+                {NEGATIVE_FORMAT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="settings-item settings-item--static">
+            <label className="settings-item__label" htmlFor="settings-currency-display">
+              Currency display
+            </label>
+            <div className="settings-item__control">
+              <select
+                id="settings-currency-display"
+                aria-label="Currency display mode"
+                className="settings-item__select"
+                value={displaySettings.currencyDisplay}
+                onChange={(e) =>
+                  displaySettings.updateSettings({
+                    currencyDisplay: e.target.value as CurrencyDisplayMode,
+                  })
+                }
+              >
+                {CURRENCY_DISPLAY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div
+            className="settings-item settings-item--static"
+            aria-label="Live preview of display settings"
+            role="group"
+          >
+            <span className="settings-item__label">Preview</span>
+            <span
+              className="settings-item__value"
+              style={{
+                display: 'flex',
+                gap: 'var(--spacing-4, 1rem)',
+                flexWrap: 'wrap',
+              }}
+            >
+              <CurrencyDisplay amount={123456} colorize />
+              <CurrencyDisplay amount={0} colorize />
+              <CurrencyDisplay amount={-123456} colorize />
+            </span>
+          </div>
+
+          <button
+            type="button"
+            className="settings-item settings-item--button"
+            onClick={() => displaySettings.resetSettings()}
+            aria-label="Reset display settings to defaults"
+          >
+            <span className="settings-item__label">Reset to defaults</span>
+            <span className="settings-item__value">↺</span>
+          </button>
         </div>
       </section>
       <section aria-label="Security" className="page-section">
