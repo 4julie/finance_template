@@ -178,7 +178,14 @@ export const InsightsPage: React.FC = () => {
             label="Net Cash Flow"
             value={<CurrencyDisplay amount={insights.netCashFlow} />}
           />
-          <MetricCard label="Savings Rate" value={`${insights.savingsRate}%`} />
+          <MetricCard
+            label="Savings Rate"
+            value={
+              <span aria-label={`Savings rate: ${insights.savingsRate} percent`}>
+                {insights.savingsRate}%
+              </span>
+            }
+          />
           <MetricCard
             label="Avg. Daily Spending"
             value={<CurrencyDisplay amount={insights.averageDailySpending} />}

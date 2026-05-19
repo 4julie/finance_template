@@ -8,6 +8,7 @@ import { BudgetForm } from '../components/forms';
 import type { CreateBudgetInput } from '../db/repositories/budgets';
 import { useBudgets, useCategories } from '../hooks';
 import type { Budget } from '../kmp/bridge';
+import { getBudgetStatusIndicator } from '../lib/a11y';
 import '../styles/pages.css';
 
 const PERIOD_LABELS: Record<string, string> = {
@@ -123,6 +124,7 @@ export const BudgetDetailPage: React.FC = () => {
       ? Math.round((budget.spentAmount.amount / budget.amount.amount) * 100)
       : 0;
   const statusTone = percentUsed > 90 ? 'negative' : percentUsed > 75 ? 'warning' : 'positive';
+  const budgetStatus = getBudgetStatusIndicator(percentUsed);
   const radius = 36;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (Math.min(percentUsed, 100) / 100) * circumference;
@@ -227,7 +229,7 @@ export const BudgetDetailPage: React.FC = () => {
             aria-valuenow={Math.min(percentUsed, 100)}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label={`${percentUsed}% of budget used`}
+            aria-label={`${budget.name} budget: ${percentUsed} percent used, ${budgetStatus.label}`}
           >
             <svg
               className="progress-ring__svg"
@@ -289,11 +291,13 @@ export const BudgetDetailPage: React.FC = () => {
                     : 'var(--semantic-status-negative)',
               }}
             >
+              <span aria-hidden="true">{budgetStatus.icon} </span>
               {budget.remainingAmount.amount >= 0 ? (
                 <>
                   <CurrencyDisplay
                     amount={budget.remainingAmount.amount}
                     currency={budget.currency.code}
+                    context={`remaining in ${budget.name} budget`}
                   />{' '}
                   left
                 </>
@@ -302,6 +306,7 @@ export const BudgetDetailPage: React.FC = () => {
                   <CurrencyDisplay
                     amount={Math.abs(budget.remainingAmount.amount)}
                     currency={budget.currency.code}
+                    context={`over in ${budget.name} budget`}
                   />{' '}
                   over budget
                 </>

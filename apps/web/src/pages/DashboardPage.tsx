@@ -13,6 +13,7 @@ import { CurrencyDisplay, EmptyState, ErrorBanner, LoadingSpinner } from '../com
 import { useCategories, useDashboardData, useTransactions } from '../hooks';
 import type { DashboardData } from '../hooks/useDashboardData';
 import type { Transaction } from '../kmp/bridge';
+import { getBudgetStatusIndicator } from '../lib/a11y';
 
 const PERIOD_DAYS: Record<Exclude<TimePeriod, 'custom'>, number> = {
   '7d': 7,
@@ -225,6 +226,7 @@ export const DashboardPage: React.FC = () => {
       : 0;
   const budgetStatusTone =
     budgetPercentage > 90 ? 'negative' : budgetPercentage > 75 ? 'warning' : 'positive';
+  const dashboardBudgetStatus = getBudgetStatusIndicator(budgetPercentage);
   const handleRetry = () => {
     refresh();
     refreshCategories();
@@ -262,7 +264,7 @@ export const DashboardPage: React.FC = () => {
                   <h3 className="card__title">Net Worth</h3>
                 </div>
                 <div className="card__value" aria-live="polite">
-                  <CurrencyDisplay amount={data.netWorth} colorize />
+                  <CurrencyDisplay amount={data.netWorth} colorize context="net worth" />
                 </div>
               </article>
               <article className="card" aria-label="Monthly spending">
@@ -270,7 +272,7 @@ export const DashboardPage: React.FC = () => {
                   <h3 className="card__title">Spent This Month</h3>
                 </div>
                 <div className="card__value" aria-live="polite">
-                  <CurrencyDisplay amount={data.spentThisMonth} />
+                  <CurrencyDisplay amount={data.spentThisMonth} context="spent this month" />
                 </div>
               </article>
               <article className="card" aria-label="Budget health">
@@ -278,7 +280,9 @@ export const DashboardPage: React.FC = () => {
                   <h3 className="card__title">Budget Health</h3>
                 </div>
                 <div className="card__value" aria-live="polite">
+                  <span aria-hidden="true">{dashboardBudgetStatus.icon} </span>
                   {budgetPercentage}% used
+                  <span className="sr-only">, {dashboardBudgetStatus.label}</span>
                 </div>
                 <div
                   className="progress-bar"
@@ -286,7 +290,7 @@ export const DashboardPage: React.FC = () => {
                   aria-valuenow={budgetPercentage}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  aria-label={`Budget ${budgetPercentage}% used`}
+                  aria-label={`Budget ${budgetPercentage} percent used, ${dashboardBudgetStatus.label}`}
                 >
                   <div
                     className={`progress-bar__fill progress-bar__fill--${budgetStatusTone}`}

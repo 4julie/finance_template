@@ -1,0 +1,163 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/**
+ * Reduced Motion — Comprehensive static fallbacks for all animations.
+ *
+ * This stylesheet provides a documented, centralized reference for how
+ * every animated component behaves when `prefers-reduced-motion: reduce`
+ * is active. It supplements the global safety net in tokens.css and
+ * accessibility.css by providing intentional, component-specific fallbacks.
+ *
+ * WCAG 2.2 SC 2.3.3 (AAA) / SC 2.3.1 (AA):
+ *   Users who request reduced motion MUST NOT be presented with:
+ *   - Continuous/looping animations (spinners, shimmer, pulse)
+ *   - Celebratory/decorative animations (confetti, sparkles, bounce)
+ *   - Transition-based micro-interactions that convey no meaning
+ *
+ *   Static fallbacks provided:
+ *   - Progress bars/rings: show final state immediately (no transition)
+ *   - Loading spinners: static icon with "Loading…" text
+ *   - Toast notifications: appear/disappear instantly
+ *   - Celebration overlays: show static badge, no sparkle/confetti
+ *   - Charts: data rendered without entrance animations
+ *   - Cards: no hover lift or shadow transitions
+ *   - Form inputs: no focus transition; focus ring applied instantly
+ *
+ * Animation documentation requirements:
+ *   Before shipping any new animation-heavy feature, document:
+ *   1. What the animation conveys visually
+ *   2. How the reduced-motion fallback conveys the same information
+ *   3. Whether a static text/icon alternative exists
+ *
+ * @see apps/web/src/styles/animations.css — animation utility classes
+ * @see apps/web/src/styles/microinteractions.css — micro-interaction transitions
+ * @see apps/web/src/styles/accessibility.css — global a11y overrides
+ * @see apps/web/src/theme/tokens.css — global reduced-motion safety net
+ *
+ * References: issue #1699
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* -----------------------------------------------------------------
+   * 1. Progress indicators — show final state, no animation
+   * ----------------------------------------------------------------- */
+
+  .progress-bar__fill {
+    transition: none;
+  }
+
+  .progress-ring__fill {
+    transition: none;
+  }
+
+  /* Ensure SVG-based progress rings show their current value statically */
+  .progress-ring svg {
+    animation: none;
+  }
+
+  /* -----------------------------------------------------------------
+   * 2. Loading spinners — static fallback
+   *
+   * The global safety net (animation-duration: 0.01ms !important) in
+   * tokens.css stops the spin animation. Here we ensure the visual
+   * element remains visible in a static state.
+   * ----------------------------------------------------------------- */
+
+  .loading-spinner__circle {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* -----------------------------------------------------------------
+   * 3. Toast notifications — appear/disappear instantly
+   * ----------------------------------------------------------------- */
+
+  .toast,
+  .toast--entering,
+  .toast--exiting {
+    animation: none;
+    transition: none;
+    opacity: 1;
+  }
+
+  .toast--exiting {
+    opacity: 0;
+  }
+
+  /* -----------------------------------------------------------------
+   * 4. Celebration / success overlays — static badge
+   *
+   * The MilestoneCelebration component also checks useReducedMotion()
+   * in JavaScript to conditionally render sparkle particles. This CSS
+   * rule acts as the declarative fallback layer.
+   * ----------------------------------------------------------------- */
+
+  .milestone-celebration {
+    animation: none;
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+
+  .milestone-celebration__icon {
+    animation: none;
+    transform: none;
+  }
+
+  .milestone-celebration__sparkle {
+    display: none;
+  }
+
+  /* -----------------------------------------------------------------
+   * 5. Number / value change flash — show final state
+   * ----------------------------------------------------------------- */
+
+  .animate-number-change {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* -----------------------------------------------------------------
+   * 6. Chart entry transitions — show data immediately
+   *
+   * Recharts and D3 charts check prefersReducedMotion() in JS to
+   * disable `isAnimationActive`. This rule catches any CSS-based
+   * transitions on chart elements.
+   * ----------------------------------------------------------------- */
+
+  .recharts-wrapper *,
+  .chart-container * {
+    transition: none !important;
+  }
+
+  /* -----------------------------------------------------------------
+   * 7. Insights page bars — no width transition
+   * ----------------------------------------------------------------- */
+
+  .insights-category-bar__fill,
+  .insights-daily-chart__bar {
+    transition: none;
+  }
+
+  /* -----------------------------------------------------------------
+   * 8. Skeleton loading — static background, no shimmer
+   * ----------------------------------------------------------------- */
+
+  .skeleton,
+  .animate-shimmer {
+    animation: none;
+    background: var(--semantic-background-secondary, #f3f4f6);
+    background-size: auto;
+  }
+
+  /* -----------------------------------------------------------------
+   * 9. Page/route transitions — no slide/fade
+   * ----------------------------------------------------------------- */
+
+  .page-transition,
+  .route-transition {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

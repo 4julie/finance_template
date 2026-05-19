@@ -14,6 +14,7 @@ import { BudgetForm } from '../components/forms';
 import type { CreateBudgetInput } from '../db/repositories/budgets';
 import { useBudgets, useCategories } from '../hooks';
 import type { Budget } from '../kmp/bridge';
+import { getBudgetStatusIndicator } from '../lib/a11y';
 
 function getBudgetIcon(iconName: string | null | undefined): string {
   switch (iconName) {
@@ -253,6 +254,7 @@ export const BudgetsPage: React.FC = () => {
                 const remainingAmount = budget.remainingAmount.amount;
                 const statusTone =
                   percentUsed > 90 ? 'negative' : percentUsed > 75 ? 'warning' : 'positive';
+                const budgetStatus = getBudgetStatusIndicator(percentUsed);
                 const radius = 36;
                 const circumference = 2 * Math.PI * radius;
                 const offset = circumference - (Math.min(percentUsed, 100) / 100) * circumference;
@@ -262,7 +264,7 @@ export const BudgetsPage: React.FC = () => {
                   <article
                     key={budget.id}
                     className="card"
-                    aria-label={`${budget.name}: ${percentUsed}% used`}
+                    aria-label={`${budget.name}: ${percentUsed}% used, ${budgetStatus.label}`}
                     style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)' }}
                   >
                     <div
@@ -271,6 +273,7 @@ export const BudgetsPage: React.FC = () => {
                       aria-valuenow={Math.min(percentUsed, 100)}
                       aria-valuemin={0}
                       aria-valuemax={100}
+                      aria-label={`${budget.name} budget: ${percentUsed} percent used, ${budgetStatus.label}`}
                     >
                       <svg
                         className="progress-ring__svg"
@@ -367,11 +370,13 @@ export const BudgetsPage: React.FC = () => {
                               : 'var(--semantic-status-negative)',
                         }}
                       >
+                        <span aria-hidden="true">{budgetStatus.icon} </span>
                         {remainingAmount >= 0 ? (
                           <>
                             <CurrencyDisplay
                               amount={remainingAmount}
                               currency={budget.currency.code}
+                              context={`remaining in ${budget.name} budget`}
                             />{' '}
                             left
                           </>
@@ -380,6 +385,7 @@ export const BudgetsPage: React.FC = () => {
                             <CurrencyDisplay
                               amount={Math.abs(remainingAmount)}
                               currency={budget.currency.code}
+                              context={`over in ${budget.name} budget`}
                             />{' '}
                             over
                           </>
