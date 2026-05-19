@@ -10,6 +10,23 @@ vi.mock('../hooks', () => ({
   useAccounts: vi.fn(),
 }));
 
+vi.mock('../hooks/useExchangeRates', () => ({
+  useExchangeRates: () => ({
+    rates: {},
+    loading: false,
+    error: null,
+    lastUpdated: null,
+    providerName: 'Static Rates',
+    convert: vi.fn().mockResolvedValue(0),
+    getRate: vi.fn(),
+    setOverride: vi.fn(),
+    removeOverride: vi.fn(),
+    overrides: {},
+    clearOverrides: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}));
+
 // AccountForm renders unconditionally and calls useDatabase internally.
 // Stub it out so the test has no provider dependency.
 vi.mock('../components/forms', () => ({

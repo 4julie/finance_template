@@ -126,3 +126,5 @@ export { useTaggingRules } from './useTaggingRules';
 export type { UseTaggingRulesResult } from './useTaggingRules';
 export { useTagSuggestions } from './useTagSuggestions';
 export type { UseTagSuggestionsResult } from './useTagSuggestions';
+export { useExchangeRates } from './useExchangeRates';
+export type { UseExchangeRatesResult } from './useExchangeRates';
