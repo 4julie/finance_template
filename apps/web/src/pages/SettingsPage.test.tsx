@@ -54,6 +54,20 @@ vi.mock('../components/gdpr', () => ({
       <div>Privacy Settings Mock</div>
     </section>
   ),
+  CrashReportingSettings: () => <div>Crash Reporting Settings Mock</div>,
+}));
+
+const togglePrivacyModeMock = vi.fn();
+vi.mock('../contexts/PrivacyModeContext', () => ({
+  usePrivacyMode: () => ({
+    isPrivacyMode: false,
+    togglePrivacyMode: togglePrivacyModeMock,
+    setPrivacyMode: vi.fn(),
+    maskValue: (v: string) => v,
+  }),
+  useIsPrivacyModeActive: () => false,
+  MASKED_AMOUNT: '•••.••',
+  MASKED_LABEL: '••••',
 }));
 
 // Mock display settings hook to avoid localStorage side-effects
@@ -144,6 +158,9 @@ describe('SettingsPage', () => {
     expect(screen.getByLabelText('Currency')).toHaveValue('USD');
     expect(screen.getByLabelText('Theme')).toHaveValue('system');
     expect(screen.getByRole('checkbox', { name: 'Notifications' })).toBeChecked();
+    expect(
+      screen.getByRole('checkbox', { name: 'Hide all financial amounts and balances' }),
+    ).not.toBeChecked();
     expect(screen.getByText('0.1.0')).toBeInTheDocument();
   });
 

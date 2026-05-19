@@ -5,10 +5,11 @@ import React, { useCallback, useState } from 'react';
 import { useAuth } from '../auth/auth-context';
 import { CurrencyDisplay } from '../components/common/CurrencyDisplay';
 import { DataExport } from '../components/DataExport';
-import { PrivacySettings } from '../components/gdpr';
+import { CrashReportingSettings, PrivacySettings } from '../components/gdpr';
 import { SettingInfoWidget } from '../components/settings';
 import { CurrencyRatesSettings } from '../components/settings/CurrencyRatesSettings';
 import '../components/settings/currency-rates-settings.css';
+import { usePrivacyMode } from '../contexts/PrivacyModeContext';
 import { useOfflineStatus } from '../hooks/useOfflineStatus';
 import { useTheme } from '../hooks/useTheme';
 import type { ThemeValue } from '../hooks/useTheme';
@@ -72,6 +73,7 @@ const CURRENCY_DISPLAY_OPTIONS: Array<{ value: CurrencyDisplayMode; label: strin
  */
 export const SettingsPage: React.FC = () => {
   const { theme, setTheme, themes } = useTheme();
+  const { isPrivacyMode, togglePrivacyMode } = usePrivacyMode();
   const [currency, setCurrency] = useState<CurrencyPreference>(
     () => (localStorage.getItem(CURRENCY_STORAGE_KEY) as CurrencyPreference) || 'USD',
   );
@@ -122,6 +124,15 @@ export const SettingsPage: React.FC = () => {
     setMonitoringEnabled(nextMonitoringEnabled);
 
     if (nextMonitoringEnabled) {
+      initMonitoring();
+    }
+  }, []);
+
+  const handleMonitoringToggle = useCallback((enabled: boolean) => {
+    localStorage.setItem(MONITORING_CONSENT_STORAGE_KEY, String(enabled));
+    setMonitoringEnabled(enabled);
+
+    if (enabled) {
       initMonitoring();
     }
   }, []);
@@ -418,6 +429,19 @@ export const SettingsPage: React.FC = () => {
             <span className="settings-item__label">Reset to defaults</span>
             <span className="settings-item__value">↺</span>
           </button>
+          <div className="settings-item settings-item--static">
+            <label className="settings-item__label" htmlFor="s-privacy-mode">
+              Privacy Mode
+            </label>
+            <input
+              type="checkbox"
+              id="s-privacy-mode"
+              checked={isPrivacyMode}
+              onChange={() => togglePrivacyMode()}
+              aria-label="Hide all financial amounts and balances"
+              className="settings-item__checkbox"
+            />
+          </div>
         </div>
       </section>
       <section aria-label="Security" className="page-section">
@@ -524,6 +548,7 @@ export const SettingsPage: React.FC = () => {
           await deleteAccount();
         }}
       />
+      <CrashReportingSettings enabled={monitoringEnabled} onToggle={handleMonitoringToggle} />
     </>
   );
 };

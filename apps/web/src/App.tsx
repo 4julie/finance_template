@@ -4,6 +4,7 @@ import type { FC } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AppLayout } from './components/layout';
 import { ConsentDialog } from './components/gdpr';
+import { PrivacyModeProvider } from './contexts/PrivacyModeContext';
 import { AppRoutes } from './routes';
 
 /** Map path segments to human-readable page titles. */
@@ -62,12 +63,12 @@ export const App: FC = () => {
   const isStandalonePage = !AUTHENTICATED_ROUTES.has(activePath);
 
   return isStandalonePage ? (
-    <>
+    <PrivacyModeProvider>
       <ConsentDialog />
       <AppRoutes />
-    </>
+    </PrivacyModeProvider>
   ) : (
-    <>
+    <PrivacyModeProvider>
       <ConsentDialog />
       <AppLayout
         activePath={activePath}
@@ -76,6 +77,6 @@ export const App: FC = () => {
       >
         <AppRoutes />
       </AppLayout>
-    </>
+    </PrivacyModeProvider>
   );
 };

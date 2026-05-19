@@ -74,8 +74,99 @@
   html:not([data-theme='light']) .privacy-settings__delete-confirm {
     background-color: rgba(239, 68, 68, 0.12);
   }
+
+  html:not([data-theme='light']) .privacy-settings__example-payload {
+    background-color: var(--semantic-background-secondary, #1a1a2e);
+  }
 }
 
 [data-theme='dark'] .privacy-settings__delete-confirm {
   background-color: rgba(239, 68, 68, 0.12);
+}
+
+[data-theme='dark'] .privacy-settings__example-payload {
+  background-color: var(--semantic-background-secondary, #1a1a2e);
+}
+
+/* -------------------------------------------------------------------
+ * Crash reporting / example payload
+ * ------------------------------------------------------------------- */
+
+.privacy-settings__never-included-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--spacing-2) 0 0;
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+}
+
+.privacy-settings__never-included-item {
+  margin-bottom: var(--spacing-1);
+}
+
+.privacy-settings__example-payload {
+  padding: var(--spacing-4);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--semantic-border-default, #e2e8f0);
+  background-color: var(--semantic-background-secondary, #f8fafc);
+  margin-top: var(--spacing-2);
+}
+
+.privacy-settings__payload-fields {
+  margin: var(--spacing-3) 0;
+}
+
+.privacy-settings__payload-field {
+  margin-bottom: var(--spacing-3);
+  padding-bottom: var(--spacing-2);
+  border-bottom: 1px solid var(--semantic-border-default, #e2e8f0);
+}
+
+.privacy-settings__payload-field:last-child {
+  border-bottom: none;
+}
+
+.privacy-settings__payload-field-name {
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-mono, monospace);
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-primary);
+}
+
+.privacy-settings__payload-field-desc {
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+  margin: var(--spacing-1) 0;
+}
+
+.privacy-settings__payload-field-value {
+  margin: var(--spacing-1) 0 0;
+}
+
+.privacy-settings__payload-field-value code {
+  font-size: var(--type-scale-caption-font-size);
+  font-family: var(--font-family-mono, monospace);
+  color: var(--semantic-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.privacy-settings__raw-json {
+  margin-top: var(--spacing-3);
+}
+
+.privacy-settings__raw-json summary {
+  cursor: pointer;
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+  padding: var(--spacing-2) 0;
+}
+
+.privacy-settings__json-pre {
+  overflow-x: auto;
+  padding: var(--spacing-3);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--semantic-background-tertiary, #f1f5f9);
+  font-size: var(--type-scale-caption-font-size);
+  line-height: 1.5;
 }

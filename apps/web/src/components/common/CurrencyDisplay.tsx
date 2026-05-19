@@ -3,6 +3,7 @@
 import React from 'react';
 
 import { formatCurrencyForScreenReader } from '../../lib/a11y';
+import { MASKED_AMOUNT, useIsPrivacyModeActive } from '../../contexts/PrivacyModeContext';
 import {
   formatAmountWithSettings,
   getAmountColor,
@@ -41,6 +42,10 @@ export interface CurrencyDisplayProps {
  * settings (decimal visibility, negative format, currency display mode,
  * and amount colors) via the `useMoneyDisplay()` hook.
  *
+ * When privacy mode is active, the amount is replaced with a masked
+ * placeholder (e.g., `$•••.••`) and the accessible label indicates
+ * "Amount hidden".
+ *
  * Accessibility: when `negativeFormat` is `'color-only'`, the visible
  * text omits the minus sign but the `aria-label` always includes
  * "negative" for screen readers so information is never conveyed by
@@ -58,6 +63,7 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   'aria-label': ariaLabel,
 }) => {
   const displaySettings = useMoneyDisplay();
+  const isPrivacyMode = useIsPrivacyModeActive();
 
   // Format the visible text using the user's display preferences.
   const formatted = formatAmountWithSettings(amount, displaySettings, {
@@ -68,21 +74,33 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
 
   // Build CSS class for color (legacy class-based approach still supported).
   let colorClass = '';
-  if (colorize) {
+  if (colorize && !isPrivacyMode) {
     if (amount > 0) colorClass = 'amount--positive';
     else if (amount < 0) colorClass = 'amount--negative';
     else colorClass = 'amount--zero';
   }
 
   // Apply user-chosen color via inline style when colorize is enabled.
-  const colorStyle: React.CSSProperties | undefined = colorize
-    ? { color: getAmountColor(amount, displaySettings) }
-    : undefined;
+  const colorStyle: React.CSSProperties | undefined =
+    colorize && !isPrivacyMode ? { color: getAmountColor(amount, displaySettings) } : undefined;
+
+  // When privacy mode is active, mask both the display and the label.
+  const currencySymbol =
+    new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+    })
+      .formatToParts(0)
+      .find((part) => part.type === 'currency')?.value ?? '$';
+
+  const displayText = isPrivacyMode ? `${currencySymbol}${MASKED_AMOUNT}` : formatted;
 
   // The accessible label always uses the standard format with explicit
   // "negative" prefix and optional context so screen readers convey
   // sign and meaning regardless of visual negative format.
-  const label = ariaLabel ?? formatCurrencyForScreenReader(amount, currency, context);
+  const label = isPrivacyMode
+    ? 'Amount hidden'
+    : (ariaLabel ?? formatCurrencyForScreenReader(amount, currency, context));
 
   return (
     <span
@@ -90,7 +108,7 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
       aria-label={label}
       style={colorStyle}
     >
-      {formatted}
+      {displayText}
     </span>
   );
 };
