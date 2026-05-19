@@ -50,6 +50,8 @@ function makeTransaction(overrides: Partial<Transaction> = {}): Transaction {
     statementDescription: null,
     customFields: null,
     extraNotes: null,
+    counterpartyName: null,
+    counterpartyAccountId: null,
     createdAt: '2024-06-15T08:00:00Z',
     updatedAt: '2024-06-15T08:00:00Z',
     deletedAt: null,

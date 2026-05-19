@@ -557,6 +557,9 @@ export const TransactionsPage: React.FC = () => {
                             <p className="list-item__primary">{transactionLabel}</p>
                           </Link>
                           <p className="list-item__secondary">
+                            {transaction.counterpartyName
+                              ? `${transaction.counterpartyName} · `
+                              : ''}
                             {transaction.categoryId !== null
                               ? (categoryNames.get(transaction.categoryId) ?? 'Uncategorized')
                               : 'Uncategorized'}{' '}

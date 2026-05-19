@@ -8,3 +8,5 @@ export { TransactionSort, DEFAULT_SORT } from './TransactionSort';
 export type { SortConfig, SortField, SortDirection, TransactionSortProps } from './TransactionSort';
 export { TransactionEditPanel } from './TransactionEditPanel';
 export type { TransactionEditPanelProps } from './TransactionEditPanel';
+export { CounterpartyInput } from './CounterpartyInput';
+export type { CounterpartyInputProps } from './CounterpartyInput';

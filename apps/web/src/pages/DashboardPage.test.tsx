@@ -68,6 +68,8 @@ describe('DashboardPage', () => {
             statementDescription: null,
             customFields: null,
             extraNotes: null,
+            counterpartyName: null,
+            counterpartyAccountId: null,
             ...syncMetadata,
           },
           {
@@ -96,6 +98,8 @@ describe('DashboardPage', () => {
             statementDescription: null,
             customFields: null,
             extraNotes: null,
+            counterpartyName: null,
+            counterpartyAccountId: null,
             ...syncMetadata,
           },
         ],

@@ -51,6 +51,8 @@ const TRANSACTION_COLUMNS = [
   'statement_description',
   'custom_fields',
   'extra_notes',
+  'counterparty_name',
+  'counterparty_account_id',
   'created_at',
   'updated_at',
   'deleted_at',
@@ -93,6 +95,8 @@ export interface CreateTransactionInput {
   statementDescription?: string | null;
   customFields?: Record<string, string> | null;
   extraNotes?: string | null;
+  counterpartyName?: string | null;
+  counterpartyAccountId?: SyncId | null;
 }
 
 /** Input used when updating an existing transaction record. */
@@ -121,6 +125,8 @@ export interface UpdateTransactionInput {
   statementDescription?: string | null;
   customFields?: Record<string, string> | null;
   extraNotes?: string | null;
+  counterpartyName?: string | null;
+  counterpartyAccountId?: SyncId | null;
 }
 
 function mapTransaction(row: Row): Transaction {
@@ -150,6 +156,8 @@ function mapTransaction(row: Row): Transaction {
     statementDescription: optionalString(row.statement_description),
     customFields: parseCustomFields(row.custom_fields),
     extraNotes: optionalString(row.extra_notes),
+    counterpartyName: optionalString(row.counterparty_name),
+    counterpartyAccountId: optionalString(row.counterparty_account_id),
     ...mapSyncMetadata(row),
   };
 }
@@ -165,10 +173,11 @@ function buildTransactionQuery(additionalClauses: string[] = [], filters: Transa
       `COALESCE(note, '') LIKE ?`,
       `COALESCE(tags, '') LIKE ?`,
       `status LIKE ?`,
+      `COALESCE(counterparty_name, '') LIKE ?`,
       `COALESCE((SELECT name FROM category WHERE category.id = "transaction".category_id AND category.deleted_at IS NULL), '') LIKE ?`,
       `COALESCE((SELECT name FROM account WHERE account.id = "transaction".account_id AND account.deleted_at IS NULL), '') LIKE ?`,
     ];
-    const searchParams: unknown[] = [pattern, pattern, pattern, pattern, pattern, pattern];
+    const searchParams: unknown[] = [pattern, pattern, pattern, pattern, pattern, pattern, pattern];
 
     // If the search term looks numeric, also match the amount (in cents)
     const numericSearch = filters.searchTerm.trim().replace(/[$,]/g, '');
@@ -253,13 +262,15 @@ export function createTransaction(db: SqliteDb, input: CreateTransactionInput): 
       statement_description,
       custom_fields,
       extra_notes,
+      counterparty_name,
+      counterparty_account_id,
       created_at,
       updated_at,
       deleted_at,
       sync_version,
       is_synced
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
       ${SQLITE_NOW_EXPRESSION},
       ${SQLITE_NOW_EXPRESSION},
       NULL,
@@ -292,6 +303,8 @@ export function createTransaction(db: SqliteDb, input: CreateTransactionInput): 
       input.statementDescription ?? null,
       serializeCustomFields(input.customFields ?? null),
       input.extraNotes ?? null,
+      input.counterpartyName ?? null,
+      input.counterpartyAccountId ?? null,
     ],
   );
 
@@ -368,6 +381,14 @@ export function updateTransaction(
       updates.customFields !== undefined ? updates.customFields : existingTransaction.customFields,
     extraNotes:
       updates.extraNotes !== undefined ? updates.extraNotes : existingTransaction.extraNotes,
+    counterpartyName:
+      updates.counterpartyName !== undefined
+        ? updates.counterpartyName
+        : existingTransaction.counterpartyName,
+    counterpartyAccountId:
+      updates.counterpartyAccountId !== undefined
+        ? updates.counterpartyAccountId
+        : existingTransaction.counterpartyAccountId,
   };
 
   execute(
@@ -397,6 +418,8 @@ export function updateTransaction(
             statement_description = ?,
             custom_fields = ?,
             extra_notes = ?,
+            counterparty_name = ?,
+            counterparty_account_id = ?,
             updated_at = ${SQLITE_NOW_EXPRESSION},
             sync_version = 1,
             is_synced = 0
@@ -427,6 +450,8 @@ export function updateTransaction(
       mergedTransaction.statementDescription,
       serializeCustomFields(mergedTransaction.customFields ?? null),
       mergedTransaction.extraNotes,
+      mergedTransaction.counterpartyName,
+      mergedTransaction.counterpartyAccountId,
       transactionId,
     ],
   );

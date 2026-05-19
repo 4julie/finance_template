@@ -75,6 +75,8 @@ function makeTransaction(overrides: Partial<Transaction> = {}): Transaction {
     extraNotes: null,
     ...syncMetadata,
     ...overrides,
+    counterpartyName: overrides.counterpartyName ?? null,
+    counterpartyAccountId: overrides.counterpartyAccountId ?? null,
   };
 }
 

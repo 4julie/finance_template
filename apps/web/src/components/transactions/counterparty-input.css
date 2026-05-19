@@ -1,0 +1,162 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/**
+ * Styles for the CounterpartyInput combobox component.
+ *
+ * Provides autocomplete dropdown, matched indicator, keyboard-focused
+ * option highlighting, and responsive + dark mode adaptations.
+ *
+ * References: issue #1514
+ */
+
+/* ---------------------------------------------------------------------------
+ * Container
+ * ------------------------------------------------------------------------- */
+
+.counterparty-input {
+  position: relative;
+}
+
+.counterparty-input__wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.counterparty-input__field {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--type-scale-body-font-size, 1rem);
+  line-height: var(--type-scale-body-line-height, 1.5);
+  color: var(--semantic-text-primary);
+  background: var(--semantic-background-primary);
+  border: 1px solid var(--semantic-border-default);
+  border-radius: var(--border-radius-md, 6px);
+  outline: none;
+  transition: border-color var(--duration-fast, 150ms) var(--easing-out, ease-out);
+}
+
+.counterparty-input__field:focus {
+  border-color: var(--semantic-border-focus, var(--color-primary-500));
+  box-shadow: 0 0 0 2px var(--semantic-focus-ring, rgba(59, 130, 246, 0.3));
+}
+
+/* ---------------------------------------------------------------------------
+ * Matched indicator
+ * ------------------------------------------------------------------------- */
+
+.counterparty-input__matched {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  margin-top: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--type-scale-caption-font-size, 0.75rem);
+  color: var(--semantic-text-success, var(--color-green-700));
+  background: var(--semantic-background-success-subtle, rgba(34, 197, 94, 0.1));
+  border-radius: var(--border-radius-sm, 4px);
+}
+
+.counterparty-input__matched-icon {
+  font-size: 0.875rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * Dropdown listbox
+ * ------------------------------------------------------------------------- */
+
+.counterparty-input__listbox {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  max-height: 240px;
+  overflow-y: auto;
+  margin: var(--spacing-1) 0 0;
+  padding: var(--spacing-1) 0;
+  list-style: none;
+  background: var(--semantic-background-primary);
+  border: 1px solid var(--semantic-border-default);
+  border-radius: var(--border-radius-md, 6px);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+}
+
+.counterparty-input__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--type-scale-body-font-size, 1rem);
+  color: var(--semantic-text-primary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.counterparty-input__option:hover,
+.counterparty-input__option--focused {
+  background: var(--semantic-background-hover, var(--color-neutral-100));
+}
+
+.counterparty-input__option--selected {
+  font-weight: 600;
+  color: var(--semantic-text-primary);
+}
+
+.counterparty-input__option-category {
+  font-size: var(--type-scale-caption-font-size, 0.75rem);
+  color: var(--semantic-text-tertiary, var(--semantic-text-secondary));
+  white-space: nowrap;
+}
+
+.counterparty-input__empty {
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--type-scale-caption-font-size, 0.75rem);
+  color: var(--semantic-text-secondary);
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+ * Dark mode
+ * ------------------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .counterparty-input__option:hover,
+  html:not([data-theme='light']) .counterparty-input__option--focused {
+    background: var(--semantic-background-hover, var(--color-neutral-800));
+  }
+}
+
+[data-theme='dark'] .counterparty-input__option:hover,
+[data-theme='dark'] .counterparty-input__option--focused {
+  background: var(--semantic-background-hover, var(--color-neutral-800));
+}
+
+/* ---------------------------------------------------------------------------
+ * Reduced motion
+ * ------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .counterparty-input__field {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * High contrast
+ * ------------------------------------------------------------------------- */
+
+@media (prefers-contrast: more) {
+  .counterparty-input__field {
+    border-width: 2px;
+  }
+
+  .counterparty-input__option--focused {
+    outline: 2px solid var(--semantic-text-primary);
+    outline-offset: -2px;
+  }
+}

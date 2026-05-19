@@ -134,6 +134,11 @@ export interface Transaction extends SyncMetadata {
   // Flexible fields
   readonly customFields: Readonly<Record<string, string>> | null;
   readonly extraNotes: string | null;
+
+  /** Counterparty name (e.g. "Walgreens", "Microsoft"). */
+  readonly counterpartyName: string | null;
+  /** UUID of an internal account for transfer counterparties. */
+  readonly counterpartyAccountId: SyncId | null;
 }
 
 /** Maps to KMP `com.finance.models.BudgetPeriod`. */

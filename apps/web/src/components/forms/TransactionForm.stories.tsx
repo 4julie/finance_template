@@ -174,6 +174,8 @@ const mockTransaction: Transaction = {
   statementDescription: null,
   customFields: null,
   extraNotes: null,
+  counterpartyName: null,
+  counterpartyAccountId: null,
   createdAt: '2026-04-10T14:30:00Z',
   updatedAt: '2026-04-10T14:30:00Z',
   deletedAt: null,

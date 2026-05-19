@@ -163,6 +163,7 @@ describe('transactions repository', () => {
         '%grocery%',
         '%grocery%',
         '%grocery%',
+        '%grocery%',
         'EXPENSE',
         5,
       ]);
@@ -530,8 +531,16 @@ describe('transactions repository', () => {
 
       // Should wrap in % but not escape internal wildcards (basic LIKE)
       const params = mockQuery.mock.calls[0][2] as unknown[];
-      // 6 LIKE patterns (numeric check doesn't match "100%" due to trailing %)
-      expect(params).toEqual(['%100%%', '%100%%', '%100%%', '%100%%', '%100%%', '%100%%']);
+      // 7 LIKE patterns (numeric check doesn't match "100%" due to trailing %)
+      expect(params).toEqual([
+        '%100%%',
+        '%100%%',
+        '%100%%',
+        '%100%%',
+        '%100%%',
+        '%100%%',
+        '%100%%',
+      ]);
     });
 
     it('should trim search term whitespace', () => {
@@ -545,6 +554,7 @@ describe('transactions repository', () => {
 
       const params = mockQuery.mock.calls[0][2] as unknown[];
       expect(params).toEqual([
+        '%coffee%',
         '%coffee%',
         '%coffee%',
         '%coffee%',
