@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { formatCurrencyLabel } from '../../lib/currency';
+import { formatCurrencyForScreenReader } from '../../lib/a11y';
 import {
   formatAmountWithSettings,
   getAmountColor,
@@ -22,6 +22,13 @@ export interface CurrencyDisplayProps {
   showSign?: boolean;
   /** Additional CSS class names. */
   className?: string;
+  /**
+   * Contextual description appended to the screen reader label.
+   *
+   * Provides additional meaning so amounts are not announced in
+   * isolation (e.g., "Dining category", "Emergency Fund goal").
+   */
+  context?: string;
   /** Override the accessible label. */
   'aria-label'?: string;
 }
@@ -37,7 +44,8 @@ export interface CurrencyDisplayProps {
  * Accessibility: when `negativeFormat` is `'color-only'`, the visible
  * text omits the minus sign but the `aria-label` always includes
  * "negative" for screen readers so information is never conveyed by
- * color alone.
+ * color alone. The optional `context` prop appends a description
+ * (e.g., "Dining category") so amounts announce their meaning.
  */
 export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   amount,
@@ -46,6 +54,7 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   colorize = false,
   showSign = false,
   className = '',
+  context,
   'aria-label': ariaLabel,
 }) => {
   const displaySettings = useMoneyDisplay();
@@ -71,9 +80,9 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
     : undefined;
 
   // The accessible label always uses the standard format with explicit
-  // "negative" prefix so screen readers convey sign regardless of
-  // visual negative format.
-  const label = ariaLabel ?? formatCurrencyLabel(amount, { currency, locale });
+  // "negative" prefix and optional context so screen readers convey
+  // sign and meaning regardless of visual negative format.
+  const label = ariaLabel ?? formatCurrencyForScreenReader(amount, currency, context);
 
   return (
     <span

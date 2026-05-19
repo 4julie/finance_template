@@ -8,6 +8,7 @@ import { GoalForm } from '../components/forms';
 import type { CreateGoalInput } from '../db/repositories/goals';
 import { useGoals } from '../hooks';
 import type { Goal } from '../kmp/bridge';
+import { getGoalStatusIndicator } from '../lib/a11y';
 import '../styles/pages.css';
 
 function getGoalIcon(iconName: string | null | undefined): string {
@@ -104,6 +105,8 @@ export const GoalDetailPage: React.FC = () => {
     goal.targetAmount.amount > 0
       ? Math.round((goal.currentAmount.amount / goal.targetAmount.amount) * 100)
       : 0;
+
+  const goalStatus = getGoalStatusIndicator(percentComplete);
 
   const statusTone =
     percentComplete >= 100
@@ -218,7 +221,10 @@ export const GoalDetailPage: React.FC = () => {
         >
           Progress
         </h3>
-        <div className="card" aria-label={`${goal.name}: ${percentComplete}% complete`}>
+        <div
+          className="card"
+          aria-label={`${goal.name}: ${percentComplete}% complete, ${goalStatus.label}`}
+        >
           <div
             style={{
               display: 'flex',
@@ -226,8 +232,16 @@ export const GoalDetailPage: React.FC = () => {
               marginBottom: 'var(--spacing-2)',
             }}
           >
-            <CurrencyDisplay amount={goal.currentAmount.amount} currency={goal.currency.code} />
-            <CurrencyDisplay amount={goal.targetAmount.amount} currency={goal.currency.code} />
+            <CurrencyDisplay
+              amount={goal.currentAmount.amount}
+              currency={goal.currency.code}
+              context={`saved for ${goal.name}`}
+            />
+            <CurrencyDisplay
+              amount={goal.targetAmount.amount}
+              currency={goal.currency.code}
+              context={`target for ${goal.name}`}
+            />
           </div>
           <div
             className="progress-bar"
@@ -235,7 +249,7 @@ export const GoalDetailPage: React.FC = () => {
             aria-valuenow={Math.min(percentComplete, 100)}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label={`${percentComplete}% of goal reached`}
+            aria-label={`${goal.name}: ${percentComplete} percent of goal reached, ${goalStatus.label}`}
           >
             <div
               className={`progress-bar__fill progress-bar__fill--${statusTone}`}
@@ -252,12 +266,17 @@ export const GoalDetailPage: React.FC = () => {
             }}
           >
             <span>
+              <span aria-hidden="true">{goalStatus.icon} </span>
               {percentComplete >= 100 ? (
                 'Goal reached! 🎉'
               ) : (
                 <>
-                  <CurrencyDisplay amount={remainingAmount} currency={goal.currency.code} /> to go (
-                  {percentComplete}%)
+                  <CurrencyDisplay
+                    amount={remainingAmount}
+                    currency={goal.currency.code}
+                    context={`remaining for ${goal.name} goal`}
+                  />{' '}
+                  to go ({percentComplete}%)
                 </>
               )}
             </span>

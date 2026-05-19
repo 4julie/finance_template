@@ -13,6 +13,7 @@ import { GoalForm } from '../components/forms';
 import type { CreateGoalInput } from '../db/repositories/goals';
 import { useGoals } from '../hooks';
 import type { Goal } from '../kmp/bridge';
+import { getGoalStatusIndicator } from '../lib/a11y';
 
 function getGoalIcon(iconName: string | null | undefined): string {
   switch (iconName) {
@@ -174,6 +175,7 @@ export const GoalsPage: React.FC = () => {
                   goal.targetAmount.amount - goal.currentAmount.amount,
                   0,
                 );
+                const goalStatus = getGoalStatusIndicator(percentComplete);
                 const statusTone =
                   percentComplete >= 100
                     ? 'positive'
@@ -192,7 +194,7 @@ export const GoalsPage: React.FC = () => {
                   <article
                     key={goal.id}
                     className="card"
-                    aria-label={`${goal.name}: ${percentComplete}%`}
+                    aria-label={`${goal.name}: ${percentComplete}%, ${goalStatus.label}`}
                   >
                     <div
                       style={{
@@ -285,6 +287,7 @@ export const GoalsPage: React.FC = () => {
                       aria-valuenow={Math.min(percentComplete, 100)}
                       aria-valuemin={0}
                       aria-valuemax={100}
+                      aria-label={`${goal.name}: ${percentComplete} percent of goal reached, ${goalStatus.label}`}
                     >
                       <div
                         className={`progress-bar__fill progress-bar__fill--${statusTone}`}
@@ -301,6 +304,7 @@ export const GoalsPage: React.FC = () => {
                       }}
                     >
                       <span>
+                        <span aria-hidden="true">{goalStatus.icon} </span>
                         {percentComplete >= 100 ? (
                           'Goal reached!'
                         ) : (
@@ -308,6 +312,7 @@ export const GoalsPage: React.FC = () => {
                             <CurrencyDisplay
                               amount={remainingAmount}
                               currency={goal.currency.code}
+                              context={`remaining for ${goal.name} goal`}
                             />{' '}
                             to go
                           </>
