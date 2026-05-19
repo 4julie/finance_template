@@ -640,10 +640,10 @@ describe('Data aggregation validation (#1334)', () => {
   });
 
   it('budget percentage is 0 when no budget exists', () => {
-    const monthlyBudget = 0;
-    const budgetSpent = 0;
-    const percentage = monthlyBudget > 0 ? Math.round((budgetSpent / monthlyBudget) * 100) : 0;
-    expect(percentage).toBe(0);
+    const calculatePercentage = (budget: number, spent: number) =>
+      budget > 0 ? Math.round((spent / budget) * 100) : 0;
+    expect(calculatePercentage(0, 0)).toBe(0);
+    expect(calculatePercentage(0, 500)).toBe(0);
   });
 
   it('budget status tone reflects overspending', () => {
