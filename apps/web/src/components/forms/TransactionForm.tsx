@@ -198,6 +198,19 @@ export function TransactionForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [suggestion, setSuggestion] = useState<CategorySuggestion | null>(null);
 
+  // -- additional details state ---------------------------------------------
+  const [additionalOpen, setAdditionalOpen] = useState(false);
+  const [merchantCity, setMerchantCity] = useState('');
+  const [merchantState, setMerchantState] = useState('');
+  const [merchantZip, setMerchantZip] = useState('');
+  const [merchantCountry, setMerchantCountry] = useState('');
+  const [statementDescription, setStatementDescription] = useState('');
+  const [externalReferenceId, setExternalReferenceId] = useState('');
+  const [customFieldEntries, setCustomFieldEntries] = useState<{ key: string; value: string }[]>(
+    [],
+  );
+  const [extraNotes, setExtraNotes] = useState('');
+
   // -- auto-categorisation --------------------------------------------------
   const { suggestCategory: autoSuggest, learnCorrection } = useAutoCategory(categories);
 
@@ -237,6 +250,21 @@ export function TransactionForm({
     setSubmitting(false);
     setSubmitError(null);
     setSuggestion(null);
+
+    // Additional details
+    setMerchantCity(initialData?.merchantCity ?? '');
+    setMerchantState(initialData?.merchantState ?? '');
+    setMerchantZip(initialData?.merchantZip ?? '');
+    setMerchantCountry(initialData?.merchantCountry ?? '');
+    setStatementDescription(initialData?.statementDescription ?? '');
+    setExternalReferenceId(initialData?.externalReferenceId ?? '');
+    setExtraNotes(initialData?.extraNotes ?? '');
+    setCustomFieldEntries(
+      initialData?.customFields
+        ? Object.entries(initialData.customFields).map(([key, value]) => ({ key, value }))
+        : [],
+    );
+    setAdditionalOpen(false);
   }, [initialData, isOpen]);
 
   // -- auto-suggest category when description changes ----------------------
@@ -306,6 +334,15 @@ export function TransactionForm({
         return;
       }
 
+      // Build custom fields from entries, skipping empty keys.
+      const customFields: Record<string, string> = {};
+      for (const entry of customFieldEntries) {
+        const trimmedKey = entry.key.trim();
+        if (trimmedKey) {
+          customFields[trimmedKey] = entry.value;
+        }
+      }
+
       const input: CreateTransactionInput = {
         householdId: selectedAccount.householdId,
         accountId,
@@ -318,6 +355,14 @@ export function TransactionForm({
         categoryId: categoryId || null,
         note: notes.trim() || null,
         tags: parseTags(tagsInput),
+        merchantCity: merchantCity.trim() || null,
+        merchantState: merchantState.trim() || null,
+        merchantZip: merchantZip.trim() || null,
+        merchantCountry: merchantCountry.trim() || null,
+        statementDescription: statementDescription.trim() || null,
+        externalReferenceId: externalReferenceId.trim() || null,
+        customFields: Object.keys(customFields).length > 0 ? customFields : null,
+        extraNotes: extraNotes.trim() || null,
       };
 
       // Learn from user's category choice if it differs from the suggestion.
@@ -342,6 +387,15 @@ export function TransactionForm({
         setTagsInput('');
         setErrors({});
         setSuggestion(null);
+        setMerchantCity('');
+        setMerchantState('');
+        setMerchantZip('');
+        setMerchantCountry('');
+        setStatementDescription('');
+        setExternalReferenceId('');
+        setCustomFieldEntries([]);
+        setExtraNotes('');
+        setAdditionalOpen(false);
       } catch (err) {
         setSubmitError(err instanceof Error ? err.message : submitFailureMessage);
       } finally {
@@ -359,6 +413,14 @@ export function TransactionForm({
       categoryId,
       notes,
       tagsInput,
+      merchantCity,
+      merchantState,
+      merchantZip,
+      merchantCountry,
+      statementDescription,
+      externalReferenceId,
+      customFieldEntries,
+      extraNotes,
       onSubmit,
       submitFailureMessage,
       suggestion,
@@ -616,6 +678,236 @@ export function TransactionForm({
                 </div>
               )}
             </div>
+
+            {/* Additional Details — expandable section */}
+            <fieldset className="form-group" style={{ border: 'none', padding: 0, margin: 0 }}>
+              <legend style={{ display: 'contents' }}>
+                <button
+                  type="button"
+                  onClick={() => setAdditionalOpen((prev) => !prev)}
+                  aria-expanded={additionalOpen}
+                  aria-controls="txn-additional-details"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--spacing-1)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 'var(--spacing-1) 0',
+                    fontSize: 'var(--type-scale-body-font-size)',
+                    fontWeight: 600,
+                    color: 'var(--semantic-text-secondary)',
+                    width: '100%',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      display: 'inline-block',
+                      transition: 'transform 0.2s',
+                      transform: additionalOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                    }}
+                  >
+                    ▶
+                  </span>
+                  Additional Details
+                </button>
+              </legend>
+
+              {additionalOpen && (
+                <div
+                  id="txn-additional-details"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--spacing-3)',
+                    marginTop: 'var(--spacing-2)',
+                  }}
+                >
+                  {/* Merchant location fields */}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: 'var(--spacing-3)',
+                    }}
+                  >
+                    <div className="form-group">
+                      <label htmlFor="txn-merchant-city" className="form-group__label">
+                        Merchant City
+                      </label>
+                      <input
+                        id="txn-merchant-city"
+                        className="form-input"
+                        type="text"
+                        value={merchantCity}
+                        onChange={(e) => setMerchantCity(e.target.value)}
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="txn-merchant-state" className="form-group__label">
+                        Merchant State
+                      </label>
+                      <input
+                        id="txn-merchant-state"
+                        className="form-input"
+                        type="text"
+                        value={merchantState}
+                        onChange={(e) => setMerchantState(e.target.value)}
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="txn-merchant-zip" className="form-group__label">
+                        Merchant ZIP
+                      </label>
+                      <input
+                        id="txn-merchant-zip"
+                        className="form-input"
+                        type="text"
+                        value={merchantZip}
+                        onChange={(e) => setMerchantZip(e.target.value)}
+                        placeholder="12345 or 12345-6789"
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="txn-merchant-country" className="form-group__label">
+                        Merchant Country
+                      </label>
+                      <input
+                        id="txn-merchant-country"
+                        className="form-input"
+                        type="text"
+                        value={merchantCountry}
+                        onChange={(e) => setMerchantCountry(e.target.value)}
+                        placeholder="US, GB, etc."
+                        maxLength={2}
+                        autoComplete="off"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Statement description */}
+                  <div className="form-group">
+                    <label htmlFor="txn-statement-desc" className="form-group__label">
+                      Statement Description
+                    </label>
+                    <input
+                      id="txn-statement-desc"
+                      className="form-input"
+                      type="text"
+                      value={statementDescription}
+                      onChange={(e) => setStatementDescription(e.target.value)}
+                      autoComplete="off"
+                    />
+                  </div>
+
+                  {/* External reference ID */}
+                  <div className="form-group">
+                    <label htmlFor="txn-external-ref" className="form-group__label">
+                      External Reference ID
+                    </label>
+                    <input
+                      id="txn-external-ref"
+                      className="form-input"
+                      type="text"
+                      value={externalReferenceId}
+                      onChange={(e) => setExternalReferenceId(e.target.value)}
+                      readOnly={isEditMode && !!initialData?.externalReferenceId}
+                      autoComplete="off"
+                    />
+                  </div>
+
+                  {/* Custom fields — key/value pairs */}
+                  <div className="form-group">
+                    <label className="form-group__label">Custom Fields</label>
+                    {customFieldEntries.map((entry, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'flex',
+                          gap: 'var(--spacing-2)',
+                          marginBottom: 'var(--spacing-1)',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <input
+                          className="form-input"
+                          type="text"
+                          placeholder="Field name"
+                          value={entry.key}
+                          onChange={(e) => {
+                            const updated = [...customFieldEntries];
+                            updated[idx] = { ...entry, key: e.target.value };
+                            setCustomFieldEntries(updated);
+                          }}
+                          aria-label={`Custom field ${idx + 1} name`}
+                          autoComplete="off"
+                          style={{ flex: 1 }}
+                        />
+                        <input
+                          className="form-input"
+                          type="text"
+                          placeholder="Value"
+                          value={entry.value}
+                          onChange={(e) => {
+                            const updated = [...customFieldEntries];
+                            updated[idx] = { ...entry, value: e.target.value };
+                            setCustomFieldEntries(updated);
+                          }}
+                          aria-label={`Custom field ${idx + 1} value`}
+                          autoComplete="off"
+                          style={{ flex: 1 }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCustomFieldEntries(customFieldEntries.filter((_, i) => i !== idx));
+                          }}
+                          aria-label={`Remove custom field ${idx + 1}`}
+                          className="icon-button"
+                          style={{ flexShrink: 0 }}
+                        >
+                          <span aria-hidden="true">✕</span>
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCustomFieldEntries([...customFieldEntries, { key: '', value: '' }])
+                      }
+                      className="form-button form-button--secondary"
+                      style={{
+                        fontSize: 'var(--type-scale-caption-font-size)',
+                        padding: 'var(--spacing-1) var(--spacing-2)',
+                      }}
+                    >
+                      + Add Field
+                    </button>
+                  </div>
+
+                  {/* Extra notes */}
+                  <div className="form-group">
+                    <label htmlFor="txn-extra-notes" className="form-group__label">
+                      Extra Notes
+                    </label>
+                    <textarea
+                      id="txn-extra-notes"
+                      className="form-textarea"
+                      value={extraNotes}
+                      onChange={(e) => setExtraNotes(e.target.value)}
+                      rows={3}
+                      placeholder="Free-form text — bank memos, import leftovers, etc."
+                    />
+                  </div>
+                </div>
+              )}
+            </fieldset>
           </div>
 
           {/* Actions */}

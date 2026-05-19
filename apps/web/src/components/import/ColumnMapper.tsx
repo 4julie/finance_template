@@ -31,6 +31,14 @@ export const TRANSACTION_FIELDS: { value: TransactionField | ''; label: string }
   { value: 'type', label: 'Type' },
   { value: 'note', label: 'Note' },
   { value: 'tags', label: 'Tags' },
+  { value: 'merchantCity', label: 'Merchant City' },
+  { value: 'merchantState', label: 'Merchant State' },
+  { value: 'merchantZip', label: 'Merchant ZIP' },
+  { value: 'merchantCountry', label: 'Merchant Country' },
+  { value: 'externalReferenceId', label: 'Reference ID' },
+  { value: 'statementDescription', label: 'Statement Description' },
+  { value: 'customFields', label: 'Custom Fields' },
+  { value: 'extraNotes', label: 'Extra Notes' },
 ];
 
 const MAX_PREVIEW_ROWS = 3;
@@ -90,7 +98,8 @@ export const ColumnMapper: React.FC<ColumnMapperProps> = ({
       </h3>
       <p className="import-section-description">
         Match each CSV column to a transaction field. Columns marked &ldquo;Unmapped&rdquo; will be
-        ignored during import.
+        ignored during import. Use &ldquo;Custom Fields&rdquo; or &ldquo;Extra Notes&rdquo; for data
+        that doesn&apos;t fit a standard field.
       </p>
 
       <div className="import-table-wrapper">

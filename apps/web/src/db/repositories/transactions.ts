@@ -17,8 +17,10 @@ import {
   mapCurrency,
   mapSyncMetadata,
   optionalString,
+  parseCustomFields,
   parseTags,
   requireString,
+  serializeCustomFields,
   serializeTags,
   toBoolean,
 } from './helpers';
@@ -40,6 +42,15 @@ const TRANSACTION_COLUMNS = [
   'is_recurring',
   'recurring_rule_id',
   'tags',
+  'merchant_address',
+  'merchant_city',
+  'merchant_state',
+  'merchant_zip',
+  'merchant_country',
+  'external_reference_id',
+  'statement_description',
+  'custom_fields',
+  'extra_notes',
   'created_at',
   'updated_at',
   'deleted_at',
@@ -73,6 +84,15 @@ export interface CreateTransactionInput {
   isRecurring?: boolean;
   recurringRuleId?: SyncId | null;
   tags?: readonly string[];
+  merchantAddress?: string | null;
+  merchantCity?: string | null;
+  merchantState?: string | null;
+  merchantZip?: string | null;
+  merchantCountry?: string | null;
+  externalReferenceId?: string | null;
+  statementDescription?: string | null;
+  customFields?: Record<string, string> | null;
+  extraNotes?: string | null;
 }
 
 /** Input used when updating an existing transaction record. */
@@ -92,6 +112,15 @@ export interface UpdateTransactionInput {
   isRecurring?: boolean;
   recurringRuleId?: SyncId | null;
   tags?: readonly string[];
+  merchantAddress?: string | null;
+  merchantCity?: string | null;
+  merchantState?: string | null;
+  merchantZip?: string | null;
+  merchantCountry?: string | null;
+  externalReferenceId?: string | null;
+  statementDescription?: string | null;
+  customFields?: Record<string, string> | null;
+  extraNotes?: string | null;
 }
 
 function mapTransaction(row: Row): Transaction {
@@ -112,6 +141,15 @@ function mapTransaction(row: Row): Transaction {
     isRecurring: toBoolean(row.is_recurring),
     recurringRuleId: optionalString(row.recurring_rule_id),
     tags: parseTags(row.tags),
+    merchantAddress: optionalString(row.merchant_address),
+    merchantCity: optionalString(row.merchant_city),
+    merchantState: optionalString(row.merchant_state),
+    merchantZip: optionalString(row.merchant_zip),
+    merchantCountry: optionalString(row.merchant_country),
+    externalReferenceId: optionalString(row.external_reference_id),
+    statementDescription: optionalString(row.statement_description),
+    customFields: parseCustomFields(row.custom_fields),
+    extraNotes: optionalString(row.extra_notes),
     ...mapSyncMetadata(row),
   };
 }
@@ -206,13 +244,22 @@ export function createTransaction(db: SqliteDb, input: CreateTransactionInput): 
       is_recurring,
       recurring_rule_id,
       tags,
+      merchant_address,
+      merchant_city,
+      merchant_state,
+      merchant_zip,
+      merchant_country,
+      external_reference_id,
+      statement_description,
+      custom_fields,
+      extra_notes,
       created_at,
       updated_at,
       deleted_at,
       sync_version,
       is_synced
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
       ${SQLITE_NOW_EXPRESSION},
       ${SQLITE_NOW_EXPRESSION},
       NULL,
@@ -236,6 +283,15 @@ export function createTransaction(db: SqliteDb, input: CreateTransactionInput): 
       input.isRecurring ? 1 : 0,
       input.recurringRuleId ?? null,
       serializeTags(input.tags ?? []),
+      input.merchantAddress ?? null,
+      input.merchantCity ?? null,
+      input.merchantState ?? null,
+      input.merchantZip ?? null,
+      input.merchantCountry ?? null,
+      input.externalReferenceId ?? null,
+      input.statementDescription ?? null,
+      serializeCustomFields(input.customFields ?? null),
+      input.extraNotes ?? null,
     ],
   );
 
@@ -284,6 +340,34 @@ export function updateTransaction(
         ? updates.recurringRuleId
         : existingTransaction.recurringRuleId,
     tags: updates.tags ?? existingTransaction.tags,
+    merchantAddress:
+      updates.merchantAddress !== undefined
+        ? updates.merchantAddress
+        : existingTransaction.merchantAddress,
+    merchantCity:
+      updates.merchantCity !== undefined ? updates.merchantCity : existingTransaction.merchantCity,
+    merchantState:
+      updates.merchantState !== undefined
+        ? updates.merchantState
+        : existingTransaction.merchantState,
+    merchantZip:
+      updates.merchantZip !== undefined ? updates.merchantZip : existingTransaction.merchantZip,
+    merchantCountry:
+      updates.merchantCountry !== undefined
+        ? updates.merchantCountry
+        : existingTransaction.merchantCountry,
+    externalReferenceId:
+      updates.externalReferenceId !== undefined
+        ? updates.externalReferenceId
+        : existingTransaction.externalReferenceId,
+    statementDescription:
+      updates.statementDescription !== undefined
+        ? updates.statementDescription
+        : existingTransaction.statementDescription,
+    customFields:
+      updates.customFields !== undefined ? updates.customFields : existingTransaction.customFields,
+    extraNotes:
+      updates.extraNotes !== undefined ? updates.extraNotes : existingTransaction.extraNotes,
   };
 
   execute(
@@ -304,6 +388,15 @@ export function updateTransaction(
             is_recurring = ?,
             recurring_rule_id = ?,
             tags = ?,
+            merchant_address = ?,
+            merchant_city = ?,
+            merchant_state = ?,
+            merchant_zip = ?,
+            merchant_country = ?,
+            external_reference_id = ?,
+            statement_description = ?,
+            custom_fields = ?,
+            extra_notes = ?,
             updated_at = ${SQLITE_NOW_EXPRESSION},
             sync_version = 1,
             is_synced = 0
@@ -325,6 +418,15 @@ export function updateTransaction(
       mergedTransaction.isRecurring ? 1 : 0,
       mergedTransaction.recurringRuleId,
       serializeTags(mergedTransaction.tags),
+      mergedTransaction.merchantAddress,
+      mergedTransaction.merchantCity,
+      mergedTransaction.merchantState,
+      mergedTransaction.merchantZip,
+      mergedTransaction.merchantCountry,
+      mergedTransaction.externalReferenceId,
+      mergedTransaction.statementDescription,
+      serializeCustomFields(mergedTransaction.customFields ?? null),
+      mergedTransaction.extraNotes,
       transactionId,
     ],
   );

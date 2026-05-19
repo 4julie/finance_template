@@ -32,6 +32,8 @@ export const TransactionDetailPage: React.FC = () => {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+  const [additionalDetailsOpen, setAdditionalDetailsOpen] = useState(false);
+  const [copiedRefId, setCopiedRefId] = useState(false);
 
   const {
     transactions,
@@ -68,6 +70,51 @@ export const TransactionDetailPage: React.FC = () => {
   const handleFormCancel = useCallback(() => {
     setIsFormOpen(false);
   }, []);
+
+  /** Whether the transaction has any additional detail fields populated. */
+  const hasAdditionalDetails = useMemo(() => {
+    if (!transaction) return false;
+    return !!(
+      transaction.merchantAddress ||
+      transaction.merchantCity ||
+      transaction.merchantState ||
+      transaction.merchantZip ||
+      transaction.merchantCountry ||
+      transaction.externalReferenceId ||
+      transaction.statementDescription ||
+      (transaction.customFields && Object.keys(transaction.customFields).length > 0) ||
+      transaction.extraNotes
+    );
+  }, [transaction]);
+
+  /** Format merchant location as a single-line address. */
+  const formattedMerchantLocation = useMemo(() => {
+    if (!transaction) return null;
+    const parts: string[] = [];
+    if (transaction.merchantAddress) parts.push(transaction.merchantAddress);
+    const cityStateZip = [
+      transaction.merchantCity,
+      transaction.merchantState
+        ? transaction.merchantZip
+          ? `${transaction.merchantState} ${transaction.merchantZip}`
+          : transaction.merchantState
+        : transaction.merchantZip,
+    ]
+      .filter(Boolean)
+      .join(', ');
+    if (cityStateZip) parts.push(cityStateZip);
+    if (transaction.merchantCountry) parts.push(transaction.merchantCountry);
+    return parts.length > 0 ? parts.join(', ') : null;
+  }, [transaction]);
+
+  /** Copy external reference ID to clipboard. */
+  const handleCopyRefId = useCallback(() => {
+    if (!transaction?.externalReferenceId) return;
+    navigator.clipboard.writeText(transaction.externalReferenceId).then(() => {
+      setCopiedRefId(true);
+      setTimeout(() => setCopiedRefId(false), 2000);
+    });
+  }, [transaction]);
 
   const handleFormSubmit = useCallback(
     async (data: CreateTransactionInput): Promise<void> => {
@@ -233,6 +280,191 @@ export const TransactionDetailPage: React.FC = () => {
           )}
         </dl>
       </article>
+
+      {hasAdditionalDetails && (
+        <article
+          className="card"
+          aria-label="Additional transaction details"
+          style={{ marginBottom: 'var(--spacing-6)' }}
+        >
+          <button
+            type="button"
+            onClick={() => setAdditionalDetailsOpen((prev) => !prev)}
+            aria-expanded={additionalDetailsOpen}
+            aria-controls="additional-details-content"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-2)',
+              width: '100%',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 'var(--spacing-2) 0',
+              fontSize: 'var(--type-scale-subheading-font-size)',
+              fontWeight: 'var(--type-scale-subheading-font-weight)',
+              color: 'var(--semantic-text-primary)',
+              textAlign: 'left',
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                display: 'inline-block',
+                transition: 'transform 0.2s',
+                transform: additionalDetailsOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+              }}
+            >
+              ▶
+            </span>
+            Additional Details
+          </button>
+
+          {additionalDetailsOpen && (
+            <dl
+              id="additional-details-content"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 'var(--spacing-4)',
+                marginTop: 'var(--spacing-3)',
+              }}
+            >
+              {formattedMerchantLocation && (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <dt className="card__title">Merchant Location</dt>
+                  <dd>{formattedMerchantLocation}</dd>
+                </div>
+              )}
+
+              {transaction.externalReferenceId && (
+                <div>
+                  <dt className="card__title">External Reference ID</dt>
+                  <dd
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--spacing-2)',
+                    }}
+                  >
+                    <code
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: 'var(--type-scale-caption-font-size)',
+                      }}
+                    >
+                      {transaction.externalReferenceId}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={handleCopyRefId}
+                      aria-label="Copy reference ID to clipboard"
+                      className="icon-button"
+                      style={{ fontSize: '0.875rem', padding: 'var(--spacing-1)' }}
+                    >
+                      {copiedRefId ? '✓' : '📋'}
+                    </button>
+                  </dd>
+                </div>
+              )}
+
+              {transaction.statementDescription && (
+                <div>
+                  <dt className="card__title">Statement Description</dt>
+                  <dd>{transaction.statementDescription}</dd>
+                </div>
+              )}
+
+              {transaction.customFields && Object.keys(transaction.customFields).length > 0 && (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <dt className="card__title">Custom Fields</dt>
+                  <dd>
+                    <table
+                      aria-label="Custom fields"
+                      style={{
+                        width: '100%',
+                        borderCollapse: 'collapse',
+                        marginTop: 'var(--spacing-1)',
+                      }}
+                    >
+                      <thead>
+                        <tr>
+                          <th
+                            scope="col"
+                            style={{
+                              textAlign: 'left',
+                              padding: 'var(--spacing-1) var(--spacing-2)',
+                              borderBottom: '1px solid var(--semantic-border-primary)',
+                              fontWeight: 600,
+                            }}
+                          >
+                            Field
+                          </th>
+                          <th
+                            scope="col"
+                            style={{
+                              textAlign: 'left',
+                              padding: 'var(--spacing-1) var(--spacing-2)',
+                              borderBottom: '1px solid var(--semantic-border-primary)',
+                              fontWeight: 600,
+                            }}
+                          >
+                            Value
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(transaction.customFields).map(([key, value]) => (
+                          <tr key={key}>
+                            <td
+                              style={{
+                                padding: 'var(--spacing-1) var(--spacing-2)',
+                                borderBottom: '1px solid var(--semantic-border-primary)',
+                              }}
+                            >
+                              {key}
+                            </td>
+                            <td
+                              style={{
+                                padding: 'var(--spacing-1) var(--spacing-2)',
+                                borderBottom: '1px solid var(--semantic-border-primary)',
+                              }}
+                            >
+                              {value}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </dd>
+                </div>
+              )}
+
+              {transaction.extraNotes && (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <dt className="card__title">Extra Notes</dt>
+                  <dd>
+                    <pre
+                      style={{
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                        fontFamily: 'monospace',
+                        fontSize: 'var(--type-scale-caption-font-size)',
+                        margin: 0,
+                        padding: 'var(--spacing-2)',
+                        backgroundColor: 'var(--semantic-background-secondary)',
+                        borderRadius: 'var(--radius-sm)',
+                      }}
+                    >
+                      {transaction.extraNotes}
+                    </pre>
+                  </dd>
+                </div>
+              )}
+            </dl>
+          )}
+        </article>
+      )}
 
       <TransactionForm
         isOpen={isFormOpen}

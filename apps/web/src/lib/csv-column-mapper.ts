@@ -21,7 +21,15 @@ export type TransactionField =
   | 'category'
   | 'type'
   | 'note'
-  | 'tags';
+  | 'tags'
+  | 'merchantCity'
+  | 'merchantState'
+  | 'merchantZip'
+  | 'merchantCountry'
+  | 'externalReferenceId'
+  | 'statementDescription'
+  | 'customFields'
+  | 'extraNotes';
 
 /** Map from zero-based CSV column index to a transaction field. */
 export interface ColumnMapping {
@@ -53,6 +61,14 @@ export interface RawImportRow {
   type?: string;
   note?: string;
   tags?: string;
+  merchantCity?: string;
+  merchantState?: string;
+  merchantZip?: string;
+  merchantCountry?: string;
+  externalReferenceId?: string;
+  statementDescription?: string;
+  customFields?: string;
+  extraNotes?: string;
   /** Original CSV row number (1-based, relative to data rows) for error reporting. */
   rowIndex: number;
 }
@@ -146,6 +162,59 @@ const FIELD_PATTERNS: FieldPattern[] = [
     partial: ['tag', 'label'],
     exactConfidence: 1.0,
     partialConfidence: 0.6,
+  },
+  {
+    field: 'merchantCity',
+    exact: ['city', 'merchant city', 'store city'],
+    partial: ['city'],
+    exactConfidence: 0.9,
+    partialConfidence: 0.5,
+  },
+  {
+    field: 'merchantState',
+    exact: ['state', 'merchant state', 'province', 'region', 'store state'],
+    partial: ['state', 'province'],
+    exactConfidence: 0.9,
+    partialConfidence: 0.5,
+  },
+  {
+    field: 'merchantZip',
+    exact: ['zip', 'zip code', 'postal code', 'postcode', 'merchant zip'],
+    partial: ['zip', 'postal'],
+    exactConfidence: 0.9,
+    partialConfidence: 0.5,
+  },
+  {
+    field: 'merchantCountry',
+    exact: ['country', 'country code', 'merchant country'],
+    partial: ['country'],
+    exactConfidence: 0.9,
+    partialConfidence: 0.5,
+  },
+  {
+    field: 'externalReferenceId',
+    exact: [
+      'reference',
+      'reference number',
+      'reference id',
+      'ref',
+      'ref no',
+      'trans id',
+      'transaction id',
+      'transaction number',
+      'confirmation number',
+      'check number',
+    ],
+    partial: ['reference', 'ref', 'trans id', 'confirmation'],
+    exactConfidence: 0.9,
+    partialConfidence: 0.6,
+  },
+  {
+    field: 'statementDescription',
+    exact: ['statement description', 'statement name', 'statement memo', 'original description'],
+    partial: ['statement'],
+    exactConfidence: 0.9,
+    partialConfidence: 0.5,
   },
 ];
 

@@ -38,6 +38,14 @@ export type TransactionField =
   | 'account'
   | 'note'
   | 'type'
+  | 'merchantCity'
+  | 'merchantState'
+  | 'merchantZip'
+  | 'merchantCountry'
+  | 'externalReferenceId'
+  | 'statementDescription'
+  | 'customFields'
+  | 'extraNotes'
   | 'skip';
 
 export interface ColumnMapping {

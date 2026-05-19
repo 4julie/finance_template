@@ -167,6 +167,14 @@ describe('TransactionForm', () => {
       categoryId: 'category-food',
       note: 'Morning treat',
       tags: ['coffee', 'morning'],
+      merchantCity: null,
+      merchantState: null,
+      merchantZip: null,
+      merchantCountry: null,
+      statementDescription: null,
+      externalReferenceId: null,
+      customFields: null,
+      extraNotes: null,
     });
   });
 
@@ -176,5 +184,80 @@ describe('TransactionForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Additional details
+  // ---------------------------------------------------------------------------
+
+  it('shows additional details section when expanded', () => {
+    renderTransactionForm();
+
+    // Additional details section is collapsed by default
+    expect(screen.queryByLabelText('Merchant City')).not.toBeInTheDocument();
+
+    // Expand it
+    fireEvent.click(screen.getByRole('button', { name: /additional details/i }));
+
+    expect(screen.getByLabelText('Merchant City')).toBeInTheDocument();
+    expect(screen.getByLabelText('Merchant State')).toBeInTheDocument();
+    expect(screen.getByLabelText('Merchant ZIP')).toBeInTheDocument();
+    expect(screen.getByLabelText('Merchant Country')).toBeInTheDocument();
+    expect(screen.getByLabelText('Statement Description')).toBeInTheDocument();
+    expect(screen.getByLabelText('External Reference ID')).toBeInTheDocument();
+    expect(screen.getByLabelText('Extra Notes')).toBeInTheDocument();
+    expect(screen.getByText('+ Add Field')).toBeInTheDocument();
+  });
+
+  it('can add and remove custom field entries', () => {
+    renderTransactionForm();
+
+    fireEvent.click(screen.getByRole('button', { name: /additional details/i }));
+    fireEvent.click(screen.getByText('+ Add Field'));
+
+    expect(screen.getByLabelText('Custom field 1 name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Custom field 1 value')).toBeInTheDocument();
+
+    // Remove it
+    fireEvent.click(screen.getByRole('button', { name: /remove custom field 1/i }));
+    expect(screen.queryByLabelText('Custom field 1 name')).not.toBeInTheDocument();
+  });
+
+  it('includes additional fields in submission data', async () => {
+    const { onSubmit } = renderTransactionForm();
+
+    // Fill required fields — amount uses keyDown events with useAmountInput
+    const amountInput = screen.getByLabelText('Amount');
+    fireEvent.keyDown(amountInput, { key: '5' });
+    fireEvent.keyDown(amountInput, { key: '0' });
+    fireEvent.keyDown(amountInput, { key: '0' });
+    fireEvent.keyDown(amountInput, { key: '0' });
+
+    fireEvent.change(screen.getByLabelText('Payee'), { target: { value: 'Test Merchant' } });
+    fireEvent.change(screen.getByLabelText('Account'), { target: { value: 'account-1' } });
+
+    // Expand and fill additional fields
+    fireEvent.click(screen.getByRole('button', { name: /additional details/i }));
+    fireEvent.change(screen.getByLabelText('Merchant City'), { target: { value: 'Denver' } });
+    fireEvent.change(screen.getByLabelText('Merchant State'), { target: { value: 'CO' } });
+    fireEvent.change(screen.getByLabelText('Statement Description'), {
+      target: { value: 'TEST MERCHANT #1' },
+    });
+    fireEvent.change(screen.getByLabelText('Extra Notes'), {
+      target: { value: 'Imported transaction' },
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Add Transaction' }));
+    });
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        merchantCity: 'Denver',
+        merchantState: 'CO',
+        statementDescription: 'TEST MERCHANT #1',
+        extraNotes: 'Imported transaction',
+      }),
+    );
   });
 });

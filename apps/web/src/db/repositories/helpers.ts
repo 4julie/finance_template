@@ -114,3 +114,32 @@ export function parseTags(value: unknown): readonly string[] {
 export function createLikePattern(value: string): string {
   return `%${value.trim()}%`;
 }
+
+/** Serialize a custom-fields record as JSON for SQLite storage. */
+export function serializeCustomFields(fields: Record<string, string> | null): string | null {
+  if (fields === null || Object.keys(fields).length === 0) {
+    return null;
+  }
+  return JSON.stringify(fields);
+}
+
+/** Parse a JSON-encoded custom-fields record from SQLite storage. */
+export function parseCustomFields(value: unknown): Readonly<Record<string, string>> | null {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      const result: Record<string, string> = {};
+      for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
+        result[k] = String(v);
+      }
+      return result;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
