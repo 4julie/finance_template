@@ -45,6 +45,7 @@ Present facts, not judgments — let users draw their own conclusions.
 - Never use shame-based language about spending habits
 - Neutral visual indicators for over-budget states (no alarm colors without opt-in)
 - Financial terminology always accompanied by plain-language explanation
+- See [Content Language Guidelines](content-language-guidelines.md) for comprehensive non-judgmental copy standards, vocabulary reference, and content review checklist
 
 ---
 
