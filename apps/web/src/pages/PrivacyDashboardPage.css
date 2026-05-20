@@ -1,0 +1,346 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/* -------------------------------------------------------------------
+ * PrivacyDashboardPage styles
+ *
+ * Full-page privacy dashboard with data inventory, consent management,
+ * and storage visualization.
+ * ------------------------------------------------------------------- */
+
+.privacy-dashboard {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-4) var(--spacing-4) var(--spacing-8);
+}
+
+/* Header */
+.privacy-dashboard__header {
+  margin-bottom: var(--spacing-6);
+}
+
+.privacy-dashboard__title {
+  font-size: var(--type-scale-h1-font-size, 2rem);
+  font-weight: var(--font-weight-bold, 700);
+  color: var(--semantic-text-primary);
+  margin: 0 0 var(--spacing-2);
+}
+
+.privacy-dashboard__subtitle {
+  font-size: var(--type-scale-body-font-size, 1rem);
+  color: var(--semantic-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Sections */
+.privacy-dashboard__section {
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-5);
+  border-radius: var(--card-border-radius, var(--border-radius-md));
+  border: 1px solid var(--semantic-border-default);
+  background-color: var(--semantic-background-elevated, var(--semantic-background-secondary));
+  box-shadow: var(--card-shadow, none);
+}
+
+.privacy-dashboard__section-title {
+  font-size: var(--type-scale-h2-font-size, 1.5rem);
+  font-weight: var(--font-weight-semibold);
+  color: var(--semantic-text-primary);
+  margin: 0 0 var(--spacing-2);
+}
+
+.privacy-dashboard__section-description {
+  font-size: var(--type-scale-body-font-size, 1rem);
+  color: var(--semantic-text-secondary);
+  margin: 0 0 var(--spacing-4);
+  line-height: 1.5;
+}
+
+/* Storage bar */
+.privacy-dashboard__storage-overview {
+  margin-top: var(--spacing-3);
+}
+
+.privacy-dashboard__storage-bar {
+  height: 12px;
+  border-radius: 6px;
+  background-color: var(--semantic-background-primary);
+  border: 1px solid var(--semantic-border-default);
+  overflow: hidden;
+}
+
+.privacy-dashboard__storage-fill {
+  height: 100%;
+  border-radius: 6px;
+  background-color: var(--semantic-interactive-default);
+  transition: width 0.3s ease;
+}
+
+.privacy-dashboard__storage-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-2);
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+}
+
+/* Data categories */
+.privacy-dashboard__categories {
+  display: grid;
+  gap: var(--spacing-3);
+}
+
+.privacy-dashboard__category-card {
+  display: flex;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--semantic-border-default);
+  background-color: var(--semantic-background-primary);
+}
+
+.privacy-dashboard__category-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 2.5rem;
+  text-align: center;
+}
+
+.privacy-dashboard__category-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.privacy-dashboard__category-name {
+  font-size: var(--type-scale-body-font-size, 1rem);
+  font-weight: var(--font-weight-semibold);
+  color: var(--semantic-text-primary);
+  margin: 0 0 var(--spacing-1);
+}
+
+.privacy-dashboard__category-description {
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+  margin: 0 0 var(--spacing-2);
+  line-height: 1.4;
+}
+
+.privacy-dashboard__category-meta {
+  display: flex;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+}
+
+.privacy-dashboard__category-local {
+  color: var(--semantic-status-positive);
+}
+
+.privacy-dashboard__category-leaves {
+  color: var(--semantic-status-info);
+}
+
+/* Consent management */
+.privacy-dashboard__consent-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--semantic-border-default);
+}
+
+.privacy-dashboard__consent-item:last-of-type {
+  border-bottom: none;
+}
+
+.privacy-dashboard__consent-item--essential {
+  opacity: 0.7;
+}
+
+.privacy-dashboard__consent-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.privacy-dashboard__consent-label {
+  font-size: var(--type-scale-body-font-size, 1rem);
+  font-weight: var(--font-weight-semibold);
+  color: var(--semantic-text-primary);
+  cursor: pointer;
+}
+
+.privacy-dashboard__consent-required {
+  font-size: var(--type-scale-caption-font-size);
+  font-weight: var(--font-weight-normal, 400);
+  color: var(--semantic-text-secondary);
+}
+
+.privacy-dashboard__consent-description {
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+  margin: var(--spacing-1) 0 0;
+  line-height: 1.4;
+}
+
+.privacy-dashboard__consent-toggle {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: var(--spacing-1);
+  cursor: pointer;
+}
+
+.privacy-dashboard__consent-toggle:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: 2px;
+}
+
+.privacy-dashboard__consent-timestamp {
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+  margin-top: var(--spacing-3);
+}
+
+.privacy-dashboard__consent-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-3);
+}
+
+.privacy-dashboard__action-btn {
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--semantic-border-default);
+  background-color: var(--semantic-background-primary);
+  color: var(--semantic-interactive-default);
+  font-size: var(--type-scale-caption-font-size);
+  font-weight: var(--font-weight-medium, 500);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.privacy-dashboard__action-btn:hover {
+  background-color: var(--semantic-background-secondary);
+}
+
+.privacy-dashboard__action-btn:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: 2px;
+}
+
+.privacy-dashboard__status {
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-status-positive);
+  margin-top: var(--spacing-2);
+}
+
+/* Loading / error */
+.privacy-dashboard__loading {
+  text-align: center;
+  padding: var(--spacing-4);
+  color: var(--semantic-text-secondary);
+}
+
+.privacy-dashboard__error {
+  padding: var(--spacing-3);
+  border-radius: var(--border-radius-sm);
+  background-color: rgba(239, 68, 68, 0.08);
+  color: var(--semantic-status-negative);
+  font-size: var(--type-scale-caption-font-size);
+}
+
+/* Data rights */
+.privacy-dashboard__rights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-3);
+}
+
+.privacy-dashboard__right-card {
+  padding: var(--spacing-4);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--semantic-border-default);
+  background-color: var(--semantic-background-primary);
+}
+
+.privacy-dashboard__right-title {
+  font-size: var(--type-scale-body-font-size, 1rem);
+  font-weight: var(--font-weight-semibold);
+  color: var(--semantic-text-primary);
+  margin: 0 0 var(--spacing-2);
+}
+
+.privacy-dashboard__right-description {
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+  margin: 0 0 var(--spacing-3);
+  line-height: 1.4;
+}
+
+.privacy-dashboard__right-link {
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-interactive-default);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium, 500);
+}
+
+.privacy-dashboard__right-link:hover {
+  text-decoration: underline;
+}
+
+.privacy-dashboard__right-link:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------
+ * Reduced motion
+ * ------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .privacy-dashboard__storage-fill,
+  .privacy-dashboard__action-btn {
+    transition: none;
+  }
+}
+
+/* -------------------------------------------------------------------
+ * High contrast
+ * ------------------------------------------------------------------- */
+
+@media (prefers-contrast: more) {
+  .privacy-dashboard__section,
+  .privacy-dashboard__category-card,
+  .privacy-dashboard__right-card {
+    border-width: 2px;
+  }
+}
+
+/* -------------------------------------------------------------------
+ * Mobile
+ * ------------------------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .privacy-dashboard {
+    padding: var(--spacing-3) var(--spacing-3) var(--spacing-6);
+  }
+
+  .privacy-dashboard__section {
+    padding: var(--spacing-3);
+  }
+
+  .privacy-dashboard__category-card {
+    flex-direction: column;
+  }
+
+  .privacy-dashboard__category-meta {
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+
+  .privacy-dashboard__consent-actions {
+    flex-direction: column;
+  }
+}

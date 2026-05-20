@@ -151,3 +151,13 @@ export { useSpendingPace } from './useSpendingPace';
 export type { UseSpendingPaceResult } from './useSpendingPace';
 export { useTransactionConfirmation } from './useTransactionConfirmation';
 export type { UseTransactionConfirmationResult } from './useTransactionConfirmation';
+export { useConsentHistory } from './useConsentHistory';
+export type { UseConsentHistoryResult } from './useConsentHistory';
+export { useLocalOnlyMode } from './useLocalOnlyMode';
+export type { UseLocalOnlyModeResult } from './useLocalOnlyMode';
+export { usePrivacyDashboard } from './usePrivacyDashboard';
+export type {
+  UsePrivacyDashboardResult,
+  DataCategory,
+  StorageQuotaInfo,
+} from './usePrivacyDashboard';
