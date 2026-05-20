@@ -243,6 +243,37 @@ export interface Investment extends SyncMetadata {
   readonly lastPriceUpdate: Instant | null;
 }
 
+/** Maps to KMP `com.finance.models.TaxTreatment`. */
+export type TaxTreatment = 'TAXABLE' | 'TAX_DEFERRED' | 'TAX_FREE';
+
+/** Maps to KMP `com.finance.models.InvestmentAccountSubtype`. */
+export type InvestmentAccountSubtype =
+  | 'BROKERAGE'
+  | 'TRADITIONAL_IRA'
+  | 'ROTH_IRA'
+  | 'SEP_IRA'
+  | 'SIMPLE_IRA'
+  | '401K'
+  | '403B'
+  | '457B'
+  | 'HSA'
+  | '529'
+  | 'TRUST'
+  | 'OTHER';
+
+/** Maps to KMP `com.finance.models.CostBasisMethod`. */
+export type CostBasisMethod = 'FIFO' | 'LIFO' | 'SPECIFIC_ID' | 'AVERAGE_COST';
+
+/** Maps to KMP `com.finance.models.InvestmentLot`. */
+export interface InvestmentLot extends SyncMetadata {
+  readonly id: SyncId;
+  readonly investmentId: SyncId;
+  readonly purchaseDate: LocalDate;
+  readonly shares: number;
+  readonly costPerShare: Cents;
+  readonly totalCost: Cents;
+}
+
 /** Maps to KMP `com.finance.models.BillFrequency`. */
 export type BillFrequency = 'ONE_TIME' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
 

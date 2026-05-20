@@ -46,22 +46,38 @@ function renderWithRoute(investmentId: string) {
 }
 
 describe('InvestmentDetailPage', () => {
+  const baseMockReturn = {
+    investments: [mockInvestment],
+    summary: {
+      totalValue: 195000,
+      totalCostBasis: 150000,
+      totalGainLoss: 45000,
+      totalGainLossPercent: 30,
+    },
+    loading: false,
+    error: null,
+    refresh: vi.fn(),
+    createInvestment: vi.fn(),
+    updateInvestment: vi.fn(),
+    deleteInvestment: vi.fn(),
+    getLots: vi.fn().mockReturnValue([]),
+    createLot: vi.fn(),
+    updateLot: vi.fn(),
+    deleteLot: vi.fn(),
+    computeAllocationAnalysis: vi.fn().mockReturnValue({
+      totalPortfolioValue: 195000,
+      comparisons: [],
+      isTargetValid: true,
+    }),
+    computeFeeAnalysis: vi.fn().mockReturnValue({
+      summary: { totalValue: 0, weightedExpenseRatioBps: 0, totalAnnualFees: 0, fundFees: [] },
+      projections: [],
+      comparisons: [],
+    }),
+  };
+
   beforeEach(() => {
-    mockedUseInvestments.mockReturnValue({
-      investments: [mockInvestment],
-      summary: {
-        totalValue: 195000,
-        totalCostBasis: 150000,
-        totalGainLoss: 45000,
-        totalGainLossPercent: 30,
-      },
-      loading: false,
-      error: null,
-      refresh: vi.fn(),
-      createInvestment: vi.fn(),
-      updateInvestment: vi.fn(),
-      deleteInvestment: vi.fn(),
-    });
+    mockedUseInvestments.mockReturnValue(baseMockReturn);
   });
 
   it('renders investment details with symbol and name', () => {
@@ -88,14 +104,11 @@ describe('InvestmentDetailPage', () => {
 
   it('renders loading state', () => {
     mockedUseInvestments.mockReturnValue({
+      ...baseMockReturn,
       investments: [],
       summary: { totalValue: 0, totalCostBasis: 0, totalGainLoss: 0, totalGainLossPercent: 0 },
       loading: true,
       error: null,
-      refresh: vi.fn(),
-      createInvestment: vi.fn(),
-      updateInvestment: vi.fn(),
-      deleteInvestment: vi.fn(),
     });
 
     renderWithRoute('inv-1');
@@ -105,14 +118,11 @@ describe('InvestmentDetailPage', () => {
 
   it('renders error state', () => {
     mockedUseInvestments.mockReturnValue({
+      ...baseMockReturn,
       investments: [],
       summary: { totalValue: 0, totalCostBasis: 0, totalGainLoss: 0, totalGainLossPercent: 0 },
       loading: false,
       error: 'Database error',
-      refresh: vi.fn(),
-      createInvestment: vi.fn(),
-      updateInvestment: vi.fn(),
-      deleteInvestment: vi.fn(),
     });
 
     renderWithRoute('inv-1');

@@ -62,22 +62,38 @@ const mockInvestments = [
 ];
 
 describe('InvestmentsPage', () => {
+  const baseMockReturn = {
+    investments: mockInvestments,
+    summary: {
+      totalValue: 807500,
+      totalCostBasis: 700000,
+      totalGainLoss: 107500,
+      totalGainLossPercent: 15.36,
+    },
+    loading: false,
+    error: null,
+    refresh: vi.fn(),
+    createInvestment: vi.fn(),
+    updateInvestment: vi.fn(),
+    deleteInvestment: vi.fn(),
+    getLots: vi.fn().mockReturnValue([]),
+    createLot: vi.fn(),
+    updateLot: vi.fn(),
+    deleteLot: vi.fn(),
+    computeAllocationAnalysis: vi.fn().mockReturnValue({
+      totalPortfolioValue: 807500,
+      comparisons: [],
+      isTargetValid: true,
+    }),
+    computeFeeAnalysis: vi.fn().mockReturnValue({
+      summary: { totalValue: 0, weightedExpenseRatioBps: 0, totalAnnualFees: 0, fundFees: [] },
+      projections: [],
+      comparisons: [],
+    }),
+  };
+
   beforeEach(() => {
-    mockedUseInvestments.mockReturnValue({
-      investments: mockInvestments,
-      summary: {
-        totalValue: 807500,
-        totalCostBasis: 700000,
-        totalGainLoss: 107500,
-        totalGainLossPercent: 15.36,
-      },
-      loading: false,
-      error: null,
-      refresh: vi.fn(),
-      createInvestment: vi.fn(),
-      updateInvestment: vi.fn(),
-      deleteInvestment: vi.fn(),
-    });
+    mockedUseInvestments.mockReturnValue(baseMockReturn);
   });
 
   it('renders portfolio summary with total value', () => {
@@ -118,14 +134,11 @@ describe('InvestmentsPage', () => {
 
   it('renders loading state', () => {
     mockedUseInvestments.mockReturnValue({
+      ...baseMockReturn,
       investments: [],
       summary: { totalValue: 0, totalCostBasis: 0, totalGainLoss: 0, totalGainLossPercent: 0 },
       loading: true,
       error: null,
-      refresh: vi.fn(),
-      createInvestment: vi.fn(),
-      updateInvestment: vi.fn(),
-      deleteInvestment: vi.fn(),
     });
 
     render(
@@ -140,14 +153,12 @@ describe('InvestmentsPage', () => {
   it('renders error state with retry', () => {
     const refresh = vi.fn();
     mockedUseInvestments.mockReturnValue({
+      ...baseMockReturn,
       investments: [],
       summary: { totalValue: 0, totalCostBasis: 0, totalGainLoss: 0, totalGainLossPercent: 0 },
       loading: false,
       error: 'Failed to load investments.',
       refresh,
-      createInvestment: vi.fn(),
-      updateInvestment: vi.fn(),
-      deleteInvestment: vi.fn(),
     });
 
     render(
@@ -161,14 +172,11 @@ describe('InvestmentsPage', () => {
 
   it('renders empty state when no investments exist', () => {
     mockedUseInvestments.mockReturnValue({
+      ...baseMockReturn,
       investments: [],
       summary: { totalValue: 0, totalCostBasis: 0, totalGainLoss: 0, totalGainLossPercent: 0 },
       loading: false,
       error: null,
-      refresh: vi.fn(),
-      createInvestment: vi.fn(),
-      updateInvestment: vi.fn(),
-      deleteInvestment: vi.fn(),
     });
 
     render(

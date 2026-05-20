@@ -6,4 +6,5 @@ export * from './budgets';
 export * from './goals';
 export * from './categories';
 export * from './investments';
+export * from './investment-lots';
 export * from './bills';
