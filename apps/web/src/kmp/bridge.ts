@@ -206,15 +206,139 @@ export interface Household extends SyncMetadata {
 }
 
 /** Maps to KMP `com.finance.models.HouseholdRole`. */
-export type HouseholdRole = 'OWNER' | 'PARTNER' | 'MEMBER' | 'VIEWER';
+export type HouseholdRole = 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER';
 
 /** Maps to KMP `com.finance.models.HouseholdMember`. */
 export interface HouseholdMember extends SyncMetadata {
   readonly id: SyncId;
   readonly householdId: SyncId;
   readonly userId: SyncId;
+  readonly displayName: string | null;
   readonly role: HouseholdRole;
   readonly joinedAt: Instant;
+}
+
+/**
+ * Permission capabilities that can be assigned per household role.
+ * Maps to KMP `com.finance.models.HouseholdPermission`.
+ */
+export type HouseholdPermission =
+  | 'MANAGE_MEMBERS'
+  | 'INVITE_MEMBERS'
+  | 'MANAGE_ROLES'
+  | 'VIEW_SHARED_ACCOUNTS'
+  | 'EDIT_SHARED_ACCOUNTS'
+  | 'CREATE_SHARED_BUDGETS'
+  | 'EDIT_SHARED_BUDGETS'
+  | 'VIEW_SHARED_BUDGETS'
+  | 'CREATE_SHARED_GOALS'
+  | 'EDIT_SHARED_GOALS'
+  | 'VIEW_SHARED_GOALS'
+  | 'ADD_TRANSACTIONS';
+
+/** Default permissions per household role. */
+export const ROLE_PERMISSIONS: Readonly<Record<HouseholdRole, readonly HouseholdPermission[]>> = {
+  OWNER: [
+    'MANAGE_MEMBERS',
+    'INVITE_MEMBERS',
+    'MANAGE_ROLES',
+    'VIEW_SHARED_ACCOUNTS',
+    'EDIT_SHARED_ACCOUNTS',
+    'CREATE_SHARED_BUDGETS',
+    'EDIT_SHARED_BUDGETS',
+    'VIEW_SHARED_BUDGETS',
+    'CREATE_SHARED_GOALS',
+    'EDIT_SHARED_GOALS',
+    'VIEW_SHARED_GOALS',
+    'ADD_TRANSACTIONS',
+  ],
+  ADMIN: [
+    'INVITE_MEMBERS',
+    'MANAGE_ROLES',
+    'VIEW_SHARED_ACCOUNTS',
+    'EDIT_SHARED_ACCOUNTS',
+    'CREATE_SHARED_BUDGETS',
+    'EDIT_SHARED_BUDGETS',
+    'VIEW_SHARED_BUDGETS',
+    'CREATE_SHARED_GOALS',
+    'EDIT_SHARED_GOALS',
+    'VIEW_SHARED_GOALS',
+    'ADD_TRANSACTIONS',
+  ],
+  MEMBER: ['VIEW_SHARED_ACCOUNTS', 'VIEW_SHARED_BUDGETS', 'VIEW_SHARED_GOALS', 'ADD_TRANSACTIONS'],
+  VIEWER: ['VIEW_SHARED_ACCOUNTS', 'VIEW_SHARED_BUDGETS', 'VIEW_SHARED_GOALS'],
+};
+
+/** Status of a household invitation. */
+export type InvitationStatus = 'PENDING' | 'ACCEPTED' | 'EXPIRED' | 'REVOKED';
+
+/** Maps to KMP `com.finance.models.HouseholdInvitation`. */
+export interface HouseholdInvitation extends SyncMetadata {
+  readonly id: SyncId;
+  readonly householdId: SyncId;
+  readonly invitedBy: SyncId;
+  readonly email: string;
+  readonly role: HouseholdRole;
+  readonly status: InvitationStatus;
+  readonly inviteCode: string;
+  readonly expiresAt: Instant;
+}
+
+/**
+ * Account sharing mode for mine/yours/ours finances.
+ * Maps to KMP `com.finance.models.AccountSharingMode`.
+ *
+ * - `PRIVATE` — visible only to the owner ("mine only")
+ * - `SHARED` — visible to all household members ("ours")
+ */
+export type AccountSharingMode = 'PRIVATE' | 'SHARED';
+
+/** Per-account sharing configuration within a household. */
+export interface AccountSharing extends SyncMetadata {
+  readonly id: SyncId;
+  readonly accountId: SyncId;
+  readonly householdId: SyncId;
+  readonly ownerId: SyncId;
+  readonly sharingMode: AccountSharingMode;
+}
+
+/**
+ * Shared budget mode for household budgets.
+ *
+ * - `FLEX` — overall spending limit, spend freely within categories
+ * - `CATEGORY` — per-category limits for the household
+ */
+export type SharedBudgetMode = 'FLEX' | 'CATEGORY';
+
+/** Shared household budget configuration. */
+export interface SharedBudget extends SyncMetadata {
+  readonly id: SyncId;
+  readonly householdId: SyncId;
+  readonly budgetId: SyncId;
+  readonly mode: SharedBudgetMode;
+  readonly isActive: boolean;
+}
+
+/** Per-member contribution tracking for a shared budget. */
+export interface BudgetContribution {
+  readonly memberId: SyncId;
+  readonly memberName: string | null;
+  readonly spentAmount: Cents;
+}
+
+/** Shared household goal with per-member contribution tracking. */
+export interface SharedGoal extends SyncMetadata {
+  readonly id: SyncId;
+  readonly householdId: SyncId;
+  readonly goalId: SyncId;
+  readonly isShared: boolean;
+}
+
+/** Per-member contribution tracking for a shared goal. */
+export interface GoalContribution {
+  readonly memberId: SyncId;
+  readonly memberName: string | null;
+  readonly contributedAmount: Cents;
 }
 
 /** Maps to KMP `com.finance.models.InvestmentType`. */

@@ -8,3 +8,5 @@ export {
   MASKED_LABEL,
 } from './PrivacyModeContext';
 export type { PrivacyModeContextValue, PrivacyModeProviderProps } from './PrivacyModeContext';
+export { HouseholdProvider, useHouseholdContext, useHouseholdPermission } from './HouseholdContext';
+export type { HouseholdContextValue, HouseholdProviderProps } from './HouseholdContext';
