@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: BUSL-1.1
 
 /**
- * Family/Household Plan page.
+ * Household management page.
  *
- * Provides household creation, member invitation, role management,
- * and shared vs personal budget toggling.
+ * Provides household creation, member invitation with privacy-by-default,
+ * role management (OWNER, ADMIN, MEMBER, VIEWER), account sharing
+ * (mine/yours/ours), shared budget configuration, and shared goals.
  *
- * References: issue #339
+ * References: issues #1780, #1779, #1781, #1716, #1784, #1786
  */
 
 import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 
 import { useHousehold } from '../hooks/useHousehold';
-import type { HouseholdRole } from '../kmp/bridge';
+import type { HouseholdRole, AccountSharingMode, SharedBudgetMode } from '../kmp/bridge';
+import { ROLE_PERMISSIONS } from '../kmp/bridge';
 
 import './HouseholdPage.css';
 
@@ -21,17 +23,52 @@ import './HouseholdPage.css';
 // Constants
 // ---------------------------------------------------------------------------
 
+/** Role options for assignment (excludes OWNER — assigned only on creation). */
 const ROLE_OPTIONS: readonly { value: HouseholdRole; label: string; description: string }[] = [
-  { value: 'PARTNER', label: 'Partner', description: 'Full access to all shared finances' },
-  { value: 'MEMBER', label: 'Member', description: 'Can view and add transactions' },
+  { value: 'ADMIN', label: 'Admin', description: 'Can manage members and shared finances' },
+  { value: 'MEMBER', label: 'Member', description: 'Can view shared data and add transactions' },
   { value: 'VIEWER', label: 'Viewer', description: 'Read-only access to shared data' },
 ];
 
 const ROLE_LABELS: Record<HouseholdRole, string> = {
   OWNER: 'Owner',
-  PARTNER: 'Partner',
+  ADMIN: 'Admin',
   MEMBER: 'Member',
   VIEWER: 'Viewer',
+};
+
+const SHARING_MODE_LABELS: Record<AccountSharingMode, string> = {
+  PRIVATE: 'Private (Mine Only)',
+  SHARED: 'Shared (Ours)',
+};
+
+const BUDGET_MODE_LABELS: Record<SharedBudgetMode, string> = {
+  FLEX: 'Flex (overall limit)',
+  CATEGORY: 'Category (per-category limits)',
+};
+
+/** Demo account IDs for account sharing toggles. */
+const DEMO_ACCOUNT_IDS = ['acct-checking', 'acct-savings', 'acct-credit'];
+const DEMO_ACCOUNT_NAMES: Record<string, string> = {
+  'acct-checking': 'Checking Account',
+  'acct-savings': 'Savings Account',
+  'acct-credit': 'Credit Card',
+};
+
+/** Demo budget IDs for shared budget configuration. */
+const DEMO_BUDGET_IDS = ['budget-groceries', 'budget-dining', 'budget-entertainment'];
+const DEMO_BUDGET_NAMES: Record<string, string> = {
+  'budget-groceries': 'Groceries',
+  'budget-dining': 'Dining Out',
+  'budget-entertainment': 'Entertainment',
+};
+
+/** Demo goal IDs for shared goals. */
+const DEMO_GOAL_IDS = ['goal-vacation', 'goal-emergency', 'goal-car'];
+const DEMO_GOAL_NAMES: Record<string, string> = {
+  'goal-vacation': 'Family Vacation',
+  'goal-emergency': 'Emergency Fund',
+  'goal-car': 'New Car',
 };
 
 // ---------------------------------------------------------------------------
@@ -43,7 +80,9 @@ export function HouseholdPage() {
     household,
     members,
     invitations,
-    budgetVisibility,
+    accountSharings,
+    sharedBudgets,
+    sharedGoals,
     loading,
     error,
     createHousehold,
@@ -51,7 +90,11 @@ export function HouseholdPage() {
     revokeInvitation,
     updateMemberRole,
     removeMember,
-    toggleBudgetVisibility,
+    setAccountSharing,
+    setSharedBudget,
+    removeSharedBudget,
+    setSharedGoal,
+    checkPermission,
   } = useHousehold();
 
   // -- Create household form state -----------------------------------------
@@ -63,9 +106,6 @@ export function HouseholdPage() {
   const [inviteRole, setInviteRole] = useState<HouseholdRole>('MEMBER');
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState(false);
-
-  // -- Budget IDs for demo toggle ------------------------------------------
-  const demoBudgetIds = ['budget-1', 'budget-2', 'budget-3'];
 
   // -- Handlers ------------------------------------------------------------
 
@@ -137,6 +177,7 @@ export function HouseholdPage() {
           </h1>
           <p className="household-card__description">
             Set up a household to share budgets and track finances together with family members.
+            Privacy-by-default: nothing is shared until you explicitly opt in.
           </p>
 
           {createError && (
@@ -173,6 +214,9 @@ export function HouseholdPage() {
     );
   }
 
+  // -- Filter pending invitations for display
+  const pendingInvitations = invitations.filter((inv) => inv.status === 'PENDING');
+
   // -- Household exists — full management UI --------------------------------
 
   return (
@@ -191,11 +235,17 @@ export function HouseholdPage() {
         <span className="household-header__badge">Family Plan</span>
       </header>
 
-      {/* Members Section */}
+      {/* ----------------------------------------------------------------- */}
+      {/* Members & Roles Section (#1780) */}
+      {/* ----------------------------------------------------------------- */}
       <section className="household-card" aria-labelledby="members-title">
         <h2 id="members-title" className="household-card__title">
-          Members
+          Members &amp; Roles
         </h2>
+        <p className="household-card__description">
+          Manage household members and their permission levels. Each role determines what actions a
+          member can perform.
+        </p>
 
         {members.length === 0 ? (
           <p className="household-card__empty">No members yet.</p>
@@ -205,13 +255,16 @@ export function HouseholdPage() {
               <li key={member.id} className="household-member-item">
                 <div className="household-member-item__info">
                   <span className="household-member-item__avatar" aria-hidden="true">
-                    {member.role === 'OWNER' ? '👑' : '👤'}
+                    {member.role === 'OWNER' ? '👑' : member.role === 'ADMIN' ? '🛡️' : '👤'}
                   </span>
                   <div>
                     <span className="household-member-item__name">
-                      {member.userId.slice(0, 8)}…
+                      {member.displayName ?? `${member.userId.slice(0, 8)}…`}
                     </span>
                     <span className="household-member-item__role">{ROLE_LABELS[member.role]}</span>
+                    <span className="household-member-item__permissions">
+                      {ROLE_PERMISSIONS[member.role].length} permissions
+                    </span>
                   </div>
                 </div>
                 {member.role !== 'OWNER' && (
@@ -220,7 +273,7 @@ export function HouseholdPage() {
                       className="household-form-select household-form-select--small"
                       value={member.role}
                       onChange={(e) => updateMemberRole(member.id, e.target.value as HouseholdRole)}
-                      aria-label={`Change role for member ${member.userId.slice(0, 8)}`}
+                      aria-label={`Change role for ${member.displayName ?? member.userId.slice(0, 8)}`}
                     >
                       {ROLE_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>
@@ -231,7 +284,7 @@ export function HouseholdPage() {
                     <button
                       className="household-button household-button--danger household-button--small"
                       onClick={() => removeMember(member.id)}
-                      aria-label={`Remove member ${member.userId.slice(0, 8)}`}
+                      aria-label={`Remove ${member.displayName ?? member.userId.slice(0, 8)}`}
                     >
                       Remove
                     </button>
@@ -241,17 +294,42 @@ export function HouseholdPage() {
             ))}
           </ul>
         )}
+
+        {/* Role permissions reference */}
+        <details className="household-permissions-details">
+          <summary className="household-permissions-summary">View role permissions</summary>
+          <div className="household-permissions-grid">
+            {(Object.entries(ROLE_LABELS) as [HouseholdRole, string][]).map(([role, label]) => (
+              <div key={role} className="household-permissions-column">
+                <h4 className="household-permissions-column__title">{label}</h4>
+                <ul className="household-permissions-list" role="list">
+                  {ROLE_PERMISSIONS[role].map((perm) => (
+                    <li key={perm} className="household-permissions-list__item">
+                      {perm.replace(/_/g, ' ').toLowerCase()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </details>
       </section>
 
-      {/* Invite Section */}
+      {/* ----------------------------------------------------------------- */}
+      {/* Invite Section (#1779) */}
+      {/* ----------------------------------------------------------------- */}
       <section className="household-card" aria-labelledby="invite-title">
         <h2 id="invite-title" className="household-card__title">
           Invite Member
         </h2>
+        <p className="household-card__description">
+          Send an invitation to join your household. New members start with privacy-by-default —
+          nothing is shared until they explicitly choose to share accounts.
+        </p>
 
         {inviteSuccess && (
           <div className="household-banner--success" role="status">
-            Invitation sent successfully!
+            Invitation sent successfully! The invite code has been generated.
           </div>
         )}
 
@@ -306,17 +384,20 @@ export function HouseholdPage() {
       </section>
 
       {/* Pending Invitations */}
-      {invitations.length > 0 && (
+      {pendingInvitations.length > 0 && (
         <section className="household-card" aria-labelledby="invitations-title">
           <h2 id="invitations-title" className="household-card__title">
             Pending Invitations
           </h2>
           <ul className="household-invitation-list" role="list" aria-label="Pending invitations">
-            {invitations.map((inv) => (
+            {pendingInvitations.map((inv) => (
               <li key={inv.id} className="household-invitation-item">
                 <div className="household-invitation-item__info">
                   <span className="household-invitation-item__email">{inv.email}</span>
                   <span className="household-invitation-item__role">{ROLE_LABELS[inv.role]}</span>
+                  <span className="household-invitation-item__code" title="Invite code">
+                    Code: {inv.inviteCode}
+                  </span>
                   <span className="household-invitation-item__status">{inv.status}</span>
                 </div>
                 <button
@@ -332,27 +413,160 @@ export function HouseholdPage() {
         </section>
       )}
 
-      {/* Shared vs Personal Budgets */}
-      <section className="household-card" aria-labelledby="budget-visibility-title">
-        <h2 id="budget-visibility-title" className="household-card__title">
-          Budget Sharing
+      {/* ----------------------------------------------------------------- */}
+      {/* Account Sharing — Mine/Yours/Ours (#1781, #1716) */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="household-card" aria-labelledby="account-sharing-title">
+        <h2 id="account-sharing-title" className="household-card__title">
+          Account Sharing
         </h2>
         <p className="household-card__description">
-          Toggle budgets between shared (visible to all members) and personal (only you).
+          Choose which accounts are shared with the household and which stay private. Private
+          accounts are completely hidden from other household members (mine only). Shared accounts
+          are visible to all members (ours).
         </p>
-        <ul className="household-budget-list" role="list" aria-label="Budget visibility settings">
-          {demoBudgetIds.map((budgetId) => {
-            const vis = budgetVisibility.find((bv) => bv.budgetId === budgetId);
-            const isShared = vis?.isShared ?? false;
+        <ul className="household-sharing-list" role="list" aria-label="Account sharing settings">
+          {DEMO_ACCOUNT_IDS.map((accountId) => {
+            const sharing = accountSharings.find((as) => as.accountId === accountId);
+            const mode: AccountSharingMode = sharing?.sharingMode ?? 'PRIVATE';
+            const isShared = mode === 'SHARED';
             return (
-              <li key={budgetId} className="household-budget-item">
-                <span className="household-budget-item__name">Budget {budgetId.slice(-1)}</span>
+              <li key={accountId} className="household-sharing-item">
+                <div className="household-sharing-item__info">
+                  <span className="household-sharing-item__name">
+                    {DEMO_ACCOUNT_NAMES[accountId]}
+                  </span>
+                  <span
+                    className={`household-sharing-item__badge ${isShared ? 'household-sharing-item__badge--shared' : 'household-sharing-item__badge--private'}`}
+                  >
+                    {isShared ? '🔓 Shared' : '🔒 Private'}
+                  </span>
+                </div>
                 <button
                   className={`household-toggle ${isShared ? 'household-toggle--active' : ''}`}
                   role="switch"
                   aria-checked={isShared}
-                  aria-label={`Toggle sharing for Budget ${budgetId.slice(-1)}`}
-                  onClick={() => toggleBudgetVisibility(budgetId)}
+                  aria-label={`Toggle sharing for ${DEMO_ACCOUNT_NAMES[accountId]}`}
+                  onClick={() =>
+                    setAccountSharing({
+                      accountId,
+                      sharingMode: isShared ? 'PRIVATE' : 'SHARED',
+                    })
+                  }
+                >
+                  <span className="household-toggle__track">
+                    <span className="household-toggle__thumb" />
+                  </span>
+                  <span className="household-toggle__label">{SHARING_MODE_LABELS[mode]}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="household-card__note" role="note">
+          <strong>Privacy boundary:</strong> Private ("mine only") accounts, transactions, and
+          balances are completely invisible to other household members. This is enforced at the data
+          layer, not just the UI.
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Shared Budgets (#1784) */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="household-card" aria-labelledby="shared-budgets-title">
+        <h2 id="shared-budgets-title" className="household-card__title">
+          Shared Budgets
+        </h2>
+        <p className="household-card__description">
+          Configure budgets that are shared with the household. Choose between flex mode (one
+          overall spending limit) or category mode (per-category limits).
+        </p>
+        <ul className="household-budget-list" role="list" aria-label="Shared budget settings">
+          {DEMO_BUDGET_IDS.map((budgetId) => {
+            const shared = sharedBudgets.find((sb) => sb.budgetId === budgetId);
+            const isActive = shared?.isActive ?? false;
+            const mode: SharedBudgetMode = shared?.mode ?? 'CATEGORY';
+            return (
+              <li key={budgetId} className="household-budget-item">
+                <div className="household-budget-item__info">
+                  <span className="household-budget-item__name">{DEMO_BUDGET_NAMES[budgetId]}</span>
+                  {isActive && (
+                    <span className="household-budget-item__mode">{BUDGET_MODE_LABELS[mode]}</span>
+                  )}
+                </div>
+                <div className="household-budget-item__controls">
+                  {isActive && (
+                    <select
+                      className="household-form-select household-form-select--small"
+                      value={mode}
+                      onChange={(e) =>
+                        setSharedBudget({
+                          budgetId,
+                          mode: e.target.value as SharedBudgetMode,
+                        })
+                      }
+                      aria-label={`Budget mode for ${DEMO_BUDGET_NAMES[budgetId]}`}
+                    >
+                      <option value="FLEX">Flex</option>
+                      <option value="CATEGORY">Category</option>
+                    </select>
+                  )}
+                  <button
+                    className={`household-toggle ${isActive ? 'household-toggle--active' : ''}`}
+                    role="switch"
+                    aria-checked={isActive}
+                    aria-label={`Toggle sharing for ${DEMO_BUDGET_NAMES[budgetId]}`}
+                    onClick={() => {
+                      if (isActive && shared) {
+                        removeSharedBudget(shared.id);
+                      } else {
+                        setSharedBudget({ budgetId, mode });
+                      }
+                    }}
+                  >
+                    <span className="household-toggle__track">
+                      <span className="household-toggle__thumb" />
+                    </span>
+                    <span className="household-toggle__label">
+                      {isActive ? 'Shared' : 'Personal'}
+                    </span>
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Shared Goals (#1786) */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="household-card" aria-labelledby="shared-goals-title">
+        <h2 id="shared-goals-title" className="household-card__title">
+          Shared Goals
+        </h2>
+        <p className="household-card__description">
+          Share savings goals with the household so everyone can track progress together. Per-member
+          contribution tracking shows who contributed what.
+        </p>
+        <ul className="household-goal-list" role="list" aria-label="Shared goal settings">
+          {DEMO_GOAL_IDS.map((goalId) => {
+            const shared = sharedGoals.find((sg) => sg.goalId === goalId);
+            const isShared = shared?.isShared ?? false;
+            return (
+              <li key={goalId} className="household-goal-item">
+                <div className="household-goal-item__info">
+                  <span className="household-goal-item__name">{DEMO_GOAL_NAMES[goalId]}</span>
+                  {isShared && (
+                    <span className="household-goal-item__badge">Shared with household</span>
+                  )}
+                </div>
+                <button
+                  className={`household-toggle ${isShared ? 'household-toggle--active' : ''}`}
+                  role="switch"
+                  aria-checked={isShared}
+                  aria-label={`Toggle sharing for ${DEMO_GOAL_NAMES[goalId]}`}
+                  onClick={() => setSharedGoal({ goalId, isShared: !isShared })}
                 >
                   <span className="household-toggle__track">
                     <span className="household-toggle__thumb" />
@@ -365,6 +579,65 @@ export function HouseholdPage() {
             );
           })}
         </ul>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Permission Check Demo (dev reference) */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="household-card" aria-labelledby="permissions-demo-title">
+        <h2 id="permissions-demo-title" className="household-card__title">
+          Permission Reference
+        </h2>
+        <p className="household-card__description">
+          Quick reference for what each role can do in this household.
+        </p>
+        <div className="household-permissions-table-wrap">
+          <table className="household-permissions-table" aria-label="Role permissions matrix">
+            <thead>
+              <tr>
+                <th scope="col">Permission</th>
+                {(Object.keys(ROLE_LABELS) as HouseholdRole[]).map((role) => (
+                  <th key={role} scope="col">
+                    {ROLE_LABELS[role]}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(
+                [
+                  'MANAGE_MEMBERS',
+                  'INVITE_MEMBERS',
+                  'MANAGE_ROLES',
+                  'VIEW_SHARED_ACCOUNTS',
+                  'EDIT_SHARED_ACCOUNTS',
+                  'CREATE_SHARED_BUDGETS',
+                  'VIEW_SHARED_BUDGETS',
+                  'CREATE_SHARED_GOALS',
+                  'VIEW_SHARED_GOALS',
+                  'ADD_TRANSACTIONS',
+                ] as const
+              ).map((perm) => (
+                <tr key={perm}>
+                  <td>{perm.replace(/_/g, ' ').toLowerCase()}</td>
+                  {(Object.keys(ROLE_LABELS) as HouseholdRole[]).map((role) => (
+                    <td key={role} className="household-permissions-table__cell">
+                      {checkPermission(role, perm) ? (
+                        <span aria-label="Allowed" title="Allowed">
+                          ✅
+                        </span>
+                      ) : (
+                        <span aria-label="Denied" title="Denied">
+                          ❌
+                        </span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
     </main>
   );

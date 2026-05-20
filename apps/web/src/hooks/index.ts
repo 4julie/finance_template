@@ -161,3 +161,12 @@ export type {
   DataCategory,
   StorageQuotaInfo,
 } from './usePrivacyDashboard';
+export { useHousehold } from './useHousehold';
+export type {
+  UseHouseholdResult,
+  CreateHouseholdInput,
+  InviteMemberInput,
+  SetAccountSharingInput,
+  SetSharedBudgetInput,
+  SetSharedGoalInput,
+} from './useHousehold';

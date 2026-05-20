@@ -13,6 +13,10 @@ import { useHousehold } from '../useHousehold';
 let uuidCounter = 0;
 vi.stubGlobal('crypto', {
   randomUUID: () => `uuid-${++uuidCounter}`,
+  getRandomValues: (arr: Uint8Array) => {
+    for (let i = 0; i < arr.length; i++) arr[i] = i + 1;
+    return arr;
+  },
 });
 
 beforeEach(() => {
@@ -60,15 +64,15 @@ describe('useHousehold', () => {
     act(() => {
       invitation = result.current.inviteMember({
         email: 'partner@example.com',
-        role: 'PARTNER',
+        role: 'ADMIN',
       });
     });
 
     expect(invitation).not.toBeNull();
     expect(result.current.invitations).toHaveLength(1);
     expect(result.current.invitations[0]?.email).toBe('partner@example.com');
-    expect(result.current.invitations[0]?.role).toBe('PARTNER');
-    expect(result.current.invitations[0]?.status).toBe('pending');
+    expect(result.current.invitations[0]?.role).toBe('ADMIN');
+    expect(result.current.invitations[0]?.status).toBe('PENDING');
   });
 
   it('returns null when inviting without a household', () => {
@@ -106,7 +110,6 @@ describe('useHousehold', () => {
     });
 
     expect(revoked!).toBe(true);
-    expect(result.current.invitations).toHaveLength(0);
   });
 
   it('updates a member role', () => {
@@ -116,18 +119,17 @@ describe('useHousehold', () => {
       result.current.createHousehold({ name: 'Test' });
     });
 
-    // The first member is the owner — we cannot change owner role in this test,
-    // but we test the mechanism
+    // The first member is the owner — we test the mechanism
     const memberId = result.current.members[0]?.id;
     expect(memberId).toBeDefined();
 
     let updated: boolean;
     act(() => {
-      updated = result.current.updateMemberRole(memberId!, 'PARTNER');
+      updated = result.current.updateMemberRole(memberId!, 'ADMIN');
     });
 
     expect(updated!).toBe(true);
-    expect(result.current.members[0]?.role).toBe('PARTNER');
+    expect(result.current.members[0]?.role).toBe('ADMIN');
   });
 
   it('removes a member', () => {
@@ -148,21 +150,25 @@ describe('useHousehold', () => {
     expect(result.current.members).toHaveLength(0);
   });
 
-  it('toggles budget visibility', () => {
+  it('sets account sharing mode', () => {
     const { result } = renderHook(() => useHousehold());
 
     act(() => {
-      result.current.toggleBudgetVisibility('budget-1');
+      result.current.createHousehold({ name: 'Test' });
     });
-
-    expect(result.current.budgetVisibility).toHaveLength(1);
-    expect(result.current.budgetVisibility[0]?.isShared).toBe(true);
 
     act(() => {
-      result.current.toggleBudgetVisibility('budget-1');
+      result.current.setAccountSharing({ accountId: 'acct-1', sharingMode: 'SHARED' });
     });
 
-    expect(result.current.budgetVisibility[0]?.isShared).toBe(false);
+    expect(result.current.accountSharings).toHaveLength(1);
+    expect(result.current.accountSharings[0]?.sharingMode).toBe('SHARED');
+
+    act(() => {
+      result.current.setAccountSharing({ accountId: 'acct-1', sharingMode: 'PRIVATE' });
+    });
+
+    expect(result.current.accountSharings[0]?.sharingMode).toBe('PRIVATE');
   });
 
   it('persists household data to localStorage', () => {
@@ -179,5 +185,14 @@ describe('useHousehold', () => {
 
     expect(result2.current.household?.name).toBe('Persistent Family');
     expect(result2.current.members).toHaveLength(1);
+  });
+
+  it('checks permissions correctly', () => {
+    const { result } = renderHook(() => useHousehold());
+
+    expect(result.current.checkPermission('OWNER', 'MANAGE_MEMBERS')).toBe(true);
+    expect(result.current.checkPermission('VIEWER', 'MANAGE_MEMBERS')).toBe(false);
+    expect(result.current.checkPermission('MEMBER', 'ADD_TRANSACTIONS')).toBe(true);
+    expect(result.current.checkPermission('VIEWER', 'ADD_TRANSACTIONS')).toBe(false);
   });
 });

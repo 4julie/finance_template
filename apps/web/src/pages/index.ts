@@ -25,3 +25,4 @@ export { BillDetailPage } from './BillDetailPage';
 export { CreateBillPage } from './CreateBillPage';
 export { ReportBuilderPage } from './ReportBuilderPage';
 export { PlanningPage } from './PlanningPage';
+export { HouseholdPage } from './HouseholdPage';

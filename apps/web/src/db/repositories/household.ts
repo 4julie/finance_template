@@ -1,0 +1,732 @@
+// SPDX-License-Identifier: BUSL-1.1
+
+/**
+ * Household repository — CRUD operations for household, members, invitations,
+ * account sharing, shared budgets, and shared goals.
+ *
+ * All writes set `is_synced = 0` and `sync_version = 1` to flag records for
+ * future sync. Reads always filter `deleted_at IS NULL` (soft deletes).
+ *
+ * Monetary values are stored as integer cents.
+ *
+ * References: issues #1780, #1779, #1781, #1716, #1784, #1786
+ */
+
+import type {
+  AccountSharing,
+  AccountSharingMode,
+  Household,
+  HouseholdInvitation,
+  HouseholdMember,
+  HouseholdPermission,
+  HouseholdRole,
+  InvitationStatus,
+  SharedBudget,
+  SharedBudgetMode,
+  SharedGoal,
+  SyncId,
+  BudgetContribution,
+  GoalContribution,
+} from '../../kmp/bridge';
+import { ROLE_PERMISSIONS, cents } from '../../kmp/bridge';
+import { execute, query, queryOne, type Row, type SqliteDb } from '../sqlite-wasm';
+import {
+  SQLITE_NOW_EXPRESSION,
+  mapSyncMetadata,
+  optionalString,
+  requireNumber,
+  requireString,
+  toBoolean,
+} from './helpers';
+
+// ---------------------------------------------------------------------------
+// Table initialization
+// ---------------------------------------------------------------------------
+
+/**
+ * Create household-related tables if they don't already exist.
+ *
+ * Call this during database initialization to ensure the schema is ready.
+ */
+export function initHouseholdTables(db: SqliteDb): void {
+  execute(
+    db,
+    `CREATE TABLE IF NOT EXISTS household (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      owner_id TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT,
+      sync_version INTEGER NOT NULL DEFAULT 1,
+      is_synced INTEGER NOT NULL DEFAULT 0
+    )`,
+    [],
+  );
+
+  execute(
+    db,
+    `CREATE TABLE IF NOT EXISTS household_member (
+      id TEXT PRIMARY KEY,
+      household_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      display_name TEXT,
+      role TEXT NOT NULL DEFAULT 'MEMBER',
+      joined_at TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT,
+      sync_version INTEGER NOT NULL DEFAULT 1,
+      is_synced INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY (household_id) REFERENCES household(id)
+    )`,
+    [],
+  );
+
+  execute(
+    db,
+    `CREATE TABLE IF NOT EXISTS household_invitation (
+      id TEXT PRIMARY KEY,
+      household_id TEXT NOT NULL,
+      invited_by TEXT NOT NULL,
+      email TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'MEMBER',
+      status TEXT NOT NULL DEFAULT 'PENDING',
+      invite_code TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT,
+      sync_version INTEGER NOT NULL DEFAULT 1,
+      is_synced INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY (household_id) REFERENCES household(id)
+    )`,
+    [],
+  );
+
+  execute(
+    db,
+    `CREATE TABLE IF NOT EXISTS account_sharing (
+      id TEXT PRIMARY KEY,
+      account_id TEXT NOT NULL,
+      household_id TEXT NOT NULL,
+      owner_id TEXT NOT NULL,
+      sharing_mode TEXT NOT NULL DEFAULT 'PRIVATE',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT,
+      sync_version INTEGER NOT NULL DEFAULT 1,
+      is_synced INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY (household_id) REFERENCES household(id)
+    )`,
+    [],
+  );
+
+  execute(
+    db,
+    `CREATE TABLE IF NOT EXISTS shared_budget (
+      id TEXT PRIMARY KEY,
+      household_id TEXT NOT NULL,
+      budget_id TEXT NOT NULL,
+      mode TEXT NOT NULL DEFAULT 'CATEGORY',
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT,
+      sync_version INTEGER NOT NULL DEFAULT 1,
+      is_synced INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY (household_id) REFERENCES household(id)
+    )`,
+    [],
+  );
+
+  execute(
+    db,
+    `CREATE TABLE IF NOT EXISTS shared_goal (
+      id TEXT PRIMARY KEY,
+      household_id TEXT NOT NULL,
+      goal_id TEXT NOT NULL,
+      is_shared INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT,
+      sync_version INTEGER NOT NULL DEFAULT 1,
+      is_synced INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY (household_id) REFERENCES household(id)
+    )`,
+    [],
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Row mappers
+// ---------------------------------------------------------------------------
+
+function mapHousehold(row: Row): Household {
+  return {
+    id: requireString(row.id, 'household.id'),
+    name: requireString(row.name, 'household.name'),
+    ownerId: requireString(row.owner_id, 'household.owner_id'),
+    ...mapSyncMetadata(row),
+  };
+}
+
+function mapMember(row: Row): HouseholdMember {
+  return {
+    id: requireString(row.id, 'household_member.id'),
+    householdId: requireString(row.household_id, 'household_member.household_id'),
+    userId: requireString(row.user_id, 'household_member.user_id'),
+    displayName: optionalString(row.display_name),
+    role: requireString(row.role, 'household_member.role') as HouseholdRole,
+    joinedAt: requireString(row.joined_at, 'household_member.joined_at'),
+    ...mapSyncMetadata(row),
+  };
+}
+
+function mapInvitation(row: Row): HouseholdInvitation {
+  return {
+    id: requireString(row.id, 'household_invitation.id'),
+    householdId: requireString(row.household_id, 'household_invitation.household_id'),
+    invitedBy: requireString(row.invited_by, 'household_invitation.invited_by'),
+    email: requireString(row.email, 'household_invitation.email'),
+    role: requireString(row.role, 'household_invitation.role') as HouseholdRole,
+    status: requireString(row.status, 'household_invitation.status') as InvitationStatus,
+    inviteCode: requireString(row.invite_code, 'household_invitation.invite_code'),
+    expiresAt: requireString(row.expires_at, 'household_invitation.expires_at'),
+    ...mapSyncMetadata(row),
+  };
+}
+
+function mapAccountSharing(row: Row): AccountSharing {
+  return {
+    id: requireString(row.id, 'account_sharing.id'),
+    accountId: requireString(row.account_id, 'account_sharing.account_id'),
+    householdId: requireString(row.household_id, 'account_sharing.household_id'),
+    ownerId: requireString(row.owner_id, 'account_sharing.owner_id'),
+    sharingMode: requireString(
+      row.sharing_mode,
+      'account_sharing.sharing_mode',
+    ) as AccountSharingMode,
+    ...mapSyncMetadata(row),
+  };
+}
+
+function mapSharedBudget(row: Row): SharedBudget {
+  return {
+    id: requireString(row.id, 'shared_budget.id'),
+    householdId: requireString(row.household_id, 'shared_budget.household_id'),
+    budgetId: requireString(row.budget_id, 'shared_budget.budget_id'),
+    mode: requireString(row.mode, 'shared_budget.mode') as SharedBudgetMode,
+    isActive: toBoolean(row.is_active),
+    ...mapSyncMetadata(row),
+  };
+}
+
+function mapSharedGoal(row: Row): SharedGoal {
+  return {
+    id: requireString(row.id, 'shared_goal.id'),
+    householdId: requireString(row.household_id, 'shared_goal.household_id'),
+    goalId: requireString(row.goal_id, 'shared_goal.goal_id'),
+    isShared: toBoolean(row.is_shared),
+    ...mapSyncMetadata(row),
+  };
+}
+
+function _mapBudgetContribution(row: Row): BudgetContribution {
+  return {
+    memberId: requireString(row.member_id, 'budget_contribution.member_id'),
+    memberName: optionalString(row.member_name),
+    spentAmount: cents(requireNumber(row.spent_amount, 'budget_contribution.spent_amount')),
+  };
+}
+
+function _mapGoalContribution(row: Row): GoalContribution {
+  return {
+    memberId: requireString(row.member_id, 'goal_contribution.member_id'),
+    memberName: optionalString(row.member_name),
+    contributedAmount: cents(
+      requireNumber(row.contributed_amount, 'goal_contribution.contributed_amount'),
+    ),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Household CRUD
+// ---------------------------------------------------------------------------
+
+/** Input for creating a new household. */
+export interface CreateHouseholdInput {
+  name: string;
+  ownerId: SyncId;
+}
+
+/** Retrieve the household for a given owner. Returns null if none exists. */
+export function getHouseholdByOwner(db: SqliteDb, ownerId: SyncId): Household | null {
+  const row = queryOne(db, `SELECT * FROM household WHERE owner_id = ? AND deleted_at IS NULL`, [
+    ownerId,
+  ]);
+  return row ? mapHousehold(row) : null;
+}
+
+/** Retrieve a household by its ID. */
+export function getHouseholdById(db: SqliteDb, id: SyncId): Household | null {
+  const row = queryOne(db, `SELECT * FROM household WHERE id = ? AND deleted_at IS NULL`, [id]);
+  return row ? mapHousehold(row) : null;
+}
+
+/** Create a new household and add the creator as OWNER member. */
+export function createHousehold(db: SqliteDb, input: CreateHouseholdInput): Household {
+  const id = crypto.randomUUID();
+  const memberId = crypto.randomUUID();
+  const now = new Date().toISOString();
+
+  execute(
+    db,
+    `INSERT INTO household (id, name, owner_id, created_at, updated_at, sync_version, is_synced)
+     VALUES (?, ?, ?, ${SQLITE_NOW_EXPRESSION}, ${SQLITE_NOW_EXPRESSION}, 1, 0)`,
+    [id, input.name.trim(), input.ownerId],
+  );
+
+  execute(
+    db,
+    `INSERT INTO household_member (id, household_id, user_id, display_name, role, joined_at, created_at, updated_at, sync_version, is_synced)
+     VALUES (?, ?, ?, NULL, 'OWNER', ?, ${SQLITE_NOW_EXPRESSION}, ${SQLITE_NOW_EXPRESSION}, 1, 0)`,
+    [memberId, id, input.ownerId, now],
+  );
+
+  const row = queryOne(db, `SELECT * FROM household WHERE id = ?`, [id]);
+  return mapHousehold(row!);
+}
+
+// ---------------------------------------------------------------------------
+// Member CRUD
+// ---------------------------------------------------------------------------
+
+/** Retrieve all non-deleted members of a household. */
+export function getHouseholdMembers(db: SqliteDb, householdId: SyncId): HouseholdMember[] {
+  return query(
+    db,
+    `SELECT * FROM household_member WHERE household_id = ? AND deleted_at IS NULL ORDER BY joined_at ASC`,
+    [householdId],
+  ).rows.map(mapMember);
+}
+
+/** Update a member's role within the household. */
+export function updateMemberRole(
+  db: SqliteDb,
+  memberId: SyncId,
+  role: HouseholdRole,
+): HouseholdMember | null {
+  execute(
+    db,
+    `UPDATE household_member
+       SET role = ?, updated_at = ${SQLITE_NOW_EXPRESSION}, sync_version = 1, is_synced = 0
+     WHERE id = ? AND deleted_at IS NULL`,
+    [role, memberId],
+  );
+  const row = queryOne(db, `SELECT * FROM household_member WHERE id = ?`, [memberId]);
+  return row ? mapMember(row) : null;
+}
+
+/** Soft-delete a member from the household. */
+export function removeMember(db: SqliteDb, memberId: SyncId): boolean {
+  execute(
+    db,
+    `UPDATE household_member
+       SET deleted_at = ${SQLITE_NOW_EXPRESSION}, updated_at = ${SQLITE_NOW_EXPRESSION},
+           sync_version = 1, is_synced = 0
+     WHERE id = ? AND deleted_at IS NULL`,
+    [memberId],
+  );
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Invitation CRUD
+// ---------------------------------------------------------------------------
+
+/** Input for creating a new invitation. */
+export interface CreateInvitationInput {
+  householdId: SyncId;
+  invitedBy: SyncId;
+  email: string;
+  role: HouseholdRole;
+}
+
+/** Generate a short invite code (8 hex characters). */
+function generateInviteCode(): string {
+  const bytes = new Uint8Array(4);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/** Retrieve all non-deleted invitations for a household. */
+export function getHouseholdInvitations(db: SqliteDb, householdId: SyncId): HouseholdInvitation[] {
+  return query(
+    db,
+    `SELECT * FROM household_invitation WHERE household_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
+    [householdId],
+  ).rows.map(mapInvitation);
+}
+
+/** Create a new invitation with a 7-day expiry. */
+export function createInvitation(db: SqliteDb, input: CreateInvitationInput): HouseholdInvitation {
+  const id = crypto.randomUUID();
+  const inviteCode = generateInviteCode();
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  execute(
+    db,
+    `INSERT INTO household_invitation (id, household_id, invited_by, email, role, status, invite_code, expires_at, created_at, updated_at, sync_version, is_synced)
+     VALUES (?, ?, ?, ?, ?, 'PENDING', ?, ?, ${SQLITE_NOW_EXPRESSION}, ${SQLITE_NOW_EXPRESSION}, 1, 0)`,
+    [
+      id,
+      input.householdId,
+      input.invitedBy,
+      input.email.trim().toLowerCase(),
+      input.role,
+      inviteCode,
+      expiresAt,
+    ],
+  );
+
+  const row = queryOne(db, `SELECT * FROM household_invitation WHERE id = ?`, [id]);
+  return mapInvitation(row!);
+}
+
+/** Accept a pending invitation by invite code. Creates a household member. */
+export function acceptInvitation(
+  db: SqliteDb,
+  inviteCode: string,
+  userId: SyncId,
+  displayName: string | null,
+): HouseholdMember | null {
+  const invRow = queryOne(
+    db,
+    `SELECT * FROM household_invitation
+     WHERE invite_code = ? AND status = 'PENDING' AND deleted_at IS NULL`,
+    [inviteCode],
+  );
+
+  if (!invRow) return null;
+
+  const invitation = mapInvitation(invRow);
+  const now = new Date();
+
+  // Check expiry
+  if (new Date(invitation.expiresAt) < now) {
+    execute(
+      db,
+      `UPDATE household_invitation
+         SET status = 'EXPIRED', updated_at = ${SQLITE_NOW_EXPRESSION}, sync_version = 1, is_synced = 0
+       WHERE id = ?`,
+      [invitation.id],
+    );
+    return null;
+  }
+
+  // Mark invitation as accepted
+  execute(
+    db,
+    `UPDATE household_invitation
+       SET status = 'ACCEPTED', updated_at = ${SQLITE_NOW_EXPRESSION}, sync_version = 1, is_synced = 0
+     WHERE id = ?`,
+    [invitation.id],
+  );
+
+  // Create the member with privacy-by-default: no accounts shared
+  const memberId = crypto.randomUUID();
+  execute(
+    db,
+    `INSERT INTO household_member (id, household_id, user_id, display_name, role, joined_at, created_at, updated_at, sync_version, is_synced)
+     VALUES (?, ?, ?, ?, ?, ?, ${SQLITE_NOW_EXPRESSION}, ${SQLITE_NOW_EXPRESSION}, 1, 0)`,
+    [memberId, invitation.householdId, userId, displayName, invitation.role, now.toISOString()],
+  );
+
+  const row = queryOne(db, `SELECT * FROM household_member WHERE id = ?`, [memberId]);
+  return row ? mapMember(row) : null;
+}
+
+/** Revoke a pending invitation (soft-delete). */
+export function revokeInvitation(db: SqliteDb, invitationId: SyncId): boolean {
+  execute(
+    db,
+    `UPDATE household_invitation
+       SET status = 'REVOKED', deleted_at = ${SQLITE_NOW_EXPRESSION},
+           updated_at = ${SQLITE_NOW_EXPRESSION}, sync_version = 1, is_synced = 0
+     WHERE id = ? AND status = 'PENDING' AND deleted_at IS NULL`,
+    [invitationId],
+  );
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Account Sharing (#1781, #1716)
+// ---------------------------------------------------------------------------
+
+/** Input for setting account sharing mode. */
+export interface SetAccountSharingInput {
+  accountId: SyncId;
+  householdId: SyncId;
+  ownerId: SyncId;
+  sharingMode: AccountSharingMode;
+}
+
+/** Get all account sharing settings for a household. */
+export function getAccountSharings(db: SqliteDb, householdId: SyncId): AccountSharing[] {
+  return query(db, `SELECT * FROM account_sharing WHERE household_id = ? AND deleted_at IS NULL`, [
+    householdId,
+  ]).rows.map(mapAccountSharing);
+}
+
+/** Get sharing mode for a specific account. Returns null if not configured (defaults to PRIVATE). */
+export function getAccountSharingByAccount(db: SqliteDb, accountId: SyncId): AccountSharing | null {
+  const row = queryOne(
+    db,
+    `SELECT * FROM account_sharing WHERE account_id = ? AND deleted_at IS NULL`,
+    [accountId],
+  );
+  return row ? mapAccountSharing(row) : null;
+}
+
+/** Set or update sharing mode for an account. Upsert pattern. */
+export function setAccountSharing(db: SqliteDb, input: SetAccountSharingInput): AccountSharing {
+  const existing = getAccountSharingByAccount(db, input.accountId);
+
+  if (existing) {
+    execute(
+      db,
+      `UPDATE account_sharing
+         SET sharing_mode = ?, updated_at = ${SQLITE_NOW_EXPRESSION},
+             sync_version = 1, is_synced = 0
+       WHERE id = ? AND deleted_at IS NULL`,
+      [input.sharingMode, existing.id],
+    );
+    const row = queryOne(db, `SELECT * FROM account_sharing WHERE id = ?`, [existing.id]);
+    return mapAccountSharing(row!);
+  }
+
+  const id = crypto.randomUUID();
+  execute(
+    db,
+    `INSERT INTO account_sharing (id, account_id, household_id, owner_id, sharing_mode, created_at, updated_at, sync_version, is_synced)
+     VALUES (?, ?, ?, ?, ?, ${SQLITE_NOW_EXPRESSION}, ${SQLITE_NOW_EXPRESSION}, 1, 0)`,
+    [id, input.accountId, input.householdId, input.ownerId, input.sharingMode],
+  );
+
+  const row = queryOne(db, `SELECT * FROM account_sharing WHERE id = ?`, [id]);
+  return mapAccountSharing(row!);
+}
+
+/**
+ * Check whether an account is visible to a given user within a household.
+ *
+ * Privacy boundary enforcement (#1716):
+ * - PRIVATE accounts are visible only to their owner
+ * - SHARED accounts are visible to all household members
+ * - Accounts with no sharing config default to PRIVATE (privacy-by-default)
+ */
+export function isAccountVisibleToUser(db: SqliteDb, accountId: SyncId, userId: SyncId): boolean {
+  const sharing = getAccountSharingByAccount(db, accountId);
+
+  // Default to PRIVATE — privacy-by-default
+  if (!sharing) return false;
+
+  if (sharing.sharingMode === 'SHARED') return true;
+
+  // PRIVATE — visible only to owner
+  return sharing.ownerId === userId;
+}
+
+/**
+ * Get all accounts visible to a user in a household context.
+ * Enforces privacy boundaries: only shared accounts + user's own private accounts.
+ */
+export function getVisibleAccountIds(db: SqliteDb, householdId: SyncId, userId: SyncId): SyncId[] {
+  return query(
+    db,
+    `SELECT account_id FROM account_sharing
+     WHERE household_id = ? AND deleted_at IS NULL
+       AND (sharing_mode = 'SHARED' OR owner_id = ?)`,
+    [householdId, userId],
+  ).rows.map((r: Row) => requireString(r.account_id, 'account_id'));
+}
+
+// ---------------------------------------------------------------------------
+// Shared Budgets (#1784)
+// ---------------------------------------------------------------------------
+
+/** Input for creating or updating a shared budget. */
+export interface SetSharedBudgetInput {
+  householdId: SyncId;
+  budgetId: SyncId;
+  mode: SharedBudgetMode;
+}
+
+/** Get all shared budgets for a household. */
+export function getSharedBudgets(db: SqliteDb, householdId: SyncId): SharedBudget[] {
+  return query(db, `SELECT * FROM shared_budget WHERE household_id = ? AND deleted_at IS NULL`, [
+    householdId,
+  ]).rows.map(mapSharedBudget);
+}
+
+/** Set or update a shared budget configuration. Upsert pattern. */
+export function setSharedBudget(db: SqliteDb, input: SetSharedBudgetInput): SharedBudget {
+  const existing = queryOne(
+    db,
+    `SELECT * FROM shared_budget WHERE budget_id = ? AND household_id = ? AND deleted_at IS NULL`,
+    [input.budgetId, input.householdId],
+  );
+
+  if (existing) {
+    execute(
+      db,
+      `UPDATE shared_budget
+         SET mode = ?, is_active = 1, updated_at = ${SQLITE_NOW_EXPRESSION},
+             sync_version = 1, is_synced = 0
+       WHERE id = ?`,
+      [input.mode, requireString(existing.id, 'shared_budget.id')],
+    );
+    const row = queryOne(db, `SELECT * FROM shared_budget WHERE id = ?`, [
+      requireString(existing.id, 'shared_budget.id'),
+    ]);
+    return mapSharedBudget(row!);
+  }
+
+  const id = crypto.randomUUID();
+  execute(
+    db,
+    `INSERT INTO shared_budget (id, household_id, budget_id, mode, is_active, created_at, updated_at, sync_version, is_synced)
+     VALUES (?, ?, ?, ?, 1, ${SQLITE_NOW_EXPRESSION}, ${SQLITE_NOW_EXPRESSION}, 1, 0)`,
+    [id, input.householdId, input.budgetId, input.mode],
+  );
+
+  const row = queryOne(db, `SELECT * FROM shared_budget WHERE id = ?`, [id]);
+  return mapSharedBudget(row!);
+}
+
+/** Deactivate (soft-delete) a shared budget. */
+export function removeSharedBudget(db: SqliteDb, sharedBudgetId: SyncId): boolean {
+  execute(
+    db,
+    `UPDATE shared_budget
+       SET is_active = 0, deleted_at = ${SQLITE_NOW_EXPRESSION},
+           updated_at = ${SQLITE_NOW_EXPRESSION}, sync_version = 1, is_synced = 0
+     WHERE id = ? AND deleted_at IS NULL`,
+    [sharedBudgetId],
+  );
+  return true;
+}
+
+/**
+ * Get budget contribution breakdown by member (stub).
+ *
+ * In production this joins transactions on shared accounts against
+ * budget categories. For now returns an empty array — real implementation
+ * requires transaction aggregation queries.
+ */
+export function getBudgetContributions(
+  _db: SqliteDb,
+  _sharedBudgetId: SyncId,
+): BudgetContribution[] {
+  // TODO: Implement transaction aggregation for contribution tracking
+  return [];
+}
+
+// ---------------------------------------------------------------------------
+// Shared Goals (#1786)
+// ---------------------------------------------------------------------------
+
+/** Input for sharing a goal with the household. */
+export interface SetSharedGoalInput {
+  householdId: SyncId;
+  goalId: SyncId;
+  isShared: boolean;
+}
+
+/** Get all shared goals for a household. */
+export function getSharedGoals(db: SqliteDb, householdId: SyncId): SharedGoal[] {
+  return query(
+    db,
+    `SELECT * FROM shared_goal WHERE household_id = ? AND deleted_at IS NULL AND is_shared = 1`,
+    [householdId],
+  ).rows.map(mapSharedGoal);
+}
+
+/** Set or update shared goal configuration. Upsert pattern. */
+export function setSharedGoal(db: SqliteDb, input: SetSharedGoalInput): SharedGoal {
+  const existing = queryOne(
+    db,
+    `SELECT * FROM shared_goal WHERE goal_id = ? AND household_id = ? AND deleted_at IS NULL`,
+    [input.goalId, input.householdId],
+  );
+
+  if (existing) {
+    execute(
+      db,
+      `UPDATE shared_goal
+         SET is_shared = ?, updated_at = ${SQLITE_NOW_EXPRESSION},
+             sync_version = 1, is_synced = 0
+       WHERE id = ?`,
+      [input.isShared ? 1 : 0, requireString(existing.id, 'shared_goal.id')],
+    );
+    const row = queryOne(db, `SELECT * FROM shared_goal WHERE id = ?`, [
+      requireString(existing.id, 'shared_goal.id'),
+    ]);
+    return mapSharedGoal(row!);
+  }
+
+  const id = crypto.randomUUID();
+  execute(
+    db,
+    `INSERT INTO shared_goal (id, household_id, goal_id, is_shared, created_at, updated_at, sync_version, is_synced)
+     VALUES (?, ?, ?, ?, ${SQLITE_NOW_EXPRESSION}, ${SQLITE_NOW_EXPRESSION}, 1, 0)`,
+    [id, input.householdId, input.goalId, input.isShared ? 1 : 0],
+  );
+
+  const row = queryOne(db, `SELECT * FROM shared_goal WHERE id = ?`, [id]);
+  return mapSharedGoal(row!);
+}
+
+/**
+ * Get goal contribution breakdown by member (stub).
+ *
+ * In production this joins transaction/deposit data against goal accounts.
+ * For now returns an empty array — real implementation requires
+ * transaction aggregation queries.
+ */
+export function getGoalContributions(_db: SqliteDb, _sharedGoalId: SyncId): GoalContribution[] {
+  // TODO: Implement contribution aggregation for shared goals
+  return [];
+}
+
+// ---------------------------------------------------------------------------
+// Permission helpers (#1780)
+// ---------------------------------------------------------------------------
+
+/** Check whether a role has a specific permission. */
+export function hasPermission(role: HouseholdRole, permission: HouseholdPermission): boolean {
+  return ROLE_PERMISSIONS[role].includes(permission);
+}
+
+/** Get all permissions for a role. */
+export function getPermissionsForRole(role: HouseholdRole): readonly HouseholdPermission[] {
+  return ROLE_PERMISSIONS[role];
+}
+
+/** Determine the role of a user within a household. Returns null if not a member. */
+export function getUserRole(
+  db: SqliteDb,
+  householdId: SyncId,
+  userId: SyncId,
+): HouseholdRole | null {
+  const row = queryOne(
+    db,
+    `SELECT role FROM household_member
+     WHERE household_id = ? AND user_id = ? AND deleted_at IS NULL`,
+    [householdId, userId],
+  );
+  return row ? (requireString(row.role, 'role') as HouseholdRole) : null;
+}
