@@ -5,6 +5,7 @@ import React, { useCallback, useState } from 'react';
 import { KeyboardShortcutsModal, UpdateBanner, SyncStatusBar } from '../common';
 import { ConflictResolutionDialog } from '../common/ConflictResolutionDialog';
 import { useKeyboardShortcuts } from '../../hooks';
+import { usePrivacyMode } from '../../contexts/PrivacyModeContext';
 import { useEscapeBack } from '../../hooks/useEscapeBack';
 import { useSyncStatus } from '../../hooks/useSyncStatus';
 
@@ -24,7 +25,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   pageTitle,
   children,
 }) => {
-  const { showHelp, setShowHelp } = useKeyboardShortcuts();
+  const { togglePrivacyMode } = usePrivacyMode();
+  const { showHelp, setShowHelp } = useKeyboardShortcuts({
+    onTogglePrivacyMode: togglePrivacyMode,
+  });
   const { conflictCount } = useSyncStatus();
   const [showConflicts, setShowConflicts] = useState(false);
 

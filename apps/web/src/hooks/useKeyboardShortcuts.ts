@@ -6,10 +6,11 @@
  * Supports:
  * - Single key shortcuts (?, /, N, J, K, Enter)
  * - Two-key "G then X" navigation sequences with timeout
+ * - Ctrl+Shift+P privacy mode toggle
  * - Input/textarea/contenteditable guard
  *
  * @module hooks/useKeyboardShortcuts
- * References: issues #1476, #1478
+ * References: issues #1476, #1478, #1616
  */
 
 import {
@@ -42,6 +43,8 @@ export interface UseKeyboardShortcutsOptions {
   onListNavigate?: (direction: -1 | 1) => void;
   /** Callback for Enter on selected list item. */
   onListSelect?: () => void;
+  /** Callback invoked when Ctrl+Shift+P is pressed to toggle privacy mode. */
+  onTogglePrivacyMode?: () => void;
 }
 
 export interface UseKeyboardShortcutsResult {
@@ -87,6 +90,7 @@ export const SHORTCUT_CATEGORIES: ShortcutCategory[] = [
       { keys: 'N', description: 'New transaction' },
       { keys: '/', description: 'Focus search' },
       { keys: '?', description: 'Show keyboard shortcuts' },
+      { keys: 'Ctrl+Shift+P', description: 'Toggle privacy mode' },
     ],
   },
   {
@@ -122,7 +126,14 @@ function isEditableTarget(target: EventTarget | null): target is HTMLElement {
 export function useKeyboardShortcuts(
   options: UseKeyboardShortcutsOptions = {},
 ): UseKeyboardShortcutsResult {
-  const { onNavigate, onNewTransaction, onFocusSearch, onListNavigate, onListSelect } = options;
+  const {
+    onNavigate,
+    onNewTransaction,
+    onFocusSearch,
+    onListNavigate,
+    onListSelect,
+    onTogglePrivacyMode,
+  } = options;
 
   const [showHelp, setShowHelp] = useState(false);
   const pendingGRef = useRef(false);
@@ -142,6 +153,13 @@ export function useKeyboardShortcuts(
       if (event.key === 'Escape') {
         setShowHelp(false);
         clearSequence();
+        return;
+      }
+
+      // Ctrl+Shift+P — toggle privacy mode
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'p') {
+        event.preventDefault();
+        onTogglePrivacyMode?.();
         return;
       }
 
@@ -226,7 +244,15 @@ export function useKeyboardShortcuts(
       window.removeEventListener('keydown', handleKeyDown);
       clearSequence();
     };
-  }, [onNavigate, onNewTransaction, onFocusSearch, onListNavigate, onListSelect, clearSequence]);
+  }, [
+    onNavigate,
+    onNewTransaction,
+    onFocusSearch,
+    onListNavigate,
+    onListSelect,
+    onTogglePrivacyMode,
+    clearSequence,
+  ]);
 
   return { showHelp, setShowHelp, shortcutCategories: SHORTCUT_CATEGORIES };
 }

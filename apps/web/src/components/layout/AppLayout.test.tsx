@@ -50,6 +50,15 @@ vi.mock('../common/InstallBanner', () => ({
   InstallBanner: () => <div data-testid="install-banner">Install Banner</div>,
 }));
 
+vi.mock('../../contexts/PrivacyModeContext', () => ({
+  usePrivacyMode: () => ({
+    isPrivacyMode: false,
+    togglePrivacyMode: vi.fn(),
+    setPrivacyMode: vi.fn(),
+    maskValue: (v: string) => v,
+  }),
+}));
+
 import { useKeyboardShortcuts } from '../../hooks';
 import { AppLayout } from './AppLayout';
 

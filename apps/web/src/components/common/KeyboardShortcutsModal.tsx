@@ -94,6 +94,16 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
               </th>
               <td>Close open dialogs, including this help dialog</td>
             </tr>
+            <tr>
+              <th scope="row">
+                <kbd className="keyboard-shortcuts__key">Ctrl</kbd>
+                {' + '}
+                <kbd className="keyboard-shortcuts__key">Shift</kbd>
+                {' + '}
+                <kbd className="keyboard-shortcuts__key">P</kbd>
+              </th>
+              <td>Toggle privacy mode (mask/unmask financial amounts)</td>
+            </tr>
           </tbody>
         </table>
 
