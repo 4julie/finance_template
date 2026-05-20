@@ -6,11 +6,26 @@
 
 ## Table of Contents
 
+### Session 1 — May 19, 2026
+
 - [Architecture Decisions](#architecture-decisions)
 - [Product Decisions](#product-decisions)
 - [Design Decisions](#design-decisions)
 - [New Issues Created](#new-issues-created)
 - [Summary Table](#summary-table)
+
+### Session 2 — May 20, 2026
+
+- [ADR-010: Alpha Launch — All Four Platforms](#adr-010-alpha-launch--all-four-platforms)
+- [ADR-011: AI Feature Tiering](#adr-011-ai-feature-tiering)
+- [ADR-012: Receipt OCR — On-Device Platform ML](#adr-012-receipt-ocr--on-device-platform-ml)
+- [ADR-013: Banking Integration — Provider-Agnostic Abstraction](#adr-013-banking-integration--provider-agnostic-abstraction)
+- [ADR-014: Platform UX Enhancements — All v2](#adr-014-platform-ux-enhancements--all-v2)
+- [ADR-015: Privacy Features — Biometric v1, Rest v2](#adr-015-privacy-features--biometric-v1-rest-v2)
+- [ADR-016: iOS Extensions — Widgets v1, Watch v2](#adr-016-ios-extensions--widgets-v1-watch-v2)
+- [ADR-017: External Integrations — All v2](#adr-017-external-integrations--all-v2)
+- [Issues Created This Session](#issues-created-this-session)
+- [Issues Closed This Session](#issues-closed-this-session)
 
 ---
 
@@ -218,3 +233,158 @@ Navigation structure will stabilize naturally as features are implemented. Locki
 | #1732 | Elder/caregiver mode            | Delegation feature (→ #1777)          | Actionable              |
 | #1752 | Voice transaction capture       | Deferred (use platform voice-to-text) | —                       |
 | #1725 | Stable navigation               | Deferred (too early)                  | —                       |
+
+---
+
+## Session 2 — May 20, 2026
+
+### Participants
+
+- Human (product owner), Copilot (facilitator)
+
+### Scope
+
+8 design topics covering alpha launch, AI roadmap, receipt OCR, banking integrations, platform UX, privacy, iOS widgets, and external integrations.
+
+---
+
+### ADR-010: Alpha Launch — All Four Platforms
+
+**Decision**: Ship alpha to all 4 platforms simultaneously (iOS, Android, Web, Windows).
+
+**Scaffolding prepared** (branches, not PRs — human must complete enrollments first):
+
+- `feat/ios-signing-scaffolding-1239` — Fastlane + Match + provisioning profiles
+- `feat/android-signing-scaffolding-1242` — Gradle signing + Fastlane + Play Console
+- `feat/oauth-scaffolding-1241` — Google + Apple Sign-In via Supabase
+- `feat/windows-signing-scaffolding-1244` — MSIX signing + SignTool
+- `feat/alpha-deploy-scaffolding-1248` — Submission checklist + web deployment
+
+**E2E test plan**: 78-item verification matrix posted to #1243.
+
+**Human-gated**: All enrollments, certificates, and credential configuration must be done by human before scaffolding branches can be merged.
+
+---
+
+### ADR-011: AI Feature Tiering
+
+**Decision**: Keep all 15 AI issues open, categorized into priority tiers for v2+.
+
+| Tier           | Priority | Issues                                                                                                                                           |
+| -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A — High value | v2.0     | #1637 (overspend coach), #1647 (AI savings goals), #1633 (NLP query), #1742 (wealth digest)                                                      |
+| B — Medium     | v2.x     | #1642 (AI recommendations), #1661/#1770 (explain this), #1818/#1819/#1820/#1545 (ML categorization)                                              |
+| C — Low        | v3+      | #1656 (mood AI), #1751 (decision alignment), #1748 (AI savings — overlaps #1647), #1665 (learning path), #1753 (receipt OCR — merged into #1852) |
+
+**Rationale**: AI carries privacy and cost risks for a financial app. Tier A features could start rule-based (automation engine built in #1849) and upgrade to ML later.
+
+---
+
+### ADR-012: Receipt OCR — On-Device Platform ML
+
+**Decision**: Use on-device OCR via platform-native ML APIs. No cloud OCR dependency.
+
+| Platform | API                                       |
+| -------- | ----------------------------------------- |
+| iOS      | Vision Framework (VNRecognizeTextRequest) |
+| Android  | ML Kit Text Recognition v2                |
+| Web      | Tesseract.js (WASM, runs in browser)      |
+| Windows  | Windows.Media.Ocr namespace               |
+
+**Consolidated issue**: #1852 replaces #1611, #1615, #1753.
+
+**Rationale**: On-device processing is free, privacy-preserving, and works offline — aligned with edge-first architecture.
+
+---
+
+### ADR-013: Banking Integration — Provider-Agnostic Abstraction
+
+**Decision**: Build a `BankConnectionProvider` abstraction layer supporting any aggregator, self-hosted solution, or manual import.
+
+**Architecture**:
+
+```
+BankConnectionProvider (interface)
+├── PlaidProvider         (#1854)
+├── MXProvider            (#1855)
+├── TrueLayerProvider     (#1856 — international)
+├── ManualImportProvider   (built — uses lib/import/)
+├── SelfHostedProvider    (#1857)
+└── MockProvider          (built — for testing)
+```
+
+**Rationale**: Provider-agnostic design allows cost pivoting, supports privacy-focused self-hosted users, and avoids vendor lock-in. Manual import already works via lib/import/ parsers.
+
+**Issues created**: #1853 (abstraction), #1854 (Plaid), #1855 (MX), #1856 (TrueLayer), #1857 (self-hosted).
+
+---
+
+### ADR-014: Platform UX Enhancements — All v2
+
+**Decision**: All gesture/haptic/drag-drop features deferred to v2. Core UI must stabilize first.
+
+**Epic**: #1858 tracks all 7 issues (#1760, #1756, #1764, #1758, #1725, #1651, #1638).
+
+**v2 priority order**: Navigation stability → Swipe actions → Haptics → Milestone notifications → Drag-and-drop.
+
+---
+
+### ADR-015: Privacy Features — Biometric v1, Rest v2
+
+**Decision**: Biometric-protected sensitive categories (#1719) is v1. All other privacy UI features are v2 (data layers already built).
+
+| Issue                                   | Version | Data Layer                                            |
+| --------------------------------------- | ------- | ----------------------------------------------------- |
+| #1719 — Biometric categories            | v1      | Platform-native (Face ID, fingerprint, Windows Hello) |
+| #1643 — Public privacy mode             | v2      | Built in lib/enhancements/                            |
+| #1613 — Widget privacy masking          | v2      | Depends on widget implementation                      |
+| #1778 — Differential privacy benchmarks | v2      | Built in lib/social/                                  |
+| #1697 — Encryption details center       | v2      | Built in lib/enhancements/                            |
+
+---
+
+### ADR-016: iOS Extensions — Widgets v1, Watch v2
+
+**Decision**: iOS home-screen and lock-screen widgets are v1. Apple Watch is v2.
+
+| Issue                                  | Version            |
+| -------------------------------------- | ------------------ |
+| #1605 — Lock-screen quick-entry widget | v1                 |
+| #1608 — Home-screen budget widget      | v1                 |
+| #1613 — Widget privacy masking         | v1 (ties to #1719) |
+| #1618 — Apple Watch glanceable budget  | v2                 |
+| #1623 — Apple Watch quick-entry flow   | v2                 |
+
+---
+
+### ADR-017: External Integrations — All v2
+
+**Decision**: All external integration features are v2. Banking abstraction layer (#1853) is the foundation.
+
+**Epic**: #1859 tracks all integration issues.
+
+**Rationale**: External APIs have ongoing costs, require contracts/API keys, and add maintenance burden. Build abstraction first, add providers based on user demand.
+
+---
+
+### Issues Created This Session
+
+| #     | Title                                       | Type         |
+| ----- | ------------------------------------------- | ------------ |
+| #1852 | On-device receipt OCR with itemized parsing | Consolidated |
+| #1853 | Banking connection abstraction layer        | New          |
+| #1854 | Plaid banking provider                      | New          |
+| #1855 | MX banking provider                         | New          |
+| #1856 | TrueLayer international provider            | New          |
+| #1857 | Self-hosted banking sync provider           | New          |
+| #1858 | v2 Platform UX enhancements epic            | Epic         |
+| #1859 | v2 External integrations epic               | Epic         |
+
+### Issues Closed This Session
+
+| #     | Reason                            |
+| ----- | --------------------------------- |
+| #1611 | Superseded by #1852               |
+| #1615 | Superseded by #1852               |
+| #1753 | Superseded by #1852               |
+| #1545 | Superseded by #1818, #1819, #1820 |
