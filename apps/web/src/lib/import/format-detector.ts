@@ -9,14 +9,17 @@
  *
  * Runs entirely client-side to preserve user financial data privacy.
  *
+ * Updated to use the new unified parser interfaces from #1599.
+ *
  * @module lib/import/format-detector
- * References: #1602
+ * References: #1602, #1599
  */
 
-import { parseOfx, parseQfx, type OfxParseResult } from './ofx-parser';
-import { parseQif, type QifParseResult } from './qif-parser';
+import { parseOfx } from './ofx-parser';
+import { parseQif } from './qif-parser';
 import { parseMint, isMintFormat, type MintParseResult } from './mint-parser';
 import { parseYnab, isYnabFormat, type YnabParseResult } from './ynab-parser';
+import type { ImportResult } from './types';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -60,9 +63,12 @@ export interface UniversalImportResult {
   /** Parsing errors. */
   errors: string[];
   /** Raw parse result from the format-specific parser. */
-  rawResult: OfxParseResult | QifParseResult | MintParseResult | YnabParseResult | null;
+  rawResult: ImportResult | MintParseResult | YnabParseResult | null;
   /** Account info (if available from OFX/QFX). */
-  accountInfo: { accountId: string; accountType: string | null } | null;
+  accountInfo: {
+    accountId: string;
+    accountType: string | null;
+  } | null;
   /** Currency code (if detected). */
   currency: string | null;
 }
@@ -79,6 +85,10 @@ export interface UniversalImportResult {
  *   2. Content sniffing (OFX headers, QIF type headers)
  *   3. CSV header detection (Mint, YNAB patterns)
  *   4. Fall back to generic CSV
+ *
+ * @param fileName - Original file name for extension detection.
+ * @param content - Raw file content as a string.
+ * @returns The detected format string.
  */
 export function detectFormat(fileName: string, content: string): ImportFormat {
   const ext = fileName.toLowerCase().split('.').pop() ?? '';
@@ -100,7 +110,6 @@ export function detectFormat(fileName: string, content: string): ImportFormat {
 
   // For CSV files, check if it's a known format
   if (ext === 'csv' || ext === 'txt' || ext === '') {
-    // Extract first line as headers
     const firstLine = content.split('\n')[0] ?? '';
     const headers = firstLine.split(',').map((h) => h.trim().replace(/"/g, ''));
 
@@ -114,42 +123,32 @@ export function detectFormat(fileName: string, content: string): ImportFormat {
 }
 
 // ---------------------------------------------------------------------------
-// Normalisation
+// Normalisation helpers
 // ---------------------------------------------------------------------------
 
 /**
- * Normalise OFX transactions to the universal format.
+ * Normalise ImportResult transactions to the universal format.
+ *
+ * @param result - Parse result from OFX or QIF parser.
+ * @param sourceFormat - The source format label.
+ * @param confidence - Default confidence score.
  */
-function normaliseOfx(result: OfxParseResult): NormalisedTransaction[] {
-  return result.transactions.map((t) => ({
-    date: t.dateUser ?? t.datePosted,
-    postedDate: t.dateUser ? t.datePosted : null,
-    amount: t.amount,
-    payee: t.name,
-    category: null,
-    memo: t.memo,
-    checkNum: t.checkNum,
-    sourceTransactionId: t.fitId || null,
-    sourceFormat: 'ofx' as ImportFormat,
-    confidence: 90,
-  }));
-}
-
-/**
- * Normalise QIF transactions to the universal format.
- */
-function normaliseQif(result: QifParseResult): NormalisedTransaction[] {
+function normaliseImportResult(
+  result: ImportResult,
+  sourceFormat: ImportFormat,
+  confidence: number,
+): NormalisedTransaction[] {
   return result.transactions.map((t) => ({
     date: t.date,
     postedDate: null,
-    amount: t.amount,
-    payee: t.payee,
+    amount: (t.amountCents / 100).toFixed(2),
+    payee: t.description,
     category: t.category,
     memo: t.memo,
-    checkNum: t.checkNum,
-    sourceTransactionId: null,
-    sourceFormat: 'qif' as ImportFormat,
-    confidence: 80,
+    checkNum: t.checkNumber,
+    sourceTransactionId: t.sourceId,
+    sourceFormat,
+    confidence,
   }));
 }
 
@@ -199,51 +198,37 @@ function normaliseYnab(result: YnabParseResult): NormalisedTransaction[] {
  * Detects the format from file name and content, then routes to the
  * appropriate parser. All parsing is client-side.
  *
- * @param fileName Original file name (for extension-based detection).
- * @param content Raw file content as a string.
+ * @param fileName - Original file name (for extension-based detection).
+ * @param content - Raw file content as a string.
  * @returns Universal import result with normalised transactions.
  */
 export function parseImportFile(fileName: string, content: string): UniversalImportResult {
   const format = detectFormat(fileName, content);
 
   switch (format) {
-    case 'ofx': {
+    case 'ofx':
+    case 'qfx': {
       const result = parseOfx(content);
+      const errors = result.errors.map((e) => e.message);
       return {
         format,
-        transactions: normaliseOfx(result),
-        totalCount: result.totalCount,
-        errors: result.errors,
+        transactions: normaliseImportResult(result, format, 90),
+        totalCount: result.totalRecords,
+        errors,
         rawResult: result,
-        accountInfo: result.account
-          ? { accountId: result.account.accountId, accountType: result.account.accountType }
-          : null,
-        currency: result.currency,
-      };
-    }
-
-    case 'qfx': {
-      const result = parseQfx(content);
-      return {
-        format: 'qfx',
-        transactions: normaliseOfx(result),
-        totalCount: result.totalCount,
-        errors: result.errors,
-        rawResult: result,
-        accountInfo: result.account
-          ? { accountId: result.account.accountId, accountType: result.account.accountType }
-          : null,
+        accountInfo: result.accountId ? { accountId: result.accountId, accountType: null } : null,
         currency: result.currency,
       };
     }
 
     case 'qif': {
       const result = parseQif(content);
+      const errors = result.errors.map((e) => e.message);
       return {
         format,
-        transactions: normaliseQif(result),
-        totalCount: result.totalCount,
-        errors: result.errors,
+        transactions: normaliseImportResult(result, format, 80),
+        totalCount: result.totalRecords,
+        errors,
         rawResult: result,
         accountInfo: null,
         currency: null,
@@ -259,7 +244,7 @@ export function parseImportFile(fileName: string, content: string): UniversalImp
         errors: result.errors,
         rawResult: result,
         accountInfo: null,
-        currency: 'USD', // Mint is US-only
+        currency: 'USD',
       };
     }
 
@@ -277,7 +262,6 @@ export function parseImportFile(fileName: string, content: string): UniversalImp
     }
 
     case 'csv':
-      // Generic CSV is handled by the existing CsvImportWizard
       return {
         format: 'csv',
         transactions: [],
@@ -307,7 +291,7 @@ export function parseImportFile(fileName: string, content: string): UniversalImp
  * Two transactions are considered potential duplicates if they have the
  * same date, amount, and payee (case-insensitive).
  *
- * @param transactions Transactions to check.
+ * @param transactions - Transactions to check.
  * @returns Map of duplicate group keys to arrays of transaction indices.
  */
 export function detectDuplicates(transactions: NormalisedTransaction[]): Map<string, number[]> {
@@ -323,7 +307,6 @@ export function detectDuplicates(transactions: NormalisedTransaction[]): Map<str
     }
   });
 
-  // Filter to only groups with actual duplicates
   const duplicates = new Map<string, number[]>();
   groups.forEach((indices, key) => {
     if (indices.length > 1) {

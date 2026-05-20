@@ -1,237 +1,288 @@
 // SPDX-License-Identifier: BUSL-1.1
 
 /**
- * OFX/QFX file format parser.
+ * OFX/QFX (Open Financial Exchange) parser.
  *
- * Parses Open Financial Exchange (OFX) and Quicken Financial Exchange (QFX)
- * files into a normalised transaction format. QFX is a subset of OFX with
- * Intuit-specific extensions — the parser handles both identically.
+ * Extracts STMTTRN (statement transaction) records from OFX XML/SGML content.
+ * Handles both SGML-style OFX (v1) and XML-style OFX (v2).
  *
- * Runs entirely client-side to preserve user financial data privacy.
- * No data is sent to any server during parsing.
- *
- * @see https://www.ofx.net/downloads.html OFX specification
- * @module lib/import/ofx-parser
- * References: #1602
+ * All monetary values are returned as integer cents.
+ * Pure functions — no side effects, no file I/O.
  */
 
-// ---------------------------------------------------------------------------
-// Public types
-// ---------------------------------------------------------------------------
-
-/** A single parsed OFX transaction. */
-export interface OfxTransaction {
-  /** Transaction type (DEBIT, CREDIT, etc.). */
-  type: string;
-  /** Posted date as ISO 8601 string (YYYY-MM-DD). */
-  datePosted: string;
-  /** User-initiated date (if available), ISO 8601. */
-  dateUser: string | null;
-  /** Transaction amount in decimal string (e.g., "-42.50"). */
-  amount: string;
-  /** Financial institution transaction ID. */
-  fitId: string;
-  /** Payee / description name. */
-  name: string;
-  /** Memo field (optional). */
-  memo: string | null;
-  /** Check number (optional). */
-  checkNum: string | null;
-  /** Reference number (optional). */
-  refNum: string | null;
-}
-
-/** Parsed OFX account information. */
-export interface OfxAccount {
-  /** Bank ID / routing number. */
-  bankId: string | null;
-  /** Account ID (masked for display — NEVER store full account numbers). */
-  accountId: string;
-  /** Account type (CHECKING, SAVINGS, CREDITLINE, etc.). */
-  accountType: string | null;
-}
-
-/** Result of parsing an OFX/QFX file. */
-export interface OfxParseResult {
-  /** Account information (if present). */
-  account: OfxAccount | null;
-  /** Parsed transactions. */
-  transactions: OfxTransaction[];
-  /** Currency code (ISO 4217). */
-  currency: string;
-  /** Statement date range start. */
-  dateStart: string | null;
-  /** Statement date range end. */
-  dateEnd: string | null;
-  /** Total number of transactions parsed. */
-  totalCount: number;
-  /** Errors encountered during parsing. */
-  errors: string[];
-}
+import { ImportError, ImportFormat, ImportResult, ParsedTransaction } from './types';
+import { bankersRound } from './utils';
 
 // ---------------------------------------------------------------------------
-// Internal helpers
+// Public API
 // ---------------------------------------------------------------------------
 
 /**
- * Parse an OFX date string to ISO 8601 (YYYY-MM-DD).
- * OFX dates can be: YYYYMMDD, YYYYMMDDHHMMSS, YYYYMMDDHHMMSS.XXX[GMT:offset]
+ * Parse OFX or QFX content and extract financial transactions.
+ *
+ * Supports both SGML-style (OFX v1.x) and XML-style (OFX v2.x) formats.
+ * Extracts account info, date range, and all STMTTRN records.
+ *
+ * @param content - Raw OFX/QFX text content.
+ * @returns An `ImportResult` with parsed transactions and any errors.
  */
-function parseOfxDate(raw: string | null): string | null {
-  if (!raw) return null;
+export function parseOfx(content: string): ImportResult {
+  const errors: ImportError[] = [];
 
-  // Strip timezone info in brackets
-  const cleaned = raw.replace(/\[.*\]/, '').trim();
+  // Detect format variant
+  const isQfx = content.includes('INTU.BID') || content.includes('INTU.USERID');
+  const format = isQfx ? ImportFormat.QFX : ImportFormat.OFX;
 
-  if (cleaned.length < 8) return null;
+  // Extract account ID
+  const accountId = extractTagValue(content, 'ACCTID');
 
-  const year = cleaned.substring(0, 4);
-  const month = cleaned.substring(4, 6);
-  const day = cleaned.substring(6, 8);
+  // Extract currency
+  const currency =
+    extractTagValue(content, 'CURDEF') || extractTagValue(content, 'CURRENCY') || null;
 
-  // Validate ranges
-  const y = parseInt(year, 10);
-  const m = parseInt(month, 10);
-  const d = parseInt(day, 10);
+  // Extract date range
+  const dtStart = extractTagValue(content, 'DTSTART');
+  const dtEnd = extractTagValue(content, 'DTEND');
+  const startDate = dtStart ? parseOfxDate(dtStart) : null;
+  const endDate = dtEnd ? parseOfxDate(dtEnd) : null;
 
-  if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
-  if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+  // Extract all STMTTRN blocks
+  const stmtTrnBlocks = extractBlocks(content, 'STMTTRN');
 
-  return `${year}-${month}-${day}`;
+  if (stmtTrnBlocks.length === 0) {
+    errors.push({
+      line: null,
+      message: 'No STMTTRN (transaction) records found in OFX content',
+      severity: 'warning',
+      rawValue: null,
+    });
+  }
+
+  const transactions: ParsedTransaction[] = [];
+
+  for (let i = 0; i < stmtTrnBlocks.length; i++) {
+    const block = stmtTrnBlocks[i];
+    const result = parseStmtTrn(block, i + 1);
+
+    if (result.error) {
+      errors.push(result.error);
+    }
+
+    if (result.transaction) {
+      transactions.push(result.transaction);
+    }
+  }
+
+  return {
+    format,
+    transactions,
+    errors,
+    totalRecords: stmtTrnBlocks.length,
+    accountId: accountId || null,
+    startDate,
+    endDate,
+    currency,
+  };
 }
 
-/**
- * Extract the text content between OFX tags.
- * OFX uses SGML-style tags: <TAG>value (no closing tag for simple values).
- */
-function extractTag(content: string, tag: string): string | null {
-  // Try self-closing style: <TAG>value</TAG>
-  const closingRegex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'i');
-  const closingMatch = content.match(closingRegex);
-  if (closingMatch) return closingMatch[1].trim();
+// ---------------------------------------------------------------------------
+// STMTTRN parsing
+// ---------------------------------------------------------------------------
 
-  // Try SGML style: <TAG>value\n (value runs to next tag or newline)
-  const sgmlRegex = new RegExp(`<${tag}>([^<\\n\\r]+)`, 'i');
-  const sgmlMatch = content.match(sgmlRegex);
+interface StmtTrnResult {
+  transaction: ParsedTransaction | null;
+  error: ImportError | null;
+}
+
+/** Parse a single STMTTRN block into a ParsedTransaction. */
+function parseStmtTrn(block: string, recordNumber: number): StmtTrnResult {
+  const dtPosted = extractTagValue(block, 'DTPOSTED');
+  const trnAmt = extractTagValue(block, 'TRNAMT');
+  const fitId = extractTagValue(block, 'FITID');
+  const name = extractTagValue(block, 'NAME');
+  const memo = extractTagValue(block, 'MEMO');
+  const trnType = extractTagValue(block, 'TRNTYPE');
+  const checkNum = extractTagValue(block, 'CHECKNUM');
+
+  if (!dtPosted) {
+    return {
+      transaction: null,
+      error: {
+        line: recordNumber,
+        message: `STMTTRN #${recordNumber}: Missing DTPOSTED (date)`,
+        severity: 'error',
+        rawValue: block.slice(0, 100),
+      },
+    };
+  }
+
+  if (!trnAmt) {
+    return {
+      transaction: null,
+      error: {
+        line: recordNumber,
+        message: `STMTTRN #${recordNumber}: Missing TRNAMT (amount)`,
+        severity: 'error',
+        rawValue: block.slice(0, 100),
+      },
+    };
+  }
+
+  const date = parseOfxDate(dtPosted);
+  if (!date) {
+    return {
+      transaction: null,
+      error: {
+        line: recordNumber,
+        message: `STMTTRN #${recordNumber}: Invalid DTPOSTED: "${dtPosted}"`,
+        severity: 'error',
+        rawValue: dtPosted,
+      },
+    };
+  }
+
+  const amountCents = parseOfxAmount(trnAmt);
+  if (amountCents === null) {
+    return {
+      transaction: null,
+      error: {
+        line: recordNumber,
+        message: `STMTTRN #${recordNumber}: Invalid TRNAMT: "${trnAmt}"`,
+        severity: 'error',
+        rawValue: trnAmt,
+      },
+    };
+  }
+
+  const rawFields: Record<string, string> = {};
+  for (const tag of ['DTPOSTED', 'TRNAMT', 'FITID', 'NAME', 'MEMO', 'TRNTYPE', 'CHECKNUM']) {
+    const val = extractTagValue(block, tag);
+    if (val) rawFields[tag] = val;
+  }
+
+  return {
+    transaction: {
+      date,
+      amountCents,
+      description: name || memo || '',
+      sourceId: fitId || null,
+      category: null,
+      checkNumber: checkNum || null,
+      type: trnType || null,
+      memo: memo || null,
+      balanceCents: null,
+      rawFields,
+    },
+    error: null,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// OFX extraction helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Extract the text content of an OFX tag.
+ *
+ * Handles both SGML style (`<TAG>value`) and XML style (`<TAG>value</TAG>`).
+ *
+ * @param content - The OFX text to search.
+ * @param tag - The tag name (e.g., "ACCTID", "TRNAMT").
+ * @returns The tag value, or null if not found.
+ */
+export function extractTagValue(content: string, tag: string): string | null {
+  // XML-style: <TAG>value</TAG>
+  const xmlPattern = new RegExp(`<${tag}>\\s*([^<]+?)\\s*</${tag}>`, 'i');
+  const xmlMatch = content.match(xmlPattern);
+  if (xmlMatch) return xmlMatch[1].trim();
+
+  // SGML-style: <TAG>value (terminated by newline or next tag)
+  const sgmlPattern = new RegExp(`<${tag}>\\s*([^<\\r\\n]+)`, 'i');
+  const sgmlMatch = content.match(sgmlPattern);
   if (sgmlMatch) return sgmlMatch[1].trim();
 
   return null;
 }
 
 /**
- * Extract all occurrences of an aggregate tag (e.g., <STMTTRN>...</STMTTRN>).
- */
-function extractAllBlocks(content: string, tag: string): string[] {
-  const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'gi');
-  const matches: string[] = [];
-  let match;
-  while ((match = regex.exec(content)) !== null) {
-    matches.push(match[1]);
-  }
-  return matches;
-}
-
-// ---------------------------------------------------------------------------
-// Parser
-// ---------------------------------------------------------------------------
-
-/**
- * Parse an OFX or QFX file content string into structured data.
+ * Extract all blocks between `<TAG>` and `</TAG>` (or the next `<TAG>`).
  *
- * Handles both SGML-based OFX 1.x and XML-based OFX 2.x formats.
- * All parsing is done client-side — no data leaves the browser.
- *
- * @param content Raw file content as a string.
- * @returns Parsed OFX result with transactions and account info.
+ * @param content - The OFX text to search.
+ * @param tag - The block tag name (e.g., "STMTTRN").
+ * @returns Array of block content strings.
  */
-export function parseOfx(content: string): OfxParseResult {
-  const errors: string[] = [];
-  const transactions: OfxTransaction[] = [];
+export function extractBlocks(content: string, tag: string): string[] {
+  const blocks: string[] = [];
+  const openTag = `<${tag}>`;
+  const closeTag = `</${tag}>`;
+  const upperContent = content.toUpperCase();
+  const upperOpen = openTag.toUpperCase();
+  const upperClose = closeTag.toUpperCase();
 
-  // Normalise line endings
-  const normalised = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  let pos = 0;
+  while (pos < content.length) {
+    const startIdx = upperContent.indexOf(upperOpen, pos);
+    if (startIdx < 0) break;
 
-  // Extract currency
-  const currency = extractTag(normalised, 'CURDEF') ?? 'USD';
+    const contentStart = startIdx + openTag.length;
 
-  // Extract account info
-  let account: OfxAccount | null = null;
-  const bankAcctBlock =
-    extractAllBlocks(normalised, 'BANKACCTFROM')[0] ??
-    extractAllBlocks(normalised, 'CCACCTFROM')[0];
+    // Look for explicit close tag
+    let endIdx = upperContent.indexOf(upperClose, contentStart);
 
-  if (bankAcctBlock) {
-    const accountId = extractTag(bankAcctBlock, 'ACCTID');
-    if (accountId) {
-      account = {
-        bankId: extractTag(bankAcctBlock, 'BANKID'),
-        // Mask account ID for display — show last 4 only
-        accountId: accountId.length > 4 ? `****${accountId.slice(-4)}` : accountId,
-        accountType: extractTag(bankAcctBlock, 'ACCTTYPE'),
-      };
+    if (endIdx < 0) {
+      // SGML: look for the next occurrence of the open tag
+      const nextOpen = upperContent.indexOf(upperOpen, contentStart);
+      endIdx = nextOpen >= 0 ? nextOpen : content.length;
     }
+
+    blocks.push(content.slice(contentStart, endIdx).trim());
+    pos = endIdx + (upperContent.indexOf(upperClose, contentStart) >= 0 ? closeTag.length : 0);
+    if (pos <= startIdx) pos = startIdx + 1; // Prevent infinite loops
   }
 
-  // Extract date range
-  const dateStart = parseOfxDate(extractTag(normalised, 'DTSTART'));
-  const dateEnd = parseOfxDate(extractTag(normalised, 'DTEND'));
-
-  // Extract transactions
-  const transBlocks = extractAllBlocks(normalised, 'STMTTRN');
-
-  for (let i = 0; i < transBlocks.length; i++) {
-    const block = transBlocks[i];
-
-    const type = extractTag(block, 'TRNTYPE') ?? 'OTHER';
-    const datePosted = parseOfxDate(extractTag(block, 'DTPOSTED'));
-    const dateUser = parseOfxDate(extractTag(block, 'DTUSER'));
-    const amount = extractTag(block, 'TRNAMT');
-    const fitId = extractTag(block, 'FITID') ?? '';
-    const name = extractTag(block, 'NAME') ?? extractTag(block, 'PAYEE') ?? '';
-    const memo = extractTag(block, 'MEMO');
-    const checkNum = extractTag(block, 'CHECKNUM');
-    const refNum = extractTag(block, 'REFNUM');
-
-    if (!datePosted) {
-      errors.push(`Row ${i + 1}: Missing or invalid posted date`);
-      continue;
-    }
-
-    if (!amount) {
-      errors.push(`Row ${i + 1}: Missing transaction amount`);
-      continue;
-    }
-
-    transactions.push({
-      type,
-      datePosted,
-      dateUser,
-      amount,
-      fitId,
-      name,
-      memo,
-      checkNum,
-      refNum,
-    });
-  }
-
-  return {
-    account,
-    transactions,
-    currency,
-    dateStart,
-    dateEnd,
-    totalCount: transactions.length,
-    errors,
-  };
+  return blocks;
 }
 
 /**
- * Parse a QFX file. QFX is functionally identical to OFX for our purposes.
+ * Parse an OFX date string into ISO 8601 format (YYYY-MM-DD).
  *
- * @param content Raw QFX file content.
- * @returns Parsed result (same structure as OFX).
+ * OFX dates are in the format YYYYMMDD or YYYYMMDDHHMMSS[.XXX[:tz]].
+ *
+ * @param ofxDate - OFX date string.
+ * @returns ISO 8601 date string, or null if parsing fails.
  */
-export function parseQfx(content: string): OfxParseResult {
-  return parseOfx(content);
+export function parseOfxDate(ofxDate: string): string | null {
+  const cleaned = ofxDate.trim().replace(/\[.*\]$/, '');
+
+  if (cleaned.length < 8) return null;
+
+  const year = parseInt(cleaned.slice(0, 4), 10);
+  const month = parseInt(cleaned.slice(4, 6), 10);
+  const day = parseInt(cleaned.slice(6, 8), 10);
+
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+  if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
+
+  return `${year.toString().padStart(4, '0')}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+}
+
+/**
+ * Parse an OFX amount string into integer cents.
+ *
+ * OFX amounts are decimal strings (e.g., "-123.45", "50.00").
+ * Uses Banker's rounding for fractional cents.
+ *
+ * @param ofxAmount - OFX amount string.
+ * @returns Integer cents, or null if parsing fails.
+ */
+export function parseOfxAmount(ofxAmount: string): number | null {
+  const cleaned = ofxAmount.trim();
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return null;
+  return bankersRound(num * 100);
 }
