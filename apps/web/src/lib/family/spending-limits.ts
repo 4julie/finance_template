@@ -10,7 +10,7 @@
  * References: #1800, #1728
  */
 
-import type { SpendingLimit, LimitPeriod } from './types';
+import type { SpendingLimit, LimitPeriod, ApprovalRequest } from './types';
 import { bankersRound } from './utils';
 
 // ---------------------------------------------------------------------------
