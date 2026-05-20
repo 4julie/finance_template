@@ -100,7 +100,6 @@ export function setCaregiverNotifications(
  * @returns Font scale factor (e.g. 1.25 for 20px)
  */
 export function getFontScale(profile: AccessibilityProfile): number {
-  if (STANDARD_FONT_SIZE_PX === 0) return 1;
   return profile.baseFontSizePx / STANDARD_FONT_SIZE_PX;
 }
 
