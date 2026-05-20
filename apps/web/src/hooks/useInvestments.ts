@@ -7,15 +7,18 @@
  * All operations are synchronous against the local DB; errors are captured
  * in state rather than thrown so callers can render gracefully.
  *
+ * Extended to support lot-level cost-basis tracking (#1588),
+ * target-vs-actual allocation (#1595), and fee analysis (#1625).
+ *
  * Usage:
  * ```tsx
  * const { investments, loading, error, createInvestment, refresh } = useInvestments();
  * ```
  *
- * References: issue #1105
+ * References: issues #1105, #1585, #1588, #1595, #1625
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDatabase } from '../db/DatabaseProvider';
 import {
   createInvestment as repoCreateInvestment,
@@ -25,7 +28,18 @@ import {
   type CreateInvestmentInput,
   type UpdateInvestmentInput,
 } from '../db/repositories/investments';
-import type { Investment, SyncId } from '../kmp/bridge';
+import {
+  createLot as repoCreateLot,
+  deleteLot as repoDeleteLot,
+  getLotsByInvestment,
+  updateLot as repoUpdateLot,
+  type CreateLotInput,
+  type UpdateLotInput,
+} from '../db/repositories/investment-lots';
+import type { Investment, InvestmentLot, SyncId } from '../kmp/bridge';
+import { computeAllocation, analyzeFees, DEFAULT_ASSET_CLASS_MAP } from '../lib/investment';
+import type { HoldingWithClass, FeeHoldingInput } from '../lib/investment';
+import type { AllocationAnalysis, AllocationTarget, FeeAnalysis } from '../types/investment';
 
 // ---------------------------------------------------------------------------
 // Public interface
@@ -70,6 +84,51 @@ export interface UseInvestmentsResult {
    * @returns `true` if deletion succeeded, `false` otherwise.
    */
   deleteInvestment: (investmentId: SyncId) => boolean;
+
+  // --- Lot operations (#1588) ---
+
+  /**
+   * Get all lots for a specific investment.
+   * @returns Array of lots, or empty array on error.
+   */
+  getLots: (investmentId: SyncId) => InvestmentLot[];
+  /**
+   * Create a new lot for an investment.
+   * @returns The created lot, or `null` if creation failed.
+   */
+  createLot: (input: CreateLotInput) => InvestmentLot | null;
+  /**
+   * Update an existing lot.
+   * @returns The updated lot, or `null` if not found or update failed.
+   */
+  updateLot: (lotId: SyncId, updates: UpdateLotInput) => InvestmentLot | null;
+  /**
+   * Soft-delete a lot.
+   * @returns `true` if deletion succeeded, `false` otherwise.
+   */
+  deleteLot: (lotId: SyncId) => boolean;
+
+  // --- Allocation analysis (#1595) ---
+
+  /**
+   * Compute target-vs-actual allocation analysis.
+   * @param targets - User-defined target allocation percentages.
+   * @returns Allocation analysis with deviations and rebalancing suggestions.
+   */
+  computeAllocationAnalysis: (targets: readonly AllocationTarget[]) => AllocationAnalysis;
+
+  // --- Fee analysis (#1625) ---
+
+  /**
+   * Run fee analysis for the portfolio.
+   * @param expenseRatios - Map of investmentId → expense ratio in basis points.
+   * @param annualReturnPercent - Expected annual return (default: 7%).
+   * @returns Complete fee analysis with projections and comparisons.
+   */
+  computeFeeAnalysis: (
+    expenseRatios: ReadonlyMap<string, number>,
+    annualReturnPercent?: number,
+  ) => FeeAnalysis;
 }
 
 // ---------------------------------------------------------------------------
@@ -188,6 +247,110 @@ export function useInvestments(): UseInvestmentsResult {
     [db, refresh],
   );
 
+  // --- Lot operations (#1588) ---
+
+  const getLots = useCallback(
+    (investmentId: SyncId): InvestmentLot[] => {
+      try {
+        return getLotsByInvestment(db, investmentId);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : '';
+        if (!message.includes('no such table')) {
+          setError(err instanceof Error ? err.message : 'Failed to load lots.');
+        }
+        return [];
+      }
+    },
+    [db],
+  );
+
+  const createLot = useCallback(
+    (input: CreateLotInput): InvestmentLot | null => {
+      try {
+        const created = repoCreateLot(db, input);
+        refresh();
+        return created;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create lot.');
+        setLoading(false);
+        return null;
+      }
+    },
+    [db, refresh],
+  );
+
+  const updateLotFn = useCallback(
+    (lotId: SyncId, updates: UpdateLotInput): InvestmentLot | null => {
+      try {
+        const updated = repoUpdateLot(db, lotId, updates);
+        if (updated !== null) {
+          refresh();
+        }
+        return updated;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to update lot.');
+        setLoading(false);
+        return null;
+      }
+    },
+    [db, refresh],
+  );
+
+  const deleteLotFn = useCallback(
+    (lotId: SyncId): boolean => {
+      try {
+        const deleted = repoDeleteLot(db, lotId);
+        if (deleted) {
+          refresh();
+        }
+        return deleted;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to delete lot.');
+        setLoading(false);
+        return false;
+      }
+    },
+    [db, refresh],
+  );
+
+  // --- Allocation analysis (#1595) ---
+
+  const holdingsWithClass: HoldingWithClass[] = useMemo(
+    () =>
+      investments.map((inv) => ({
+        symbol: inv.symbol,
+        marketValue: Math.round(inv.shares * inv.currentPricePerShare.amount),
+        assetClass: DEFAULT_ASSET_CLASS_MAP[inv.type],
+      })),
+    [investments],
+  );
+
+  const computeAllocationAnalysis = useCallback(
+    (targets: readonly AllocationTarget[]): AllocationAnalysis => {
+      return computeAllocation(holdingsWithClass, targets);
+    },
+    [holdingsWithClass],
+  );
+
+  // --- Fee analysis (#1625) ---
+
+  const computeFeeAnalysis = useCallback(
+    (expenseRatios: ReadonlyMap<string, number>, annualReturnPercent: number = 7): FeeAnalysis => {
+      const feeHoldings: FeeHoldingInput[] = investments
+        .filter((inv) => expenseRatios.has(inv.id))
+        .map((inv) => ({
+          investmentId: inv.id,
+          symbol: inv.symbol,
+          name: inv.name,
+          expenseRatioBps: expenseRatios.get(inv.id) ?? 0,
+          marketValue: Math.round(inv.shares * inv.currentPricePerShare.amount),
+        }));
+
+      return analyzeFees(feeHoldings, annualReturnPercent);
+    },
+    [investments],
+  );
+
   return {
     investments,
     summary,
@@ -197,5 +360,11 @@ export function useInvestments(): UseInvestmentsResult {
     createInvestment,
     updateInvestment,
     deleteInvestment,
+    getLots,
+    createLot,
+    updateLot: updateLotFn,
+    deleteLot: deleteLotFn,
+    computeAllocationAnalysis,
+    computeFeeAnalysis,
   };
 }
