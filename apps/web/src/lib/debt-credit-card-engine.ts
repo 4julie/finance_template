@@ -130,7 +130,7 @@ export function generatePaymentAlerts(
     const daysUntilDue = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
     let alertType: PaymentAlert['type'] | null = null;
-    let message: string;
+    let message = '';
 
     if (daysUntilDue < 0) {
       alertType = 'overdue';
