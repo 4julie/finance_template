@@ -1,0 +1,163 @@
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/* -------------------------------------------------------------------
+ * PrivacyGate component styles
+ *
+ * Progressive disclosure UI for features gated behind consent.
+ * Uses design-token CSS custom properties throughout.
+ * ------------------------------------------------------------------- */
+
+.privacy-gate {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: var(--spacing-6);
+}
+
+.privacy-gate__card {
+  max-width: 480px;
+  width: 100%;
+  padding: var(--spacing-6);
+  border-radius: var(--card-border-radius, var(--border-radius-md));
+  border: 1px solid var(--semantic-border-default);
+  background-color: var(--semantic-background-elevated, var(--semantic-background-secondary));
+  box-shadow: var(--card-shadow, none);
+  text-align: center;
+}
+
+.privacy-gate__icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-3);
+}
+
+.privacy-gate__title {
+  font-size: var(--type-scale-h3-font-size, 1.25rem);
+  font-weight: var(--font-weight-semibold);
+  color: var(--semantic-text-primary);
+  margin: 0 0 var(--spacing-2);
+}
+
+.privacy-gate__description {
+  font-size: var(--type-scale-body-font-size, 1rem);
+  color: var(--semantic-text-secondary);
+  margin: 0 0 var(--spacing-4);
+  line-height: 1.5;
+}
+
+.privacy-gate__consent-info {
+  padding: var(--spacing-3);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--semantic-background-primary);
+  border: 1px solid var(--semantic-border-default);
+  margin-bottom: var(--spacing-4);
+  text-align: left;
+}
+
+.privacy-gate__consent-label {
+  font-size: var(--type-scale-caption-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--semantic-text-secondary);
+  margin: 0 0 var(--spacing-1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.privacy-gate__consent-name {
+  font-size: var(--type-scale-body-font-size, 1rem);
+  font-weight: var(--font-weight-semibold);
+  color: var(--semantic-text-primary);
+  margin: 0 0 var(--spacing-1);
+}
+
+.privacy-gate__consent-description {
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.privacy-gate__data-section {
+  text-align: left;
+  margin-bottom: var(--spacing-4);
+}
+
+.privacy-gate__data-title {
+  font-size: var(--type-scale-caption-font-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--semantic-text-secondary);
+  margin: 0 0 var(--spacing-2);
+}
+
+.privacy-gate__data-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.privacy-gate__data-item {
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+  padding: var(--spacing-1) 0;
+  padding-left: var(--spacing-3);
+  position: relative;
+}
+
+.privacy-gate__data-item::before {
+  content: '•';
+  position: absolute;
+  left: var(--spacing-1);
+  color: var(--semantic-interactive-default);
+}
+
+.privacy-gate__enable-btn {
+  display: inline-block;
+  padding: var(--spacing-2) var(--spacing-5);
+  border-radius: var(--border-radius-md);
+  border: none;
+  background-color: var(--semantic-interactive-default);
+  color: var(--semantic-text-inverse, #fff);
+  font-size: var(--type-scale-body-font-size, 1rem);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  margin-bottom: var(--spacing-3);
+}
+
+.privacy-gate__enable-btn:hover {
+  background-color: var(--semantic-interactive-hover);
+}
+
+.privacy-gate__enable-btn:focus-visible {
+  outline: 2px solid var(--semantic-border-focus);
+  outline-offset: 2px;
+}
+
+.privacy-gate__revoke-note {
+  font-size: var(--type-scale-caption-font-size);
+  color: var(--semantic-text-secondary);
+  margin: 0;
+}
+
+/* -------------------------------------------------------------------
+ * Reduced motion
+ * ------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .privacy-gate__enable-btn {
+    transition: none;
+  }
+}
+
+/* -------------------------------------------------------------------
+ * Mobile
+ * ------------------------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .privacy-gate {
+    padding: var(--spacing-3);
+  }
+
+  .privacy-gate__card {
+    padding: var(--spacing-4);
+  }
+}

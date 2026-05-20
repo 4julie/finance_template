@@ -26,6 +26,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/settings': 'Settings',
   '/import': 'Import',
   '/import/wizard': 'Import Wizard',
+  '/privacy-dashboard': 'Privacy Dashboard',
 };
 
 /** Routes that are wrapped in AppLayout (authenticated main app pages). */
@@ -46,6 +47,7 @@ const AUTHENTICATED_ROUTES = new Set([
   '/settings',
   '/import',
   '/import/wizard',
+  '/privacy-dashboard',
 ]);
 
 /**
