@@ -271,7 +271,9 @@ export function calculateIdrPlanResult(
     totalInterest += interest;
   }
 
-  const forgivenAmount = Math.max(0, balance);
+  // Handle final balance rounding: if balance is very small (within rounding error),
+  // treat it as 0 (especially important for standard plans that should pay off exactly)
+  const forgivenAmount = Math.max(0, balance <= 50 ? 0 : balance);
   const isForgivenessTaxable = !isTaxFree && forgivenAmount > 0;
   const estimatedTax = isForgivenessTaxable
     ? bankersRound((forgivenAmount * ESTIMATED_TAX_RATE_BPS) / 10000)
