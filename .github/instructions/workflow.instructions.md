@@ -22,15 +22,33 @@ AI agents MUST follow this workflow for every code change:
 6. Fetch and rebase onto origin/main (auto-approved, no human needed)
 7. Push feature branch: `$env:HUSKY = "0" ; git push --no-verify origin <branch-name>` — **MANDATORY, auto-approved, do NOT ask for permission**
 8. Create PR automatically with `gh pr create` including Closes #N — **MANDATORY, auto-approved, do NOT ask for permission**
-9. **Monitor PR with `gh pr checks` — poll until ALL checks are green**
-   - CI failures: read logs, re-run the Pre-Push Checklist (steps 5a-5e), push, restart cycle
-   - Merge conflicts: fetch + rebase + force-with-lease push, restart cycle
-   - **Work is NOT complete until all remote checks are green**
-10. Mark work complete once all checks pass and no conflicts remain
-11. After human merges the PR: remove the worktree automatically
+9. **Verify the PR exists** — run `gh pr view <branch>` immediately after `gh pr create`. If it returns "no pull requests found", you have NOT created a PR — re-run step 8 until it succeeds.
+10. **Monitor PR with `gh pr checks` AND `gh pr view --json mergeable,mergeStateStatus` — poll until BOTH:**
+    - All checks are green (no failures, no pending)
+    - `mergeable == MERGEABLE` and `mergeStateStatus in {CLEAN, UNSTABLE}` (no conflicts)
+    - CI failures: read logs, re-run the Pre-Push Checklist (steps 5a-5e), push, restart cycle
+    - Merge conflicts: trigger the **Merge Conflict Protocol** (see section below) — treated with the same P0 urgency as a red CI check
+    - **Work is NOT complete until checks are green AND the PR is conflict-free**
+11. Mark work complete once steps 9 and 10 both pass
+12. After human merges the PR: remove the worktree automatically
 ```
 
-> ⚠️ **MANDATORY**: Steps 7 and 8 (push + create PR) are auto-approved and required. Stopping at step 6 (local commit only) is a **workflow violation**. A task is incomplete if it ends without a pushed branch and an open PR.
+> ⚠️ **MANDATORY**: Steps 7, 8, and 9 (push + create PR + verify PR exists) are auto-approved and required. Stopping at step 6 (local commit only) is a **workflow violation**. A task is incomplete if it ends without a pushed branch, an open PR, AND a `gh pr view` confirmation. Step 9's verification is what catches the silent-failure mode where an agent thinks it created a PR but `gh pr create` actually errored.
+
+## Definition of Done (DoD)
+
+A task is **DONE** only when ALL of the following are true. Agents MUST verify each before terminating their work loop:
+
+| Gate | Verification command                                    | Pass criteria                                  |
+| ---- | ------------------------------------------------------- | ---------------------------------------------- |
+| 1    | `git status`                                            | Clean working tree                             |
+| 2    | `git log origin/<branch>..HEAD`                         | Empty (all commits pushed)                     |
+| 3    | `gh pr view <branch> --json number`                     | Returns a PR number (proves PR exists)         |
+| 4    | `gh pr checks <number>`                                 | All checks `pass` or `skipping`; none `fail`   |
+| 5    | `gh pr view <number> --json mergeable,mergeStateStatus` | `mergeable=MERGEABLE` and not `DIRTY`/`BEHIND` |
+| 6    | PR body contains `Closes #N` for each resolved issue    | Visual / `gh pr view --json body`              |
+
+**Gates 4 AND 5 carry equal weight.** A green-CI PR sitting in a `CONFLICTING` state is not done. A conflict-free PR with a red CI check is not done. Both must clear before the agent exits.
 
 ## Worktree Setup (Required for Agents)
 
@@ -147,6 +165,75 @@ gh pr checks <number> --watch
 
 **Pushing without clean format + lint is the #1 cause of CI failures. Agents that skip this waste CI time and create noise.**
 
+### ⚠️ MANDATORY: Merge Conflict Protocol (treat as P0, same as red CI)
+
+> **🚨 Merge conflicts block merges just as effectively as red checks. Agents must self-heal conflicts with the same urgency as CI failures.**
+
+A PR with `mergeable == CONFLICTING` or `mergeStateStatus == DIRTY` is **not merge-ready**, even if every CI check is green. The orchestrator and the owning agent MUST resolve conflicts before declaring the task done.
+
+**Detection (poll every CI cycle, not just on first push):**
+
+```bash
+gh pr view <number> --json mergeable,mergeStateStatus,headRefName
+```
+
+| `mergeable`   | `mergeStateStatus`    | Action                                                                |
+| ------------- | --------------------- | --------------------------------------------------------------------- |
+| `MERGEABLE`   | `CLEAN` or `UNSTABLE` | ✅ OK — continue monitoring CI                                        |
+| `MERGEABLE`   | `BEHIND`              | Rebase: `git fetch origin main && git rebase origin/main` and re-push |
+| `CONFLICTING` | `DIRTY`               | Run **Auto-Resolve Cycle** below                                      |
+| `UNKNOWN`     | `UNKNOWN`             | Wait 10s and re-poll; GitHub is still computing                       |
+
+**Auto-Resolve Cycle (run in the agent's own worktree):**
+
+```bash
+# 1. Sync with main
+git fetch origin main
+
+# 2. Attempt rebase
+git rebase origin/main
+
+# 3a. If rebase succeeds cleanly:
+#    Re-run the Pre-Push Lint & Format Checklist (above), then:
+$env:HUSKY = "0" ; git push --force-with-lease --no-verify origin <branch>
+
+# 3b. If rebase reports conflicts:
+git status                          # list conflicted files
+git diff --name-only --diff-filter=U  # machine-readable conflict list
+```
+
+**Conflict triage rules:**
+
+1. **Auto-resolvable conflicts** (resolve without asking):
+   - `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml` — delete, re-run install, commit (`git checkout --theirs <lockfile> && npm install`)
+   - Generated files (token outputs, OpenAPI clients, SQLDelight generated code) — re-run generator and accept fresh output
+   - `CHANGELOG.md` top section — keep both entries in date order
+   - Whitespace / import-order only — accept incoming + auto-format
+2. **Semantic conflicts** (escalate, never guess):
+   - Same function or method body edited on both sides
+   - Schema migrations touching the same table
+   - Conflicting refactors (renames vs. body edits)
+   - Financial-logic or security-sensitive code
+3. **After resolving each file**: `git add <file>` then `git rebase --continue`.
+4. **If three auto-resolve attempts fail or any semantic conflict is hit**: stop, run `git rebase --abort`, and add `## Needs Human Action: merge conflict` to the PR body with the conflicted file list.
+
+**Force-with-lease is auto-approved for resolving merge conflicts on the agent's own branch** (this is the one documented exception to the "force-push requires human approval" rule — the rebase that resolved the conflict is the implicit human-equivalent action). NEVER use plain `--force`.
+
+**Conflict prevention is cheaper than conflict resolution.** See "Robust Git Practices" below.
+
+### Robust Git Practices (conflict prevention)
+
+To minimize merge-conflict churn during parallel fleet runs, agents MUST follow these practices:
+
+1. **Rebase before every push, not just the first.** If your branch has been open for more than ~30 minutes or any other PR has merged to `main` since your last push, `git fetch origin main && git rebase origin/main` before pushing again. This surfaces conflicts immediately rather than at PR-review time.
+2. **Narrow file scope per branch.** One logical change set per branch. If you find yourself editing files across more than one agent's ownership zone (see Fleet Coordination Rules), split into separate worktrees and separate PRs.
+3. **Respect file ownership.** Re-read the ownership table in `AGENTS.md` before editing shared config (`gradle/libs.versions.toml`, `package.json`, `turbo.json`, `settings.gradle.kts`). Only the designated owner edits these per fleet run.
+4. **Touch generated files only via their generator.** Never hand-edit Style Dictionary output, SQLDelight generated Kotlin, OpenAPI clients, or `*.lock` files. Re-run the generator and commit the diff.
+5. **Keep PRs small.** A PR over ~500 lines of diff or ~20 files is a conflict magnet. Decompose at planning time, not after the conflict.
+6. **Sequence schema work.** Backend migration + KMP SQLDelight changes ride a single PR (one task, one branch, two coordinated authors) — never two parallel PRs.
+7. **Commit `package-lock.json` last.** If a PR also bumps versions in `package.json`, commit the lockfile update as the very last commit before push so a rebase only ever has to rerun `npm install` once.
+8. **Use `git rerere` locally.** `git config rerere.enabled true` lets git auto-replay your past conflict resolutions if the same conflict reappears after a force-push.
+
 ### Known Local Issues
 
 - **`npm run ci:check` type-check may fail locally** — TypeScript 5.9.3 has compatibility issues with the current tsconfig. Format + lint (`npm run format:check && npx eslint . --max-warnings 0`) is sufficient for local pre-push validation. Remote CI is the source of truth for type-check.
@@ -248,6 +335,52 @@ INSERT INTO todos (id, title, description, status) VALUES
   ('sN-agent-issue', 'Title (#NNN)', 'Description', 'pending');
 ```
 
+### 4a. Batch Related Small Issues into Combined PRs
+
+To reduce conflict surface area and review churn, the orchestrator MUST batch small issues that touch the same files into a single combined PR. Batching reduces parallel-PR conflicts, cuts CI runs, and gives the human fewer PRs to review.
+
+**Mandatory batching candidates:**
+
+| Pattern                              | Combine into one PR                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Dependency CVE bumps                 | All bumps of a given ecosystem (e.g. `chore(deps): KMP security bumps`) — one PR for #1290/#1291/#1292 |
+| Lint/style cleanups                  | All ESLint or Prettier cleanups of the same surface — one PR per app                                   |
+| Detekt cleanups                      | All detekt fixes per platform — one PR for #1296/#1297/#1299                                           |
+| CI workflow tweaks                   | Related `.github/workflows/` edits — one PR per workflow                                               |
+| Doc-only edits in the same directory | One PR per `docs/` subdir per sprint                                                                   |
+| Token/design refreshes               | One PR per token generation                                                                            |
+
+**Do NOT batch:**
+
+- Feature work across different packages (one PR each — keeps reviews focused).
+- Anything touching schema (`packages/models/`, Supabase migrations) — always its own PR.
+- Anything that mixes security fixes with feature changes (separate so security can land fast).
+- PRs whose combined diff exceeds ~500 lines or ~20 files.
+
+Each batched PR's body MUST list every issue it closes:
+
+```
+Closes #1290
+Closes #1291
+Closes #1292
+```
+
+### 4b. Emit a Recommended Merge Order
+
+After the sprint plan is built, the orchestrator MUST publish a recommended merge order so the human merging PRs avoids creating conflicts they then have to ask agents to resolve.
+
+**Merge-order heuristics (top of list = merge first):**
+
+1. **Schema + migrations** (Supabase migration + matching SQLDelight) — blocks every downstream PR.
+2. **Shared package APIs** (`packages/core`, `packages/models`, `packages/sync`) — platforms depend on these.
+3. **Design tokens** (`config/tokens/` regenerations) — platform UI imports these.
+4. **Build / CI config** (`gradle/libs.versions.toml`, `package.json`, workflow files) — affects everything; merge before app PRs to avoid lockfile churn.
+5. **Backend services** (`services/api/`) — clients call these.
+6. **Platform app PRs** (`apps/web`, `apps/android`, `apps/ios`, `apps/windows`) — leaf nodes, no downstream dependents; safe to merge in any order amongst themselves.
+7. **Docs / PM / marketing** — can merge at any time, but bunching them last keeps the diff history tidy.
+
+Publish the order in the sprint plan and as a top-comment on each PR (e.g., `Merge order: 3 of 9 — depends on #1885 (schema) and #1887 (tokens)`).
+
 ### 5. Dispatch Fleet
 
 Launch all independent agents in parallel:
@@ -261,9 +394,10 @@ task(agent_type="web-engineer", mode="background", ...)
 ### 6. Monitor & Resolve
 
 - Track completions via agent notifications
+- For every agent that signals "done", run the **Definition of Done** gate-check (above). If any of gates 1-6 fails, re-dispatch the agent into its worktree to finish.
 - Push any unpushed work from agents that held off
-- Resolve merge conflicts between parallel PRs
-- Verify all CI checks pass
+- Resolve merge conflicts between parallel PRs using the **Merge Conflict Protocol** — conflicts carry the same P0 weight as red CI checks
+- Verify all CI checks pass AND every PR is in `MERGEABLE` state before declaring the sprint shippable
 
 ## Business Sprint Integration
 

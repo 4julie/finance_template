@@ -36,10 +36,20 @@ Before EVERY `git push`, run these commands **in order**:
 3. **`git add -A && git commit --amend --no-edit`** — amend commit with fixes
 4. **`$env:HUSKY = "0" ; git push --no-verify origin <branch>`** — push, bypassing the pre-push hook
 5. **`gh pr create`** with `Closes #N` in the body — create PR immediately after first push
+6. **`gh pr view <branch> --json number`** — verify the PR actually exists; if it doesn't, re-run step 5
 
 For docs-only PRs, use the quick check: **`npm run ci:check:quick`**
 
-**Pushing without a clean lint/format check is the #1 cause of CI failures. Agents that skip this waste CI time and create noise.**
+**Pushing without a clean lint/format check is the #1 cause of CI failures. Skipping the `gh pr view` verification is the #2 cause of "ghost PR" workflow gaps. Agents that skip either waste CI time and create noise.**
+
+### Definition of Done — task is NOT complete until BOTH gates pass
+
+| Gate                   | Verification                                                                              |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| **CI green**           | `gh pr checks <N>` — no failures                                                          |
+| **No merge conflicts** | `gh pr view <N> --json mergeable,mergeStateStatus` — `MERGEABLE` and not `DIRTY`/`BEHIND` |
+
+**Merge conflicts carry the same P0 weight as red CI checks.** A green-CI PR sitting in a `CONFLICTING` state is not done. See the **Merge Conflict Protocol** in `.github/instructions/workflow.instructions.md` for the auto-resolve cycle (rebase, lockfile / generated-file auto-resolve, force-with-lease push). Force-with-lease on the agent's own branch is auto-approved when used to resolve conflicts.
 
 > **Note:** `lint-staged` is configured in `.husky/pre-commit` and auto-formats staged files on commit. However, agents bypass the pre-push hook with `$env:HUSKY = "0" ; git push --no-verify`. **The explicit pre-push checklist above is therefore mandatory.**
 >
@@ -59,9 +69,10 @@ All work in this repository follows an issue-first, feature-branch + worktree wo
 3. **Commit messages must include issue references** in the format `type(scope): description (#N)`.
 4. **Push automatically** — `git push origin <branch>` is auto-approved.
 5. **Open a PR automatically** with `gh pr create` — include `Closes #N` for resolved issues.
-6. **Monitor the PR** — poll `gh pr checks` until all checks pass. Fix CI failures and merge conflicts autonomously; push and restart the check cycle until merge-ready.
-7. **Never merge PRs** — humans review and merge. The agent's job is to get the PR to merge-ready state.
-8. **Clean up the worktree** after the PR is confirmed merged: `git worktree remove <path>`.
+6. **Verify the PR exists** — `gh pr view <branch>` must return a PR number before you move on. If it doesn't, re-run `gh pr create`. This catches the silent-failure mode where `gh pr create` errored but the agent assumed success.
+7. **Monitor the PR** — poll `gh pr checks` until all checks pass AND `gh pr view --json mergeable,mergeStateStatus` shows `MERGEABLE` / not `DIRTY`. **Merge conflicts carry the same P0 weight as red CI checks** — self-heal via the Merge Conflict Protocol in `.github/instructions/workflow.instructions.md`. Both gates must clear before declaring done.
+8. **Never merge PRs** — humans review and merge. The agent's job is to get the PR to merge-ready state.
+9. **Clean up the worktree** after the PR is confirmed merged: `git worktree remove <path>`.
 
 See `docs/ai/worktrees.md` for the full worktree setup and lifecycle guide.
 
@@ -342,11 +353,14 @@ After opening a PR, each fleet agent monitors its own CI status until all checks
 **Self-healing cycle:**
 
 1. Push branch and open PR
-2. Poll `gh pr checks <number>` until all checks resolve
+2. Poll `gh pr checks <number>` AND `gh pr view <number> --json mergeable,mergeStateStatus` until BOTH:
+   - All checks resolve green
+   - `mergeable == MERGEABLE` and `mergeStateStatus` is not `DIRTY`/`BEHIND`/`CONFLICTING`
 3. If CI fails: read logs with `gh run view <run-id> --log-failed`
-4. Fix locally in the worktree
-5. Run `npm run ci:check` to confirm the fix before pushing
-6. Commit and push the fix — restart the cycle
+4. If merge conflicts (carry same P0 weight as red CI): trigger the **Merge Conflict Protocol** in `.github/instructions/workflow.instructions.md` — rebase, auto-resolve lockfiles/generated files, escalate semantic conflicts with `## Needs Human Action`
+5. Fix locally in the worktree
+6. Run `npm run ci:check` to confirm the fix before pushing
+7. Commit and push the fix (use `--force-with-lease` if the fix was a rebase) — restart the cycle
 
 **Sub-agent dispatch:** When a CI failure requires specialist knowledge, the orchestrator can dispatch a sub-agent into the affected worktree. Only one agent should be active in a worktree at a time.
 

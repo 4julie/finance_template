@@ -382,8 +382,18 @@ Every agent MUST follow this pre-push sequence before every `git push`:
 3. `git add -A && git commit --amend --no-edit` — amend commit with fixes
 4. `$env:HUSKY = "0" ; git push --no-verify origin <branch>` — push (bypass pre-push hook)
 5. `gh pr create` with `Closes #N` — create PR immediately
+6. `gh pr view <branch> --json number` — **verify the PR actually exists**; if not, re-run step 5
 
-**Pushing and creating PRs is auto-approved and mandatory.** Stopping at a local commit without a PR is a workflow violation.
+**Pushing and creating PRs is auto-approved and mandatory.** Stopping at a local commit without a PR is a workflow violation. Stopping after step 5 without the step-6 verification is the silent-failure mode that produces "ghost PR" workflow gaps (branch pushed, no PR open).
+
+### Definition of Done — BOTH gates must clear
+
+| Gate               | Verification                                                                              |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| CI green           | `gh pr checks <N>` — no failing checks                                                    |
+| No merge conflicts | `gh pr view <N> --json mergeable,mergeStateStatus` — `MERGEABLE` and not `DIRTY`/`BEHIND` |
+
+**Merge conflicts carry the same P0 weight as red CI checks.** A green-CI PR sitting in `CONFLICTING` state is not done. See the **Merge Conflict Protocol** in `.github/instructions/workflow.instructions.md` for the auto-resolve cycle (rebase, lockfile / generated-file auto-resolve, escalate semantic conflicts).
 
 For docs-only PRs, use: `npm run ci:check:quick`
 

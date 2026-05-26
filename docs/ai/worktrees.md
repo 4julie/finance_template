@@ -99,6 +99,13 @@ git rebase origin/main
 
 # Step 6: Push (bypass Husky pre-push hook)
 $env:HUSKY = "0" ; git push --no-verify origin <branch-name>
+
+# Step 7: Open PR (auto-approved, mandatory)
+gh pr create --fill --body "Closes #N"
+
+# Step 8: VERIFY the PR exists (catches silent gh-cli failures)
+gh pr view <branch-name> --json number
+# If this errors with "no pull requests found" — re-run Step 7
 ```
 
 > **Remote CI is the source of truth.** Local type-check may fail on TS 5.9.3 — see [CI Monitoring](ci-monitoring.md). The workflow above checks format and lint locally (reliable), and defers type-check to remote CI.
