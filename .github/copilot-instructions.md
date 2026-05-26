@@ -125,12 +125,13 @@ All code changes MUST follow this workflow:
 6. **Fetch and rebase**: `git fetch origin main && git rebase origin/main` (auto-approved)
 7. **Push the feature branch**: `$env:HUSKY = "0" ; git push --no-verify origin <branch-name>` — **MANDATORY, auto-approved, do NOT ask for permission**
 8. **Create a PR automatically** with `gh pr create` — include `Closes #N` and a detailed description — **MANDATORY, auto-approved, do NOT ask for permission**
-9. **Monitor `gh pr checks`** — poll until ALL checks are green; fix failures locally (re-run the pre-push checklist before each push), push, restart cycle. **Work is NOT complete until all remote checks are green.**
-10. **Never commit directly to `main`** — all changes go through feature branches and PRs
-11. **Never merge PRs** — humans review and merge; agents get the PR to merge-ready state
-12. **Clean up the worktree** after merge is confirmed: `git worktree remove <path>`
+9. **Verify the PR exists**: `gh pr view <branch> --json number` — if it doesn't return a PR number, `gh pr create` silently failed; re-run step 8. **Not running this verification step is how "ghost PR" workflow gaps happen.**
+10. **Monitor `gh pr checks` AND PR merge state** — poll `gh pr view <N> --json mergeable,mergeStateStatus` until BOTH all checks are green AND the PR shows `MERGEABLE` (not `DIRTY`/`BEHIND`/`CONFLICTING`). **Merge conflicts carry the same P0 weight as red CI checks.** Fix CI via the Pre-Push Checklist; fix conflicts via the Merge Conflict Protocol (rebase → auto-resolve lockfiles/generated files → force-with-lease push; escalate semantic conflicts with `## Needs Human Action`). **Work is NOT complete until checks are green AND the PR is conflict-free.**
+11. **Never commit directly to `main`** — all changes go through feature branches and PRs
+12. **Never merge PRs** — humans review and merge; agents get the PR to merge-ready state
+13. **Clean up the worktree** after merge is confirmed: `git worktree remove <path>`
 
-> ⚠️ **MANDATORY**: Steps 7 and 8 (push + create PR) are auto-approved and required. Stopping at step 6 (local commit only) is a **workflow violation**. A task is incomplete if it ends without a pushed branch and an open PR.
+> ⚠️ **MANDATORY**: Steps 7, 8, and 9 (push + create PR + verify PR exists) are auto-approved and required. Stopping at step 6 (local commit only) is a **workflow violation**. So is finishing step 8 without the step-9 verification — that's how branches end up pushed with no PR open. A task is incomplete if it ends without a confirmed-existing PR that is both CI-green and conflict-free.
 
 ### ⚠️ MANDATORY: Pre-Push Lint & Format Checklist (NEVER skip)
 
