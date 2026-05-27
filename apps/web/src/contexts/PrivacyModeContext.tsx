@@ -24,6 +24,7 @@ import {
 
 /** localStorage key for persisting privacy mode state. */
 const PRIVACY_STATE_STORAGE_KEY = 'finance-privacy-state-v1';
+const LEGACY_PRIVACY_MODE_STORAGE_KEY = 'finance-privacy-mode';
 
 /** Masked replacement for legacy callers. */
 export const MASKED_AMOUNT = '•••.••';
@@ -63,8 +64,33 @@ export const PrivacyModeProvider: FC<PrivacyModeProviderProps> = ({
 }) => {
   const stateRef = useRef<PrivacyState | null>(null);
   if (stateRef.current === null) {
+    const baseStorage = createLocalStoragePrivacyStorage(PRIVACY_STATE_STORAGE_KEY);
     stateRef.current = new PrivacyState({
-      storage: createLocalStoragePrivacyStorage(PRIVACY_STATE_STORAGE_KEY),
+      storage: {
+        read: () => {
+          const stored = baseStorage.read();
+          if (stored !== null) return stored;
+          try {
+            return localStorage.getItem(LEGACY_PRIVACY_MODE_STORAGE_KEY) === 'true'
+              ? JSON.stringify({ privacyMode: true, firstActivationExplained: true })
+              : null;
+          } catch {
+            return null;
+          }
+        },
+        write: (value) => {
+          baseStorage.write(value);
+          try {
+            const parsed = JSON.parse(value) as { privacyMode?: boolean };
+            localStorage.setItem(
+              LEGACY_PRIVACY_MODE_STORAGE_KEY,
+              String(parsed.privacyMode === true),
+            );
+          } catch {
+            // Legacy compatibility write is best-effort only.
+          }
+        },
+      },
       initial: {
         ...(initialValue !== undefined ? { privacyMode: initialValue } : {}),
         ...(initialPersistence !== undefined ? { persistence: initialPersistence } : {}),
