@@ -78,7 +78,7 @@ describe('biometric-categories', () => {
   describe('createTemporaryUnlock', () => {
     it('creates unlock with default duration', () => {
       const unlock = createTemporaryUnlock('cat-1', '2025-01-15T12:00:00Z');
-      expect(unlock.durationSeconds).toBe(300);
+      expect(unlock.durationSeconds).toBe(30);
     });
 
     it('creates unlock with custom duration', () => {

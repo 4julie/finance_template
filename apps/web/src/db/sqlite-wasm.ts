@@ -347,6 +347,25 @@ export const MIGRATIONS: Migration[] = [
       `CREATE INDEX IF NOT EXISTS idx_goal_status    ON goal (status);`,
       `CREATE INDEX IF NOT EXISTS idx_goal_account   ON goal (account_id);`,
       `CREATE INDEX IF NOT EXISTS idx_goal_sync      ON goal (is_synced);`,
+
+      `CREATE TABLE IF NOT EXISTS widget_privacy_config (
+        widget_id    TEXT NOT NULL PRIMARY KEY,
+        masking_mode TEXT NOT NULL DEFAULT 'Bucketed',
+        updated_at   TEXT NOT NULL
+      );`,
+    ],
+  },
+  {
+    version: 2,
+    label: 'privacy-trio-foundation',
+    up: [
+      `ALTER TABLE category ADD COLUMN is_biometric_protected INTEGER NOT NULL DEFAULT 0;`,
+      `CREATE INDEX IF NOT EXISTS idx_category_biometric ON category (is_biometric_protected);`,
+      `CREATE TABLE IF NOT EXISTS widget_privacy_config (
+        widget_id    TEXT NOT NULL PRIMARY KEY,
+        masking_mode TEXT NOT NULL DEFAULT 'Bucketed',
+        updated_at   TEXT NOT NULL
+      );`,
     ],
   },
 ];

@@ -21,6 +21,7 @@ struct CategoryItem: Identifiable, Hashable, Sendable {
     let colorHex: String
     let icon: String
     let sortOrder: Int
+    let isBiometricProtected: Bool
 
     /// Resolved Color from the stored hex string.
     var color: Color {
@@ -32,13 +33,15 @@ struct CategoryItem: Identifiable, Hashable, Sendable {
         name: String,
         colorHex: String,
         icon: String,
-        sortOrder: Int = 0
+        sortOrder: Int = 0,
+        isBiometricProtected: Bool = false
     ) {
         self.id = id
         self.name = name
         self.colorHex = colorHex
         self.icon = icon
         self.sortOrder = sortOrder
+        self.isBiometricProtected = isBiometricProtected
     }
 }
 

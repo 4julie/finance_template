@@ -352,4 +352,17 @@ describe('createPrivacySafeExport', () => {
     expect(keys).not.toContain('dollarAmount');
     expect(keys).not.toContain('totalCents');
   });
+
+  it('excludes biometric-protected categories from partner snapshots', () => {
+    const exported = createPrivacySafeExport(
+      'Test',
+      50,
+      ['food', 'medical'],
+      5,
+      '2024-01-01',
+      '2024-01-31',
+      new Set(['medical']),
+    );
+    expect(exported.categories).toEqual(['food']);
+  });
 });

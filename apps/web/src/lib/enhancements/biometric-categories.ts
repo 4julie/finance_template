@@ -85,13 +85,13 @@ export function logAccessAttempt(
  * Create a temporary unlock for a category.
  * @param categoryId - Category to unlock
  * @param unlockedAt - ISO-8601 unlock timestamp
- * @param durationSeconds - Duration of unlock in seconds (default 300 = 5 min)
+ * @param durationSeconds - Duration of unlock in seconds (default 30 = fresh-auth window)
  * @returns A TemporaryUnlock record
  */
 export function createTemporaryUnlock(
   categoryId: string,
   unlockedAt: string,
-  durationSeconds: number = 300,
+  durationSeconds: number = 30,
 ): TemporaryUnlock {
   return { categoryId, unlockedAt, durationSeconds };
 }

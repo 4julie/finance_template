@@ -19,6 +19,7 @@ import {
 } from 'recharts';
 import { CHART_COLORS, buildChartDescription, formatChartCurrency } from './chart-palette';
 import { useArrowKeyNavigation } from '../../accessibility/aria';
+import { useEffectiveMaskingMode } from '../../contexts/PrivacyModeContext';
 
 export interface SpendingCategory {
   name: string;
@@ -45,6 +46,7 @@ export const SpendingBarChart: FC<SpendingBarChartProps> = ({
 }) => {
   const chartId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
+  const maskingMode = useEffectiveMaskingMode();
 
   const description = useMemo(
     () =>
@@ -52,8 +54,9 @@ export const SpendingBarChart: FC<SpendingBarChartProps> = ({
         'Bar chart',
         data.map((d) => ({ label: d.name, value: d.amount })),
         currency,
+        maskingMode,
       ),
-    [data, currency],
+    [data, currency, maskingMode],
   );
 
   const { handleKeyDown } = useArrowKeyNavigation(containerRef, {
@@ -91,12 +94,14 @@ export const SpendingBarChart: FC<SpendingBarChartProps> = ({
             tick={{ fill: 'var(--semantic-text-secondary, #6B7280)', fontSize: 12 }}
           />
           <YAxis
-            tickFormatter={(v: number) => formatChartCurrency(v, currency)}
+            tickFormatter={(v: number) => formatChartCurrency(v, currency, 'en-US', maskingMode)}
             tick={{ fill: 'var(--semantic-text-secondary, #6B7280)', fontSize: 12 }}
             width={80}
           />
           <Tooltip
-            formatter={(value) => formatChartCurrency(Number(value ?? 0), currency)}
+            formatter={(value) =>
+              formatChartCurrency(Number(value ?? 0), currency, 'en-US', maskingMode)
+            }
             contentStyle={{
               background: 'var(--semantic-background-elevated, #FFFFFF)',
               border: '1px solid var(--semantic-border-default, #E5E7EB)',
@@ -111,7 +116,7 @@ export const SpendingBarChart: FC<SpendingBarChartProps> = ({
                 data-chart-point=""
                 tabIndex={-1}
                 role="listitem"
-                aria-label={`${entry.name}: ${formatChartCurrency(entry.amount, currency)}`}
+                aria-label={`${entry.name}: ${formatChartCurrency(entry.amount, currency, 'en-US', maskingMode)}`}
               />
             ))}
           </Bar>

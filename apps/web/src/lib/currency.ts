@@ -17,6 +17,8 @@
  * References: issue #1351
  */
 
+import { formatAmount, MaskingMode } from './ui/privacy';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -79,16 +81,12 @@ export function formatCurrency(
     signDisplay = 'auto',
   } = options;
 
-  // Normalize −0 to +0 so Intl.NumberFormat doesn't render "-$0.00"
-  const amountInMajorUnits = amountInCents / 100 || 0;
-
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
+  return formatAmount(amountInCents, MaskingMode.Visible, locale, {
     currency,
     minimumFractionDigits,
     maximumFractionDigits,
     signDisplay,
-  }).format(amountInMajorUnits);
+  });
 }
 
 /**
@@ -116,12 +114,11 @@ export function formatCurrencyValue(
     maximumFractionDigits = 2,
   } = options;
 
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
+  return formatAmount(Math.round(amountInMajorUnits * 100), MaskingMode.Visible, locale, {
     currency,
     minimumFractionDigits,
     maximumFractionDigits,
-  }).format(amountInMajorUnits);
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -189,10 +186,10 @@ export function formatChartCurrency(
   valueInMajorUnits: number,
   currency = 'USD',
   locale = 'en-US',
+  mode: MaskingMode = MaskingMode.Visible,
 ): string {
-  return formatCurrencyValue(valueInMajorUnits, {
+  return formatAmount(Math.round(valueInMajorUnits * 100), mode, locale, {
     currency,
-    locale,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });

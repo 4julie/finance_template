@@ -33,6 +33,7 @@ import {
 } from 'recharts';
 import { CHART_COLORS, formatChartCurrency } from './chart-palette';
 import { useArrowKeyNavigation } from '../../accessibility/aria';
+import { useEffectiveMaskingMode } from '../../contexts/PrivacyModeContext';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -179,6 +180,7 @@ export const SpendingTrendChart: FC<SpendingTrendChartProps> = ({
 }) => {
   const chartId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
+  const maskingMode = useEffectiveMaskingMode();
   const disableAnimation = prefersReducedMotion();
 
   const description = useMemo(() => {
@@ -187,8 +189,8 @@ export const SpendingTrendChart: FC<SpendingTrendChartProps> = ({
     const min = Math.min(...values);
     const max = Math.max(...values);
     const total = values.reduce((sum, v) => sum + v, 0);
-    return `${title}: ${data.length} data points, range ${formatChartCurrency(min, currency)} to ${formatChartCurrency(max, currency)}, total ${formatChartCurrency(total, currency)}.`;
-  }, [data, currency, title]);
+    return `${title}: ${data.length} data points, range ${formatChartCurrency(min, currency, 'en-US', maskingMode)} to ${formatChartCurrency(max, currency, 'en-US', maskingMode)}, total ${formatChartCurrency(total, currency, 'en-US', maskingMode)}.`;
+  }, [data, currency, title, maskingMode]);
 
   const { handleKeyDown } = useArrowKeyNavigation(containerRef, {
     orientation: 'horizontal',
@@ -209,7 +211,7 @@ export const SpendingTrendChart: FC<SpendingTrendChartProps> = ({
     );
     const commonYAxis = (
       <YAxis
-        tickFormatter={(v: number) => formatChartCurrency(v, currency)}
+        tickFormatter={(v: number) => formatChartCurrency(v, currency, 'en-US', maskingMode)}
         tick={{ fill: 'var(--semantic-text-secondary, #6B7280)', fontSize: 12 }}
         width={70}
       />
@@ -219,7 +221,9 @@ export const SpendingTrendChart: FC<SpendingTrendChartProps> = ({
     );
     const commonTooltip = (
       <Tooltip
-        formatter={(value) => formatChartCurrency(Number(value ?? 0), currency)}
+        formatter={(value) =>
+          formatChartCurrency(Number(value ?? 0), currency, 'en-US', maskingMode)
+        }
         contentStyle={{
           background: 'var(--semantic-background-elevated, #FFFFFF)',
           border: '1px solid var(--semantic-border-default, #E5E7EB)',
@@ -317,7 +321,7 @@ export const SpendingTrendChart: FC<SpendingTrendChartProps> = ({
       <div className="spending-trend__annotations" aria-live="polite">
         {averageDailySpending != null && (
           <span className="spending-trend__rate">
-            Avg {formatChartCurrency(averageDailySpending, currency)}/day
+            Avg {formatChartCurrency(averageDailySpending, currency, 'en-US', maskingMode)}/day
           </span>
         )}
         {comparison != null && (

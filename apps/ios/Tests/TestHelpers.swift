@@ -231,12 +231,14 @@ final class StubCategoryRepository: CategoryRepository, @unchecked Sendable {
 final class StubBiometricAuthManager: BiometricAuthManaging, @unchecked Sendable {
     var canAuthenticateResult = true
     var errorToThrow: BiometricError?
+    var authenticateCallCount = 0
 
     func canAuthenticate() -> Bool {
         canAuthenticateResult
     }
 
     func authenticate(reason: String) async throws {
+        authenticateCallCount += 1
         if let error = errorToThrow { throw error }
     }
 }

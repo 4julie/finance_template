@@ -50,5 +50,5 @@ object TestFixtures {
     fun category(id: String = "cat-001", name: String = "Food & Dining",
         isIncome: Boolean = false, isSynced: Boolean = false,
     ) = Category(SyncId(id), SyncId("hh-001"), SyncId("user-001"), name,
-        null, null, null, isIncome, false, 0, now, now, null, 0, isSynced)
+        null, null, null, isIncome, false, 0, false, now, now, null, 0, isSynced)
 }

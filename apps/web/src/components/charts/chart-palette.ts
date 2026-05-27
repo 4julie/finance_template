@@ -7,6 +7,7 @@
  */
 
 import { formatChartCurrency } from '../../lib/currency';
+import { MaskingMode } from '../../lib/ui/privacy';
 
 /**
  * Re-export the centralized chart currency formatter so that existing
@@ -63,11 +64,12 @@ export function buildChartDescription(
   chartType: string,
   dataPoints: Array<{ label: string; value: number }>,
   currency = 'USD',
+  maskingMode: MaskingMode = MaskingMode.Visible,
 ): string {
   if (dataPoints.length === 0) return `${chartType} with no data.`;
   const total = dataPoints.reduce((sum, d) => sum + d.value, 0);
   const summaries = dataPoints
-    .map((d) => `${d.label}: ${formatChartCurrency(d.value, currency)}`)
+    .map((d) => `${d.label}: ${formatChartCurrency(d.value, currency, 'en-US', maskingMode)}`)
     .join(', ');
-  return `${chartType} showing ${dataPoints.length} categories totalling ${formatChartCurrency(total, currency)}. ${summaries}.`;
+  return `${chartType} showing ${dataPoints.length} categories totalling ${formatChartCurrency(total, currency, 'en-US', maskingMode)}. ${summaries}.`;
 }

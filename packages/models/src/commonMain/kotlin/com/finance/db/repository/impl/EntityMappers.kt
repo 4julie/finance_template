@@ -94,12 +94,13 @@ object EntityMappers {
     fun mapCategory(
         id: String, householdId: String, ownerId: String, name: String,
         icon: String?, color: String?, parentId: String?, isIncome: Long,
-        isSystem: Long, sortOrder: Long, createdAt: String, updatedAt: String,
-        deletedAt: String?, syncVersion: Long, isSynced: Long,
+        isSystem: Long, sortOrder: Long, isBiometricProtected: Long,
+        createdAt: String, updatedAt: String, deletedAt: String?, syncVersion: Long, isSynced: Long,
     ): Category = Category(
         id = SyncId(id), householdId = SyncId(householdId), ownerId = SyncId(ownerId),
         name = name, icon = icon, color = color, parentId = parentId?.let { SyncId(it) },
         isIncome = isIncome != 0L, isSystem = isSystem != 0L, sortOrder = sortOrder.toInt(),
+        isBiometricProtected = isBiometricProtected != 0L,
         createdAt = Instant.parse(createdAt), updatedAt = Instant.parse(updatedAt),
         deletedAt = deletedAt?.let { Instant.parse(it) },
         syncVersion = syncVersion, isSynced = isSynced != 0L,

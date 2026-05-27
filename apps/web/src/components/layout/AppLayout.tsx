@@ -25,7 +25,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   pageTitle,
   children,
 }) => {
-  const { togglePrivacyMode } = usePrivacyMode();
+  const { isPrivacyMode, togglePrivacyMode } = usePrivacyMode();
   const { showHelp, setShowHelp } = useKeyboardShortcuts({
     onTogglePrivacyMode: togglePrivacyMode,
   });
@@ -99,6 +99,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 </svg>
               </button>
             )}
+            <button
+              type="button"
+              className={`icon-button${isPrivacyMode ? ' icon-button--active' : ''}`}
+              aria-label={isPrivacyMode ? 'Turn privacy mode off' : 'Turn privacy mode on'}
+              aria-pressed={isPrivacyMode}
+              title="Privacy mode"
+              onClick={togglePrivacyMode}
+            >
+              <span className="icon-button__glyph" aria-hidden="true">
+                {isPrivacyMode ? '●' : '○'}
+              </span>
+            </button>
             <button
               type="button"
               className="icon-button"

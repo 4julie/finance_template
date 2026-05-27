@@ -14,6 +14,8 @@
  * @module components/dashboard/widget-types
  */
 
+import { DEFAULT_WIDGET_MASKING_MODE, type MaskingMode } from '../../lib/ui/privacy';
+
 // ---------------------------------------------------------------------------
 // Widget identifiers
 // ---------------------------------------------------------------------------
@@ -148,6 +150,8 @@ export interface WidgetConfig {
   readonly order: number;
   /** Size override (defaults to the widget definition's defaultSize). */
   readonly size: WidgetSize;
+  /** Per-widget privacy masking mode; defaults to Bucketed for new widgets. */
+  readonly maskingMode: MaskingMode;
 }
 
 /** The full dashboard layout configuration. */
@@ -163,7 +167,7 @@ export interface DashboardLayout {
 // ---------------------------------------------------------------------------
 
 /** Current schema version. Bump when breaking the layout shape. */
-export const LAYOUT_VERSION = 1;
+export const LAYOUT_VERSION = 2;
 
 /** localStorage key for persisting the dashboard layout. */
 export const LAYOUT_STORAGE_KEY = 'finance:dashboard-layout';
@@ -193,6 +197,7 @@ export function buildDefaultLayout(): DashboardLayout {
         visible: true,
         order: index,
         size: def?.defaultSize ?? 'medium',
+        maskingMode: DEFAULT_WIDGET_MASKING_MODE,
       };
     }),
   };

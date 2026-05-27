@@ -330,11 +330,12 @@ export function createPrivacySafeExport(
   streakDays: number,
   periodStart: string,
   periodEnd: string,
+  protectedCategories: ReadonlySet<string> = new Set(),
 ): PrivacySafeExport {
   return {
     challengeName,
     progressPercent: Math.min(100, Math.max(0, Math.round(progressPercent))),
-    categories: [...categories],
+    categories: categories.filter((category) => !protectedCategories.has(category)),
     streakDays: Math.max(0, streakDays),
     periodStart,
     periodEnd,

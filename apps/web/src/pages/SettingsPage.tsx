@@ -9,7 +9,7 @@ import { CrashReportingSettings, PrivacySettings } from '../components/gdpr';
 import { SettingInfoWidget } from '../components/settings';
 import { CurrencyRatesSettings } from '../components/settings/CurrencyRatesSettings';
 import '../components/settings/currency-rates-settings.css';
-import { usePrivacyMode } from '../contexts/PrivacyModeContext';
+import { PrivacyPersistenceOption, usePrivacyMode } from '../contexts/PrivacyModeContext';
 import { useOfflineStatus } from '../hooks/useOfflineStatus';
 import { useTheme } from '../hooks/useTheme';
 import type { ThemeValue } from '../hooks/useTheme';
@@ -73,7 +73,8 @@ const CURRENCY_DISPLAY_OPTIONS: Array<{ value: CurrencyDisplayMode; label: strin
  */
 export const SettingsPage: React.FC = () => {
   const { theme, setTheme, themes } = useTheme();
-  const { isPrivacyMode, togglePrivacyMode } = usePrivacyMode();
+  const { isPrivacyMode, togglePrivacyMode, persistence, setPersistence, firstActivationMessage } =
+    usePrivacyMode();
   const [currency, setCurrency] = useState<CurrencyPreference>(
     () => (localStorage.getItem(CURRENCY_STORAGE_KEY) as CurrencyPreference) || 'USD',
   );
@@ -117,6 +118,13 @@ export const SettingsPage: React.FC = () => {
     localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, String(nextNotificationsEnabled));
     setNotificationsEnabled(nextNotificationsEnabled);
   }, []);
+
+  const handlePrivacyPersistenceChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setPersistence(event.target.value as PrivacyPersistenceOption);
+    },
+    [setPersistence],
+  );
 
   const handleMonitoringChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const nextMonitoringEnabled = event.target.checked;
@@ -433,14 +441,39 @@ export const SettingsPage: React.FC = () => {
             <label className="settings-item__label" htmlFor="s-privacy-mode">
               Privacy Mode
             </label>
-            <input
-              type="checkbox"
-              id="s-privacy-mode"
-              checked={isPrivacyMode}
-              onChange={() => togglePrivacyMode()}
-              aria-label="Hide all financial amounts and balances"
-              className="settings-item__checkbox"
-            />
+            <div className="settings-item__control">
+              <input
+                type="checkbox"
+                id="s-privacy-mode"
+                checked={isPrivacyMode}
+                onChange={() => togglePrivacyMode()}
+                aria-label="Hide all financial amounts and balances"
+                className="settings-item__checkbox"
+              />
+            </div>
+          </div>
+          <p className="settings-item__description">{firstActivationMessage}</p>
+          <div className="settings-item settings-item--static">
+            <label className="settings-item__label" htmlFor="s-privacy-persistence">
+              Privacy mode persistence
+            </label>
+            <div className="settings-item__control">
+              <select
+                id="s-privacy-persistence"
+                aria-label="Privacy mode persistence"
+                className="settings-item__select"
+                value={persistence}
+                onChange={handlePrivacyPersistenceChange}
+              >
+                <option value={PrivacyPersistenceOption.OffAfterOneMinute}>
+                  Off after 1 minute
+                </option>
+                <option value={PrivacyPersistenceOption.OffWhenAppCloses}>
+                  Off when app closes
+                </option>
+                <option value={PrivacyPersistenceOption.ManualOnly}>Manual only</option>
+              </select>
+            </div>
           </div>
         </div>
       </section>

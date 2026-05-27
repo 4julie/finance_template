@@ -122,18 +122,19 @@ class EntityMappersTest {
     fun mapCategory_mapsAllFields() {
         val cat = EntityMappers.mapCategory(
             "cat-1", "hh-1", "user-1", "Food", "icon", "#FF0000", null,
-            0L, 1L, 5L, "2025-01-01T00:00:00Z", "2025-01-15T12:00:00Z", null, 0L, 1L,
+            0L, 1L, 5L, 1L, "2025-01-01T00:00:00Z", "2025-01-15T12:00:00Z", null, 0L, 1L,
         )
         assertFalse(cat.isIncome)
         assertTrue(cat.isSystem)
         assertEquals(5, cat.sortOrder)
+        assertTrue(cat.isBiometricProtected)
     }
 
     @Test
     fun mapCategory_handlesSubcategory() {
         val cat = EntityMappers.mapCategory(
             "cat-2", "hh-1", "user-1", "Restaurants", null, null, "cat-1",
-            0L, 0L, 0L, "2025-01-01T00:00:00Z", "2025-01-15T12:00:00Z", null, 0L, 0L,
+            0L, 0L, 0L, 0L, "2025-01-01T00:00:00Z", "2025-01-15T12:00:00Z", null, 0L, 0L,
         )
         assertEquals("cat-1", cat.parentId?.value)
     }

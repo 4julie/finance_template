@@ -14,6 +14,7 @@ import { useCategories, useDashboardData, useTransactions } from '../hooks';
 import type { DashboardData } from '../hooks/useDashboardData';
 import type { Transaction } from '../kmp/bridge';
 import { getBudgetStatusIndicator } from '../lib/a11y';
+import { rollUpProtectedTransactions } from '../lib/ui/privacy';
 
 const PERIOD_DAYS: Record<Exclude<TimePeriod, 'custom'>, number> = {
   '7d': 7,
@@ -183,32 +184,60 @@ export const DashboardPage: React.FC = () => {
   const chartCurrency =
     chartTransactions[0]?.currency.code ?? data?.recentTransactions[0]?.currency.code ?? 'USD';
 
+  const chartPrivacyRollup = useMemo(
+    () => rollUpProtectedTransactions(chartTransactions, categories),
+    [chartTransactions, categories],
+  );
+
+  const recentPrivacyRollup = useMemo(
+    () => (data === null ? null : rollUpProtectedTransactions(data.recentTransactions, categories)),
+    [data, categories],
+  );
+
   const { trendData, barData, categoryData, hasChartData } = useMemo(() => {
-    const transformedCategoryData = buildCategoryData(chartTransactions, categoryNames);
+    const transformedCategoryData = buildCategoryData(
+      chartPrivacyRollup.visibleTransactions,
+      categoryNames,
+    );
+
+    if (chartPrivacyRollup.protectedRollup !== null) {
+      transformedCategoryData.push({
+        name: `${chartPrivacyRollup.protectedRollup.label} (${chartPrivacyRollup.protectedRollup.count})`,
+        value: chartPrivacyRollup.protectedRollup.totalCents / 100,
+      });
+    }
 
     return {
-      trendData: buildTrendData(chartTransactions, activeDays),
+      trendData: buildTrendData(chartPrivacyRollup.visibleTransactions, activeDays),
       barData: transformedCategoryData.map(({ name, value }) => ({ name, amount: value })),
       categoryData: transformedCategoryData,
       hasChartData: transformedCategoryData.length > 0,
     };
-  }, [chartTransactions, categoryNames, activeDays]);
+  }, [chartPrivacyRollup, categoryNames, activeDays]);
 
   const { averageDaily, totalSpending } = useMemo(
-    () => computeSpendingStats(chartTransactions, activeDays),
-    [chartTransactions, activeDays],
+    () => computeSpendingStats(chartPrivacyRollup.visibleTransactions, activeDays),
+    [chartPrivacyRollup, activeDays],
+  );
+
+  const prevPrivacyRollup = useMemo(
+    () => rollUpProtectedTransactions(prevTransactions, categories),
+    [prevTransactions, categories],
   );
 
   const comparison = useMemo(() => {
-    if (prevTransactions.length === 0 && totalSpending === 0) return null;
-    const prevTotal = prevTransactions.reduce((sum, t) => sum + Math.abs(t.amount.amount) / 100, 0);
+    if (prevPrivacyRollup.visibleTransactions.length === 0 && totalSpending === 0) return null;
+    const prevTotal = prevPrivacyRollup.visibleTransactions.reduce(
+      (sum, t) => sum + Math.abs(t.amount.amount) / 100,
+      0,
+    );
     if (prevTotal === 0) return null;
     const percentChange = ((totalSpending - prevTotal) / prevTotal) * 100;
     return {
       percentChange,
       absoluteChange: totalSpending - prevTotal,
     };
-  }, [prevTransactions, totalSpending]);
+  }, [prevPrivacyRollup, totalSpending]);
 
   const handlePeriodChange = useCallback((period: TimePeriod) => {
     setSelectedPeriod(period);
@@ -336,14 +365,34 @@ export const DashboardPage: React.FC = () => {
           <section className="page-section" aria-label="Recent transactions">
             <h3 className="page-section__title">Recent Transactions</h3>
             <div className="card">
-              {data.recentTransactions.length === 0 ? (
+              {(recentPrivacyRollup?.visibleTransactions.length ?? 0) === 0 &&
+              recentPrivacyRollup?.protectedRollup === null ? (
                 <EmptyState
                   title="No recent transactions"
                   description="Transactions you add will appear here."
                 />
               ) : (
                 <ul className="list-group" role="list">
-                  {data.recentTransactions.map((transaction) => (
+                  {recentPrivacyRollup?.protectedRollup !== null &&
+                    recentPrivacyRollup?.protectedRollup !== undefined && (
+                      <li className="list-item" role="listitem">
+                        <div className="list-item__content">
+                          <p className="list-item__primary">Protected</p>
+                          <p className="list-item__secondary">
+                            {recentPrivacyRollup.protectedRollup.count} protected transaction
+                            {recentPrivacyRollup.protectedRollup.count === 1 ? '' : 's'} hidden
+                          </p>
+                        </div>
+                        <div className="list-item__trailing">
+                          <CurrencyDisplay
+                            amount={recentPrivacyRollup.protectedRollup.totalCents}
+                            currency={recentPrivacyRollup.protectedRollup.currency}
+                            context="protected transactions total"
+                          />
+                        </div>
+                      </li>
+                    )}
+                  {recentPrivacyRollup?.visibleTransactions.map((transaction) => (
                     <li key={transaction.id} className="list-item" role="listitem">
                       <Link
                         to={`/transactions/${transaction.id}`}

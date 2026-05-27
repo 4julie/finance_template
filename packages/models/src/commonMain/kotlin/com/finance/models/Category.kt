@@ -18,6 +18,7 @@ data class Category(
     val isIncome: Boolean = false,
     val isSystem: Boolean = false,
     val sortOrder: Int = 0,
+    val isBiometricProtected: Boolean = false,
     val createdAt: Instant,
     val updatedAt: Instant,
     val deletedAt: Instant? = null,
