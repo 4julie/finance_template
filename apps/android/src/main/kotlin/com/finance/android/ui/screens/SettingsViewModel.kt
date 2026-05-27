@@ -18,6 +18,7 @@ import com.finance.core.export.ExportData
 import com.finance.core.export.ExportFormat
 import com.finance.core.export.ExportOutcome
 import com.finance.core.export.JsonExportSerializer
+import com.finance.android.ui.feedback.HapticAvailabilityChecker
 import com.finance.android.ui.theme.ThemePreference
 import com.finance.android.ui.theme.ThemePreferenceManager
 import com.finance.sync.auth.AuthManager
@@ -102,6 +103,8 @@ data class SettingsUiState(
     // Accessibility
     val simplifiedViewEnabled: Boolean = false,
     val highContrastEnabled: Boolean = false,
+    val hapticFeedbackEnabled: Boolean = false,
+    val hapticFeedbackAvailable: Boolean = false,
 
     // About
     val appVersion: String = "1.0.0",
@@ -127,6 +130,8 @@ data class SettingsUiState(
  * stores the actual data in `"finance_settings_encrypted"` and handles
  * migration from the legacy plain-text file (#1314).
  */
+internal const val HAPTIC_FEEDBACK_PREF_KEY = "haptic_feedback"
+
 private object PrefKeys {
     const val FILE_NAME = "finance_settings"
     const val DEFAULT_CURRENCY = "default_currency"
@@ -136,6 +141,7 @@ private object PrefKeys {
     const val APP_LOCK_TIMEOUT = "app_lock_timeout"
     const val SIMPLIFIED_VIEW = "simplified_view"
     const val HIGH_CONTRAST = "high_contrast"
+    const val HAPTIC_FEEDBACK = HAPTIC_FEEDBACK_PREF_KEY
     const val USER_NAME = "user_name"
     const val USER_EMAIL = "user_email"
 }
@@ -154,6 +160,7 @@ private object PrefKeys {
  *
  * @param prefs Local preferences store for settings persistence.
  * @param biometricChecker Abstraction to query biometric hardware availability.
+ * @param hapticChecker Abstraction to query haptic hardware availability.
  * @param householdIdProvider Provides the authenticated user's household ID.
  * @param transactionRepository Source for transaction data used in data export.
  * @param categoryRepository Source for category data used in data export.
@@ -167,6 +174,7 @@ private object PrefKeys {
 class SettingsViewModel(
     private val prefs: SharedPreferences,
     private val biometricChecker: BiometricAvailabilityChecker,
+    private val hapticChecker: HapticAvailabilityChecker,
     private val householdIdProvider: HouseholdIdProvider,
     private val transactionRepository: TransactionRepository,
     private val categoryRepository: CategoryRepository,
@@ -190,6 +198,7 @@ class SettingsViewModel(
     // -- Preference persistence -----------------------------------------------
 
     private fun loadPreferences() {
+        val hapticsAvailable = hapticChecker.isHapticFeedbackAvailable()
         _uiState.update { current ->
             current.copy(
                 userName = prefs.getString(PrefKeys.USER_NAME, "") ?: "",
@@ -207,6 +216,8 @@ class SettingsViewModel(
                     ?: AppLockTimeout.ONE_MINUTE,
                 simplifiedViewEnabled = prefs.getBoolean(PrefKeys.SIMPLIFIED_VIEW, false),
                 highContrastEnabled = prefs.getBoolean(PrefKeys.HIGH_CONTRAST, false),
+                hapticFeedbackAvailable = hapticsAvailable,
+                hapticFeedbackEnabled = prefs.getBoolean(PrefKeys.HAPTIC_FEEDBACK, hapticsAvailable),
             )
         }
     }
@@ -263,6 +274,17 @@ class SettingsViewModel(
     fun setHighContrastEnabled(enabled: Boolean) {
         updatePref { putBoolean(PrefKeys.HIGH_CONTRAST, enabled) }
         _uiState.update { it.copy(highContrastEnabled = enabled) }
+    }
+
+    fun setHapticFeedbackEnabled(enabled: Boolean) {
+        if (enabled && !_uiState.value.hapticFeedbackAvailable) {
+            viewModelScope.launch {
+                _events.emit(SettingsEvent.ShowToast("Haptic feedback is not available on this device"))
+            }
+            return
+        }
+        updatePref { putBoolean(PrefKeys.HAPTIC_FEEDBACK, enabled) }
+        _uiState.update { it.copy(hapticFeedbackEnabled = enabled) }
     }
 
     // -- Sign out --------------------------------------------------------------

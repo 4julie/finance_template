@@ -34,6 +34,8 @@ class SettingsSnapshotTest {
         appLockTimeout = AppLockTimeout.ONE_MINUTE,
         simplifiedViewEnabled = false,
         highContrastEnabled = false,
+        hapticFeedbackEnabled = true,
+        hapticFeedbackAvailable = true,
         appVersion = "1.0.0",
     )
 
@@ -54,6 +56,7 @@ class SettingsSnapshotTest {
                     onSetAppLockTimeout = {},
                     onSetSimplifiedView = {},
                     onSetHighContrast = {},
+                    onSetHapticFeedback = {},
                     onExportClick = {},
                     onDeleteClick = {},
                     onExportFormat = {},

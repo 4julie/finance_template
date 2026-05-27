@@ -71,6 +71,11 @@ final class HapticManager {
         playNotification(type: .success)
     }
 
+    /// Soft warning tap — played when transaction validation fails.
+    func validationWarning() {
+        playNotification(type: .warning)
+    }
+
     /// Warning pattern — played when spending crosses a budget threshold.
     ///
     /// Uses a custom Core Haptics pattern:
@@ -160,7 +165,7 @@ final class HapticManager {
     /// Prepares the engine so the first haptic plays without latency.
     /// Call this from the app's `onAppear` or scene-phase handler.
     func prepare() {
-        guard supportsHaptics else { return }
+        guard supportsHaptics, hapticsAllowed else { return }
         startEngine()
     }
 
@@ -171,6 +176,10 @@ final class HapticManager {
     }
 
     // MARK: - Private Helpers
+
+    private var hapticsAllowed: Bool {
+        HapticFeedbackPreferences.isEnabled() && !UIAccessibility.isReduceMotionEnabled
+    }
 
     /// Configures auto-restart handlers on the engine.
     private func configureEngine(_ engine: CHHapticEngine) {
@@ -206,6 +215,7 @@ final class HapticManager {
     /// respects the system-wide "System Haptics" toggle in
     /// Settings → Sounds & Haptics.
     private func playNotification(type: UINotificationFeedbackGenerator.FeedbackType) {
+        guard supportsHaptics, hapticsAllowed else { return }
         let generator = UINotificationFeedbackGenerator()
         generator.prepare()
         generator.notificationOccurred(type)
@@ -213,7 +223,7 @@ final class HapticManager {
 
     /// Plays an arbitrary `CHHapticEvent` pattern through the engine.
     private func playPattern(events: [CHHapticEvent]) {
-        guard let engine else { return }
+        guard hapticsAllowed, let engine else { return }
 
         do {
             let pattern = try CHHapticPattern(events: events, parameters: [])

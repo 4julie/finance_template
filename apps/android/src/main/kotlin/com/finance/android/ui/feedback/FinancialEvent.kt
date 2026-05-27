@@ -5,7 +5,8 @@ package com.finance.android.ui.feedback
 /**
  * Sealed hierarchy of financial events that trigger haptic feedback.
  *
- * Each event maps to a specific vibration pattern via [HapticFeedbackManager].
+ * Legacy event names retained for existing callers; transaction-save surfaces use
+ * the shared core haptic effects directly.
  */
 sealed class FinancialEvent {
 

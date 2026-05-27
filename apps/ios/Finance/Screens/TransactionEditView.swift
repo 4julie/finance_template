@@ -169,7 +169,7 @@ struct TransactionEditView: View {
             HapticManager.shared.transactionSaved()
             onComplete?()
             dismiss()
-        } else { HapticManager.shared.error() }
+        } else { HapticManager.shared.validationWarning() }
     }
 
     private func performDelete() async {

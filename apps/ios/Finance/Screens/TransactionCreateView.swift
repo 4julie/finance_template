@@ -284,7 +284,14 @@ struct TransactionCreateView: View {
             }
             if viewModel.currentStep == .review {
                 Button {
-                    Task { if await viewModel.save() { dismiss() } }
+                    Task {
+                        if await viewModel.save() {
+                            HapticManager.shared.transactionSaved()
+                            dismiss()
+                        } else {
+                            HapticManager.shared.validationWarning()
+                        }
+                    }
                 } label: {
                     if viewModel.isSaving { ProgressView().frame(maxWidth: .infinity) }
                     else { Text(viewModel.saveButtonTitle).frame(maxWidth: .infinity) }

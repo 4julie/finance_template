@@ -2,6 +2,7 @@
 
 package com.finance.android.ui.screens
 
+import android.content.SharedPreferences
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -66,6 +67,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -82,8 +84,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.finance.android.ui.theme.FinanceTheme
 import com.finance.android.ui.data.SampleData
+import com.finance.android.ui.feedback.rememberHapticFeedbackAvailable
+import com.finance.android.ui.feedback.rememberTransactionHapticFeedback
+import com.finance.android.ui.theme.FinanceTheme
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import com.finance.android.ui.viewmodel.CreateStep
 import com.finance.android.ui.viewmodel.TransactionCreateUiState
@@ -106,7 +111,28 @@ fun TransactionCreateScreen(
     viewModel: TransactionCreateViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
-    if (state.isSaved) { onSaved(); return }
+    val prefs: SharedPreferences = koinInject()
+    val hapticsAvailable = rememberHapticFeedbackAvailable()
+    val hapticFeedbackEnabled = prefs.getBoolean(HAPTIC_FEEDBACK_PREF_KEY, hapticsAvailable)
+    val hapticFeedback = rememberTransactionHapticFeedback(
+        appHapticsEnabled = hapticFeedbackEnabled,
+        deviceSupportsHaptics = hapticsAvailable,
+    )
+
+    LaunchedEffect(state.errors) {
+        if (state.errors.isNotEmpty()) {
+            hapticFeedback.validationFailed()
+        }
+    }
+
+    LaunchedEffect(state.isSaved) {
+        if (state.isSaved) {
+            hapticFeedback.transactionSaved()
+            onSaved()
+        }
+    }
+
+    if (state.isSaved) return
 
     Scaffold(topBar = {
         TopAppBar(title = { Text(if (state.isEditing) "Edit Transaction" else "New Transaction",
