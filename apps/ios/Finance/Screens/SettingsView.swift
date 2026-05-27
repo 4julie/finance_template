@@ -28,6 +28,7 @@ struct SettingsView: View {
                 accountSection
                 generalSection
                 notificationsSection
+                accessibilitySection
                 securitySection
                 syncSection
                 dataSection
@@ -161,6 +162,31 @@ struct SettingsView: View {
                 }
                 .accessibilityLabel(String(localized: "Goal milestones"))
                 .accessibilityHint(String(localized: "Receive notifications for goal progress milestones"))
+            }
+        }
+    }
+
+    // MARK: - Accessibility
+
+    private var accessibilitySection: some View {
+        Section(String(localized: "Accessibility")) {
+            Toggle(isOn: $viewModel.hapticFeedbackEnabled) {
+                Label(String(localized: "Haptic feedback"), systemImage: "waveform")
+            }
+            .disabled(!viewModel.hapticFeedbackAvailable)
+            .accessibilityIdentifier("haptic_feedback_toggle")
+            .accessibilityLabel(String(localized: "Haptic feedback"))
+            .accessibilityHint(
+                viewModel.hapticFeedbackAvailable
+                    ? String(localized: "Play subtle confirmations and warnings when saving transactions")
+                    : String(localized: "Haptic feedback is not available on this device")
+            )
+
+            if !viewModel.hapticFeedbackAvailable {
+                Text(String(localized: "Haptic feedback is not available on this device."))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel(String(localized: "Haptic feedback is not available on this device."))
             }
         }
     }

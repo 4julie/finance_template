@@ -91,6 +91,7 @@ import java.io.File
  * @param onSetAppLockTimeout      Callback when app-lock timeout changes.
  * @param onSetSimplifiedView      Callback when simplified-view toggle changes.
  * @param onSetHighContrast        Callback when high-contrast toggle changes.
+ * @param onSetHapticFeedback      Callback when haptic feedback toggle changes.
  * @param onExportClick            Callback when "Export data" is tapped.
  * @param onDeleteClick            Callback when "Delete account" is tapped.
  * @param onExportFormat           Callback when a format is picked in the export dialog.
@@ -116,6 +117,7 @@ fun SettingsScreen(
     onSetAppLockTimeout: (AppLockTimeout) -> Unit,
     onSetSimplifiedView: (Boolean) -> Unit,
     onSetHighContrast: (Boolean) -> Unit,
+    onSetHapticFeedback: (Boolean) -> Unit,
     onExportClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onExportFormat: (ExportFormat) -> Unit,
@@ -170,9 +172,12 @@ fun SettingsScreen(
         AccessibilitySection(
             simplifiedViewEnabled = state.simplifiedViewEnabled,
             highContrastEnabled = state.highContrastEnabled,
+            hapticFeedbackEnabled = state.hapticFeedbackEnabled,
+            hapticFeedbackAvailable = state.hapticFeedbackAvailable,
             themePreference = state.themePreference,
             onSimplifiedViewChanged = onSetSimplifiedView,
             onHighContrastChanged = onSetHighContrast,
+            onHapticFeedbackChanged = onSetHapticFeedback,
             onThemePreferenceChanged = onSetThemePreference,
         )
 
@@ -561,9 +566,12 @@ private fun AppLockTimeoutSelector(
 private fun AccessibilitySection(
     simplifiedViewEnabled: Boolean,
     highContrastEnabled: Boolean,
+    hapticFeedbackEnabled: Boolean,
+    hapticFeedbackAvailable: Boolean,
     themePreference: ThemePreference,
     onSimplifiedViewChanged: (Boolean) -> Unit,
     onHighContrastChanged: (Boolean) -> Unit,
+    onHapticFeedbackChanged: (Boolean) -> Unit,
     onThemePreferenceChanged: (ThemePreference) -> Unit,
 ) {
     SectionHeader("Accessibility")
@@ -636,6 +644,20 @@ private fun AccessibilitySection(
                 description = "Increase contrast for better visibility",
                 checked = highContrastEnabled,
                 onCheckedChange = onHighContrastChanged,
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+            SettingsToggleRow(
+                label = "Haptic feedback",
+                description = if (hapticFeedbackAvailable) {
+                    "Play subtle confirmations and warnings when saving transactions"
+                } else {
+                    "Haptic feedback is not available on this device"
+                },
+                checked = hapticFeedbackEnabled,
+                onCheckedChange = onHapticFeedbackChanged,
+                enabled = hapticFeedbackAvailable,
             )
         }
     }
@@ -1012,6 +1034,7 @@ fun SettingsScreen(
         onSetAppLockTimeout = viewModel::setAppLockTimeout,
         onSetSimplifiedView = viewModel::setSimplifiedViewEnabled,
         onSetHighContrast = themePreferenceManager::setHighContrastEnabled,
+        onSetHapticFeedback = viewModel::setHapticFeedbackEnabled,
         onExportClick = viewModel::showExportDialog,
         onDeleteClick = viewModel::showDeleteDialog,
         onExportFormat = viewModel::exportData,
@@ -1089,6 +1112,7 @@ private fun SettingsScreenPreviewLight() {
                 onSetAppLockTimeout = {},
                 onSetSimplifiedView = {},
                 onSetHighContrast = {},
+                onSetHapticFeedback = {},
                 onExportClick = {},
                 onDeleteClick = {},
                 onExportFormat = {},
@@ -1126,6 +1150,7 @@ private fun SettingsScreenPreviewDark() {
                 onSetAppLockTimeout = {},
                 onSetSimplifiedView = {},
                 onSetHighContrast = {},
+                onSetHapticFeedback = {},
                 onExportClick = {},
                 onDeleteClick = {},
                 onExportFormat = {},
@@ -1178,5 +1203,7 @@ private fun previewState() = SettingsUiState(
     appLockTimeout = AppLockTimeout.ONE_MINUTE,
     simplifiedViewEnabled = false,
     highContrastEnabled = false,
+    hapticFeedbackEnabled = true,
+    hapticFeedbackAvailable = true,
     appVersion = "1.0.0",
 )

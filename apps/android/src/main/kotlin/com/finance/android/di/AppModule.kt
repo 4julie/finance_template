@@ -37,6 +37,8 @@ import com.finance.android.ui.streak.StreakRepository
 import com.finance.android.ui.streak.StreakViewModel
 import com.finance.android.ui.streak.TransactionBackedStreakRepository
 import com.finance.android.ui.accessibility.CognitiveAccessibilityManager
+import com.finance.android.ui.feedback.DefaultHapticAvailabilityChecker
+import com.finance.android.ui.feedback.HapticAvailabilityChecker
 import com.finance.android.ui.theme.ThemeManager
 import com.finance.android.ui.theme.ThemePreferenceManager
 import com.finance.android.ui.tips.TipsViewModel
@@ -122,6 +124,11 @@ val appModule = module {
     /** Biometric availability check — delegates to [androidx.biometric.BiometricManager]. */
     single<BiometricAvailabilityChecker> {
         DefaultBiometricAvailabilityChecker(androidContext())
+    }
+
+    /** Haptic availability check — controls the default Accessibility haptic toggle. */
+    single<HapticAvailabilityChecker> {
+        DefaultHapticAvailabilityChecker(androidContext())
     }
 
     /** Theme preference manager — provides reactive theme state for the whole app. */

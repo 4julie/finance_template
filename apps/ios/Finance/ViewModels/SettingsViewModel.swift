@@ -58,6 +58,14 @@ final class SettingsViewModel {
         didSet { defaults.set(goalMilestonesEnabled, forKey: SettingsKeys.goalMilestones) }
     }
 
+    /// Whether subtle haptic confirmations and warnings are enabled.
+    var hapticFeedbackEnabled: Bool {
+        didSet { HapticFeedbackPreferences.setEnabled(hapticFeedbackEnabled, defaults: defaults) }
+    }
+
+    /// Whether this device supports haptic feedback.
+    let hapticFeedbackAvailable: Bool
+
     // MARK: - Biometric State
 
     /// Whether the biometric app-lock is currently enabled.
@@ -204,6 +212,8 @@ final class SettingsViewModel {
         self.goalMilestonesEnabled = Self.bool(
             forKey: SettingsKeys.goalMilestones, default: true, in: defaults
         )
+        self.hapticFeedbackAvailable = HapticFeedbackPreferences.deviceSupportsHaptics
+        self.hapticFeedbackEnabled = HapticFeedbackPreferences.isEnabled(defaults: defaults)
         self.lastSyncDate = defaults.object(forKey: SettingsKeys.lastSyncDate) as? Date
         self.pendingChangesCount = defaults.integer(forKey: SettingsKeys.pendingChangesCount)
 
@@ -455,6 +465,7 @@ final class SettingsViewModel {
             for key in [
                 SettingsKeys.currency, SettingsKeys.notifications,
                 SettingsKeys.budgetAlerts, SettingsKeys.goalMilestones,
+                HapticFeedbackPreferences.key,
                 SettingsKeys.lastSyncDate, SettingsKeys.pendingChangesCount,
             ] {
                 defaults.removeObject(forKey: key)

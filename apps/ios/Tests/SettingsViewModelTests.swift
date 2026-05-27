@@ -37,6 +37,11 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertTrue(vm.notificationsEnabled, "Notifications should default to enabled")
         XCTAssertTrue(vm.budgetAlertsEnabled, "Budget alerts should default to enabled")
         XCTAssertTrue(vm.goalMilestonesEnabled, "Goal milestones should default to enabled")
+        XCTAssertEqual(
+            vm.hapticFeedbackEnabled,
+            HapticFeedbackPreferences.deviceSupportsHaptics,
+            "Haptic feedback should default on only when the device supports it"
+        )
     }
 
     // MARK: - Persistence: Currency
@@ -133,6 +138,30 @@ final class SettingsViewModelTests: XCTestCase {
 
         XCTAssertFalse(vm.goalMilestonesEnabled,
                        "Goal milestones state should be restored from UserDefaults")
+    }
+
+    // MARK: - Persistence: Haptic Feedback
+
+    @MainActor
+    func testHapticFeedbackTogglePersists() {
+        let vm = makeViewModel()
+
+        vm.hapticFeedbackEnabled = false
+
+        XCTAssertFalse(
+            testDefaults.bool(forKey: HapticFeedbackPreferences.key),
+            "Haptic feedback toggle should be written to UserDefaults"
+        )
+    }
+
+    @MainActor
+    func testHapticFeedbackRestoredFromUserDefaults() {
+        testDefaults.set(false, forKey: HapticFeedbackPreferences.key)
+
+        let vm = makeViewModel()
+
+        XCTAssertFalse(vm.hapticFeedbackEnabled,
+                       "Haptic feedback state should be restored from UserDefaults")
     }
 
     // MARK: - Export: JSON

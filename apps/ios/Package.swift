@@ -74,6 +74,7 @@ let package = Package(
                 "BalanceView.swift",
                 "RecentTransactionsView.swift",
                 "BudgetStatusView.swift",
+                "Haptics/WatchHapticFeedback.swift",
                 "ComplicationProvider.swift",
                 "BudgetComplicationProvider.swift",
                 "SpendingComplicationProvider.swift",
