@@ -60,9 +60,9 @@ class GoalProgressWidget : GlanceAppWidget() {
         // TODO(#1296): Read real data from repository once wired.
         val widgetData = WidgetGoalData(
             goalName = "No goals yet",
-            currentFormatted = "$0.00",
-            targetFormatted = "$0.00",
-            remainingFormatted = "$0.00",
+            currentFormatted = WidgetPrivacyFormatter.formatAmount(0),
+            targetFormatted = WidgetPrivacyFormatter.formatAmount(0),
+            remainingFormatted = WidgetPrivacyFormatter.formatAmount(0),
             progressPercent = 0,
             totalGoals = 0,
             lastUpdated = "Just now",

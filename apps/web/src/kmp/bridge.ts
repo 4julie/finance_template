@@ -187,6 +187,7 @@ export interface Category extends SyncMetadata {
   readonly isIncome: boolean;
   readonly isSystem: boolean;
   readonly sortOrder: number;
+  readonly isBiometricProtected?: boolean;
 }
 
 /** Maps to KMP `com.finance.models.User`. */

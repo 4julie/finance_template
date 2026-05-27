@@ -34,8 +34,11 @@ final class BiometricCategoryViewModel {
     /// Set of category IDs currently protected.
     var protectedIds: Set<String> = []
 
-    /// Set of category IDs that have been unlocked this session.
+    /// Set of category IDs that have been unlocked for the fresh-auth cache window.
     var unlockedIds: Set<String> = []
+
+    private var unlockedUntilByCategory: [String: Date] = [:]
+    private let freshAuthCacheDuration: TimeInterval = 30
 
     /// Whether biometric auth is available on this device.
     var isBiometricAvailable = false
@@ -54,7 +57,7 @@ final class BiometricCategoryViewModel {
 
     /// Returns whether a category's transactions should be visible.
     func isVisible(categoryId: String) -> Bool {
-        !protectedIds.contains(categoryId) || unlockedIds.contains(categoryId)
+        !protectedIds.contains(categoryId) || hasFreshUnlock(categoryId)
     }
 
     /// Returns whether a category is currently protected.
@@ -105,41 +108,36 @@ final class BiometricCategoryViewModel {
     /// - When protecting: adds the category to the protected set.
     /// - When unprotecting: requires biometric auth first, then removes.
     func toggleProtection(for categoryId: String) async {
-        if protectedIds.contains(categoryId) {
-            // Unprotecting requires authentication
-            do {
-                isAuthenticating = true
-                try await biometricManager.authenticate(
-                    reason: String(localized: "Authenticate to remove category protection")
-                )
-                isAuthenticating = false
+        let currentlyProtected = protectedIds.contains(categoryId)
+        do {
+            isAuthenticating = true
+            let authReason: String
+            if currentlyProtected {
+                authReason = String(localized: "Authenticate to remove category protection")
+            } else {
+                authReason = String(localized: "Authenticate to protect this category")
+            }
+            try await biometricManager.authenticate(reason: authReason)
+            isAuthenticating = false
 
+            if currentlyProtected {
                 try protectedService.unprotectCategory(id: categoryId)
                 protectedIds.remove(categoryId)
                 unlockedIds.remove(categoryId)
-
+                unlockedUntilByCategory.removeValue(forKey: categoryId)
                 Self.logger.info("Unprotected category \(categoryId, privacy: .private(mask: .hash))")
-            } catch {
-                isAuthenticating = false
-                if case BiometricError.cancelled = error { return }
-                errorMessage = String(localized: "Authentication failed. Category remains protected.")
-                Self.logger.error(
-                    "Unprotect failed: \(error.localizedDescription, privacy: .public)"
-                )
-            }
-        } else {
-            // Protecting — no auth required (user is actively choosing to protect)
-            do {
+            } else {
                 try protectedService.protectCategory(id: categoryId)
                 protectedIds.insert(categoryId)
-
                 Self.logger.info("Protected category \(categoryId, privacy: .private(mask: .hash))")
-            } catch {
-                errorMessage = String(localized: "Failed to protect category.")
-                Self.logger.error(
-                    "Protect failed: \(error.localizedDescription, privacy: .public)"
-                )
             }
+        } catch {
+            isAuthenticating = false
+            if case BiometricError.cancelled = error { return }
+            errorMessage = String(localized: "Fresh authentication is required to change category protection.")
+            Self.logger.error(
+                "Protection toggle failed: \(error.localizedDescription, privacy: .public)"
+            )
         }
     }
 
@@ -151,7 +149,7 @@ final class BiometricCategoryViewModel {
     /// session. Re-locking happens when the app enters the background.
     func unlockCategory(_ categoryId: String) async -> Bool {
         guard protectedIds.contains(categoryId) else { return true }
-        guard !unlockedIds.contains(categoryId) else { return true }
+        guard !hasFreshUnlock(categoryId) else { return true }
 
         do {
             isAuthenticating = true
@@ -161,6 +159,7 @@ final class BiometricCategoryViewModel {
             isAuthenticating = false
 
             unlockedIds.insert(categoryId)
+            unlockedUntilByCategory[categoryId] = Date().addingTimeInterval(freshAuthCacheDuration)
             Self.logger.info(
                 "Unlocked protected category for session: \(categoryId, privacy: .private(mask: .hash))"
             )
@@ -176,9 +175,26 @@ final class BiometricCategoryViewModel {
         }
     }
 
+    private func hasFreshUnlock(_ categoryId: String) -> Bool {
+        guard let expiresAt = unlockedUntilByCategory[categoryId] else {
+            unlockedIds.remove(categoryId)
+            return false
+        }
+
+        if Date() < expiresAt {
+            unlockedIds.insert(categoryId)
+            return true
+        }
+
+        unlockedIds.remove(categoryId)
+        unlockedUntilByCategory.removeValue(forKey: categoryId)
+        return false
+    }
+
     /// Re-locks all unlocked categories (called on background transition).
     func relockAll() {
         unlockedIds.removeAll()
+        unlockedUntilByCategory.removeAll()
         Self.logger.debug("Re-locked all protected categories")
     }
 }

@@ -64,8 +64,8 @@ class BalanceSummaryWidget : GlanceAppWidget() {
         // TODO(#1296): Read real data from repository once SQLDelight is wired.
         // For now, use placeholder data to validate the widget layout.
         val widgetData = WidgetBalanceData(
-            netWorth = "$0.00",
-            todaySpending = "$0.00",
+            netWorth = WidgetPrivacyFormatter.formatAmount(0),
+            todaySpending = WidgetPrivacyFormatter.formatAmount(0),
             accountCount = 0,
             lastUpdated = "Just now",
         )

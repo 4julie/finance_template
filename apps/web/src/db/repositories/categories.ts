@@ -21,6 +21,7 @@ const CATEGORY_COLUMNS = [
   'is_income',
   'is_system',
   'sort_order',
+  'is_biometric_protected',
   'created_at',
   'updated_at',
   'deleted_at',
@@ -40,6 +41,7 @@ export interface CreateCategoryInput {
   isIncome?: boolean;
   isSystem?: boolean;
   sortOrder?: number;
+  isBiometricProtected?: boolean;
 }
 
 /** Input used when updating an existing category record. */
@@ -52,6 +54,7 @@ export interface UpdateCategoryInput {
   isIncome?: boolean;
   isSystem?: boolean;
   sortOrder?: number;
+  isBiometricProtected?: boolean;
 }
 
 function mapCategory(row: Row): Category {
@@ -65,6 +68,7 @@ function mapCategory(row: Row): Category {
     isIncome: toBoolean(row.is_income),
     isSystem: toBoolean(row.is_system),
     sortOrder: requireNumber(row.sort_order, 'category.sort_order'),
+    isBiometricProtected: toBoolean(row.is_biometric_protected),
     ...mapSyncMetadata(row),
   };
 }
@@ -98,13 +102,14 @@ export function createCategory(db: SqliteDb, input: CreateCategoryInput): Catego
       is_income,
       is_system,
       sort_order,
+      is_biometric_protected,
       created_at,
       updated_at,
       deleted_at,
       sync_version,
       is_synced
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
       ${SQLITE_NOW_EXPRESSION},
       ${SQLITE_NOW_EXPRESSION},
       NULL,
@@ -121,6 +126,7 @@ export function createCategory(db: SqliteDb, input: CreateCategoryInput): Catego
       input.isIncome ? 1 : 0,
       input.isSystem ? 1 : 0,
       input.sortOrder ?? 0,
+      input.isBiometricProtected ? 1 : 0,
     ],
   );
 
@@ -152,6 +158,7 @@ export function updateCategory(
     isIncome: updates.isIncome ?? existingCategory.isIncome,
     isSystem: updates.isSystem ?? existingCategory.isSystem,
     sortOrder: updates.sortOrder ?? existingCategory.sortOrder,
+    isBiometricProtected: updates.isBiometricProtected ?? existingCategory.isBiometricProtected,
   };
 
   execute(
@@ -165,6 +172,7 @@ export function updateCategory(
             is_income = ?,
             is_system = ?,
             sort_order = ?,
+            is_biometric_protected = ?,
             updated_at = ${SQLITE_NOW_EXPRESSION},
             sync_version = 1,
             is_synced = 0
@@ -179,6 +187,7 @@ export function updateCategory(
       mergedCategory.isIncome ? 1 : 0,
       mergedCategory.isSystem ? 1 : 0,
       mergedCategory.sortOrder,
+      mergedCategory.isBiometricProtected ? 1 : 0,
       categoryId,
     ],
   );

@@ -67,8 +67,8 @@ class BudgetSummaryWidget : GlanceAppWidget() {
             onTrack = 0,
             warning = 0,
             overBudget = 0,
-            totalSpentFormatted = "$0.00",
-            totalBudgetedFormatted = "$0.00",
+            totalSpentFormatted = WidgetPrivacyFormatter.formatAmount(0),
+            totalBudgetedFormatted = WidgetPrivacyFormatter.formatAmount(0),
             lastUpdated = "Just now",
         )
 

@@ -55,8 +55,8 @@ class SqlDelightCategoryRepository(
             entity.id.value, entity.householdId.value, entity.ownerId.value,
             entity.name, entity.icon, entity.color, entity.parentId?.value,
             if (entity.isIncome) 1L else 0L, if (entity.isSystem) 1L else 0L,
-            entity.sortOrder.toLong(), entity.createdAt.toString(),
-            entity.updatedAt.toString(), entity.syncVersion, 0L,
+            entity.sortOrder.toLong(), if (entity.isBiometricProtected) 1L else 0L,
+            entity.createdAt.toString(), entity.updatedAt.toString(), entity.syncVersion, 0L,
         )
     }
 
@@ -65,7 +65,8 @@ class SqlDelightCategoryRepository(
         queries.update(
             entity.name, entity.icon, entity.color, entity.parentId?.value,
             if (entity.isIncome) 1L else 0L, entity.sortOrder.toLong(),
-            now, entity.syncVersion + 1, 0L, entity.id.value,
+            if (entity.isBiometricProtected) 1L else 0L, now, entity.syncVersion + 1, 0L,
+            entity.id.value,
         )
     }
 
@@ -86,11 +87,11 @@ class SqlDelightCategoryRepository(
     private fun mapRow(
         id: String, householdId: String, ownerId: String, name: String,
         icon: String?, color: String?, parentId: String?, isIncome: Long,
-        isSystem: Long, sortOrder: Long, createdAt: String, updatedAt: String,
-        deletedAt: String?, syncVersion: Long, isSynced: Long,
+        isSystem: Long, sortOrder: Long, isBiometricProtected: Long,
+        createdAt: String, updatedAt: String, deletedAt: String?, syncVersion: Long, isSynced: Long,
     ): Category = EntityMappers.mapCategory(
         id, householdId, ownerId, name, icon, color, parentId,
-        isIncome, isSystem, sortOrder, createdAt, updatedAt,
-        deletedAt, syncVersion, isSynced,
+        isIncome, isSystem, sortOrder, isBiometricProtected,
+        createdAt, updatedAt, deletedAt, syncVersion, isSynced,
     )
 }

@@ -21,6 +21,7 @@ import {
   useState,
 } from 'react';
 import type { FC, ReactNode } from 'react';
+import { formatAmount, MaskingMode } from './ui/privacy';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -170,16 +171,13 @@ export function formatAmountWithSettings(
   const absAmountInCents = Math.abs(amountInCents);
   const absValue = absAmountInCents / 100 || 0;
 
-  const formatter = new Intl.NumberFormat(locale, {
-    style: 'currency',
+  const formatted = formatAmount(Math.round(absValue * 100), MaskingMode.Visible, locale, {
     currency,
-    currencyDisplay: settings.currencyDisplay,
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
     signDisplay: 'never',
+    currencyDisplay: settings.currencyDisplay,
   });
-
-  const formatted = formatter.format(absValue);
 
   if (!isNegative) {
     return formatted;

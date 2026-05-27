@@ -11,6 +11,7 @@
 import { type FC, useCallback, useEffect, useId, useRef } from 'react';
 import * as d3 from 'd3';
 import { CHART_COLORS, buildChartDescription, formatChartCurrency } from './chart-palette';
+import { useEffectiveMaskingMode } from '../../contexts/PrivacyModeContext';
 
 export interface CategorySlice {
   name: string;
@@ -34,11 +35,13 @@ export const CategoryPieChart: FC<CategoryPieChartProps> = ({
   const chartId = useId();
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const maskingMode = useEffectiveMaskingMode();
   const total = data.reduce((sum, d) => sum + d.value, 0);
   const description = buildChartDescription(
     'Pie chart',
     data.map((d) => ({ label: d.name, value: d.value })),
     currency,
+    maskingMode,
   );
   const reducedMotion =
     typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -70,7 +73,7 @@ export const CategoryPieChart: FC<CategoryPieChartProps> = ({
       .attr(
         'aria-label',
         (d) =>
-          `${d.data.name}: ${formatChartCurrency(d.data.value, currency)} (${((d.data.value / total) * 100).toFixed(1)}%)`,
+          `${d.data.name}: ${formatChartCurrency(d.data.value, currency, 'en-US', maskingMode)} (${((d.data.value / total) * 100).toFixed(1)}%)`,
       )
       .attr('fill', (_d, i) => CHART_COLORS[i % CHART_COLORS.length])
       .attr('stroke', 'var(--semantic-background-primary, #FFFFFF)')
@@ -99,7 +102,7 @@ export const CategoryPieChart: FC<CategoryPieChartProps> = ({
           return (t: number) => arc(i(t)) ?? '';
         });
     }
-  }, [data, currency, width, height, reducedMotion, total]);
+  }, [data, currency, width, height, reducedMotion, total, maskingMode]);
 
   useEffect(() => {
     renderChart();
@@ -157,7 +160,7 @@ export const CategoryPieChart: FC<CategoryPieChartProps> = ({
                 />
                 <span className="pie-chart-legend__name">{slice.name}</span>
                 <span className="pie-chart-legend__value">
-                  {formatChartCurrency(slice.value, currency)} ({percent}%)
+                  {formatChartCurrency(slice.value, currency, 'en-US', maskingMode)} ({percent}%)
                 </span>
               </li>
             );

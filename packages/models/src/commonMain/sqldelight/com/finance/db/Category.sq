@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS category (
     is_income INTEGER NOT NULL DEFAULT 0,
     is_system INTEGER NOT NULL DEFAULT 0,
     sort_order INTEGER NOT NULL DEFAULT 0,
+    is_biometric_protected INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     deleted_at TEXT,
@@ -54,8 +55,8 @@ selectExpenseCategories:
 SELECT * FROM category WHERE household_id = ? AND is_income = 0 AND deleted_at IS NULL ORDER BY sort_order ASC;
 
 insert:
-INSERT INTO category (id, household_id, owner_id, name, icon, color, parent_id, is_income, is_system, sort_order, created_at, updated_at, sync_version, is_synced)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO category (id, household_id, owner_id, name, icon, color, parent_id, is_income, is_system, sort_order, is_biometric_protected, created_at, updated_at, sync_version, is_synced)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE category SET
@@ -65,6 +66,7 @@ UPDATE category SET
     parent_id = ?,
     is_income = ?,
     sort_order = ?,
+    is_biometric_protected = ?,
     updated_at = ?,
     sync_version = ?,
     is_synced = ?

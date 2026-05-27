@@ -3,12 +3,9 @@
 import React from 'react';
 
 import { formatCurrencyForScreenReader } from '../../lib/a11y';
-import { MASKED_AMOUNT, useIsPrivacyModeActive } from '../../contexts/PrivacyModeContext';
-import {
-  formatAmountWithSettings,
-  getAmountColor,
-  useMoneyDisplay,
-} from '../../lib/display-settings';
+import { useEffectiveMaskingMode, useIsPrivacyModeActive } from '../../contexts/PrivacyModeContext';
+import { getAmountColor, useMoneyDisplay } from '../../lib/display-settings';
+import { formatAmount, MaskingMode } from '../../lib/ui/privacy';
 
 export interface CurrencyDisplayProps {
   /** Amount in integer cents (e.g., 12345 = $123.45). */
@@ -64,13 +61,30 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
 }) => {
   const displaySettings = useMoneyDisplay();
   const isPrivacyMode = useIsPrivacyModeActive();
+  const maskingMode = useEffectiveMaskingMode();
 
-  // Format the visible text using the user's display preferences.
-  const formatted = formatAmountWithSettings(amount, displaySettings, {
+  // Format the visible text using the canonical privacy-aware formatter.
+  const baseFormatOptions = {
     currency,
-    locale,
+    minimumFractionDigits: displaySettings.showDecimals ? 2 : 0,
+    maximumFractionDigits: displaySettings.showDecimals ? 2 : 0,
+  } as const;
+  const formattedBase = formatAmount(amount, maskingMode, locale, {
+    ...baseFormatOptions,
     signDisplay: showSign ? 'exceptZero' : 'auto',
   });
+  const formattedAbsolute = formatAmount(Math.abs(amount), MaskingMode.Visible, locale, {
+    ...baseFormatOptions,
+    signDisplay: 'never',
+  });
+  const formatted =
+    maskingMode === MaskingMode.Visible && amount < 0
+      ? displaySettings.negativeFormat === 'parentheses'
+        ? `(${formattedAbsolute})`
+        : displaySettings.negativeFormat === 'color-only'
+          ? formattedAbsolute
+          : formattedBase
+      : formattedBase;
 
   // Build CSS class for color (legacy class-based approach still supported).
   let colorClass = '';
@@ -83,17 +97,6 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   // Apply user-chosen color via inline style when colorize is enabled.
   const colorStyle: React.CSSProperties | undefined =
     colorize && !isPrivacyMode ? { color: getAmountColor(amount, displaySettings) } : undefined;
-
-  // When privacy mode is active, mask both the display and the label.
-  const currencySymbol =
-    new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency,
-    })
-      .formatToParts(0)
-      .find((part) => part.type === 'currency')?.value ?? '$';
-
-  const displayText = isPrivacyMode ? `${currencySymbol}${MASKED_AMOUNT}` : formatted;
 
   // The accessible label always uses the standard format with explicit
   // "negative" prefix and optional context so screen readers convey
@@ -108,7 +111,7 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
       aria-label={label}
       style={colorStyle}
     >
-      {displayText}
+      {formatted}
     </span>
   );
 };
