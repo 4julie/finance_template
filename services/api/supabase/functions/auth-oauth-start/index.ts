@@ -31,7 +31,7 @@ import { DEFAULT_POST_LOGIN_PATH, validateRedirectTo } from '../_shared/redirect
 
 const NO_STORE: HeadersInit = { 'Cache-Control': 'no-store', Pragma: 'no-cache' };
 
-Deno.serve(async (req) => {
+export const handler = async (req: Request): Promise<Response> => {
   const envError = validateEnv('auth-oauth-start', req);
   if (envError) return envError;
 
@@ -73,4 +73,6 @@ Deno.serve(async (req) => {
     buildSetCookie(req, COOKIE_POST_LOGIN, postLoginPath, { maxAgeSeconds: 300 }),
   );
   return new Response(null, { status: 302, headers });
-});
+};
+
+if (import.meta.main) Deno.serve(handler);
