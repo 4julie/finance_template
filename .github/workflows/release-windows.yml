@@ -31,11 +31,14 @@ on:
 
 concurrency:
   group: release-windows-${{ github.ref }}
-  cancel-in-progress: false # Never cancel release builds
+  cancel-in-progress: false # Never cancel release builds — every tag is a distinct artifact.
 
 permissions:
   contents: write
   actions: read
+
+env:
+  HAS_SIGNING_SECRETS: ${{ secrets.WINDOWS_SIGNING_CERT_BASE64 != '' && secrets.WINDOWS_CERT_PASSWORD != '' }}
 
 jobs:
   # ── Gate: require approval for store releases ───────────────────
@@ -79,8 +82,17 @@ jobs:
         id: version
         shell: bash
         run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          VERSION=$(echo "$TAG" | sed -E 's/^v//;s/-windows$//')
+          # Tag pushes -> strip refs/tags/ and any -windows suffix.
+          # workflow_dispatch from a branch -> fall back to branch-name + short SHA so
+          # downstream steps never see "refs/heads/main" as the version string.
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+            VERSION=$(echo "$TAG" | sed -E 's/^v//;s/-windows$//')
+          else
+            BRANCH="${GITHUB_REF#refs/heads/}"
+            SHA="${GITHUB_SHA::7}"
+            VERSION="${BRANCH}-${SHA}"
+          fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "📦 Version: ${VERSION}"
 
@@ -89,42 +101,50 @@ jobs:
 
       - name: Run tests
         run: ./gradlew :apps:windows:test --parallel --build-cache --stacktrace
-        continue-on-error: true
+        # Tests now gate the release. Previously continue-on-error swallowed failures.
 
-      - name: Package MSIX
+      - name: Package MSI
         run: ./gradlew :apps:windows:packageMsi --parallel --build-cache --stacktrace
 
       - name: Package distributable
         run: ./gradlew :apps:windows:createDistributable --parallel --build-cache --stacktrace
         continue-on-error: true
 
-      - name: Sign MSIX package
-        if: inputs.channel == 'store'
+      - name: Sign MSI
+        if: env.HAS_SIGNING_SECRETS == 'true'
         shell: pwsh
         run: |
           # Decode signing certificate from secret
           $certBytes = [System.Convert]::FromBase64String("${{ secrets.WINDOWS_SIGNING_CERT_BASE64 }}")
           $certPath = Join-Path $env:RUNNER_TEMP "signing-cert.pfx"
           [System.IO.File]::WriteAllBytes($certPath, $certBytes)
-
-          # Find MSIX files and sign them
-          $msixFiles = Get-ChildItem -Path "apps/windows/build" -Filter "*.msi" -Recurse
-          foreach ($file in $msixFiles) {
-            Write-Host "Signing: $($file.FullName)"
-            & signtool sign /f $certPath /p "${{ secrets.WINDOWS_CERT_PASSWORD }}" /fd sha256 /tr http://timestamp.digicert.com /td sha256 $file.FullName
+          try {
+              # Sign exactly the MSI(s) jpackage produced — narrowed from the prior
+              # recursive search over apps/windows/build to avoid catching stale or
+              # incidental MSI files left behind by earlier builds.
+              $msiFiles = Get-ChildItem -Path "apps/windows/build/compose/binaries/main/msi" -Filter "*.msi"
+              if (-not $msiFiles) { throw "No MSI found in expected output dir." }
+              foreach ($file in $msiFiles) {
+                  Write-Host "Signing: $($file.FullName)"
+                  & signtool sign /f $certPath /p "${{ secrets.WINDOWS_CERT_PASSWORD }}" `
+                      /fd sha256 /tr http://timestamp.digicert.com /td sha256 $file.FullName
+                  if ($LASTEXITCODE -ne 0) { throw "signtool exit $LASTEXITCODE on $($file.FullName)" }
+              }
+          } finally {
+              Remove-Item $certPath -Force -ErrorAction SilentlyContinue
           }
 
-          # Clean up certificate
-          Remove-Item $certPath -Force
+      - name: Warn if signing skipped
+        if: env.HAS_SIGNING_SECRETS != 'true'
+        run: |
+          echo "::warning::WINDOWS_SIGNING_CERT_BASE64 or WINDOWS_CERT_PASSWORD secret is empty — release MSI published unsigned."
 
-      - name: Upload MSIX artifact
+      - name: Upload MSI artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: windows-release-msix
-          path: |
-            apps/windows/build/compose/binaries/**/*.msi
-            apps/windows/build/compose/binaries/**/*.msix
-          if-no-files-found: warn
+          name: windows-release-msi
+          path: apps/windows/build/compose/binaries/main/msi/*.msi
+          if-no-files-found: error
           retention-days: 30
 
       - name: Upload distributable
@@ -186,7 +206,7 @@ jobs:
 
           echo "" >> release-notes.md
           echo "### Artifacts" >> release-notes.md
-          echo "- MSIX installer (for Microsoft Store / sideloading)" >> release-notes.md
+          echo "- MSI installer (signed when secrets are configured)" >> release-notes.md
           echo "- Standalone distributable" >> release-notes.md
 
       - name: Create GitHub Release
