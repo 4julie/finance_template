@@ -79,6 +79,10 @@ obj/
 *.pfx
 *.jks
 *.keystore
+
+# Local Windows dev signing cert exports (auto-generated per-machine)
+tools/windows/dev-cert/*
+!tools/windows/dev-cert/.gitkeep
 secrets/
 .secrets/
 keystore.properties
