@@ -72,6 +72,20 @@ compose.desktop {
 
             // ── Application metadata for Store submission ──
             appResourcesRootDir.set(project.layout.projectDirectory.dir("packaging/resources"))
+
+            // ── JRE modules required at runtime ──
+            // The default jpackage runtime image only includes java.base / java.desktop
+            // and a few others. SQLDelight's JDBC SQLite driver requires java.sql,
+            // and several common JVM libraries (Netty, kotlinx-coroutines internals,
+            // OkHttp's SPI lookups, JNDI-backed TLS configuration) require the modules
+            // below. Without these, the app crashes on startup with
+            // NoClassDefFoundError before the main window ever appears (see #1890).
+            modules(
+                "java.sql",        // SQLDelight JDBC SQLite driver — java.sql.DriverManager
+                "java.naming",     // OkHttp / TLS SPI lookups (defensive)
+                "java.management", // JMX hooks used by some Kotlin/Ktor internals (defensive)
+                "jdk.unsupported", // sun.misc.Unsafe — Kotlin coroutines, Netty, etc.
+            )
         }
     }
 }
