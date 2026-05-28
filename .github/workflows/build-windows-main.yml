@@ -96,13 +96,29 @@ jobs:
         if: env.HAS_SIGNING_SECRETS == 'true'
         shell: pwsh
         run: |
+          # Locate signtool from the Windows SDK — GitHub-hosted windows-latest
+          # runners do NOT have signtool.exe on PATH, even though the SDK is
+          # installed. Mirrors tools/windows/build-local.ps1's Find-SignTool.
+          $sdkRoot = 'C:\Program Files (x86)\Windows Kits\10\bin'
+          $signtool = $null
+          if (Test-Path $sdkRoot) {
+              $signtool = Get-ChildItem -Path $sdkRoot -Directory |
+                  Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
+                  Sort-Object -Property { [version]$_.Name } -Descending |
+                  ForEach-Object { Join-Path $_.FullName 'x64\signtool.exe' } |
+                  Where-Object { Test-Path $_ } |
+                  Select-Object -First 1
+          }
+          if (-not $signtool) { throw "signtool.exe not found under $sdkRoot" }
+          Write-Host "Using signtool: $signtool"
+
           $certBytes = [System.Convert]::FromBase64String("${{ secrets.WINDOWS_SIGNING_CERT_BASE64 }}")
           $certPath = Join-Path $env:RUNNER_TEMP "signing-cert.pfx"
           [System.IO.File]::WriteAllBytes($certPath, $certBytes)
           try {
               # Sign both the versioned and stable copies (they're separate files on disk).
               foreach ($target in @("${{ steps.msi.outputs.versioned }}", "${{ steps.msi.outputs.stable }}")) {
-                  & signtool sign /f $certPath /p "${{ secrets.WINDOWS_CERT_PASSWORD }}" `
+                  & $signtool sign /f $certPath /p "${{ secrets.WINDOWS_CERT_PASSWORD }}" `
                       /fd sha256 /tr http://timestamp.digicert.com /td sha256 $target
                   if ($LASTEXITCODE -ne 0) { throw "signtool exit $LASTEXITCODE on $target" }
                   Write-Host "Signed: $target"
