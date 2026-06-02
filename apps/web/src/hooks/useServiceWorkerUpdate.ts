@@ -64,6 +64,7 @@ export function useServiceWorkerUpdate(): UseServiceWorkerUpdateResult {
         }
       })
       .catch((err) => {
+        // eslint-disable-next-line no-console -- dev visibility; SW errors are non-fatal
         console.error('[sw] registration failed', err);
         registrationRef.current = null;
         setUpdateAvailable(false);
