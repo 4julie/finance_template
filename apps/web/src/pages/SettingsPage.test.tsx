@@ -9,6 +9,19 @@ const offlineStatusMock = {
   isOffline: false,
   isOnline: true,
 };
+const { clearLocalAccountDataMock, householdImpactMock } = vi.hoisted(() => ({
+  clearLocalAccountDataMock: vi.fn<() => Promise<void>>(),
+  householdImpactMock: vi.fn(() => ({
+    soloOwnedHouseholds: 1,
+    memberHouseholds: 2,
+    pendingInvites: 3,
+  })),
+}));
+
+vi.mock('../lib/account/account-deletion', () => ({
+  clearLocalAccountData: clearLocalAccountDataMock,
+  getHouseholdDeletionImpact: householdImpactMock,
+}));
 
 vi.mock('../auth/auth-context', () => ({
   useAuth: () => ({
@@ -49,9 +62,12 @@ vi.mock('../hooks/useTheme', () => ({
 
 // Mock the GDPR components to avoid pulling in full consent logic
 vi.mock('../components/gdpr', () => ({
-  PrivacySettings: () => (
+  PrivacySettings: ({ onDeleteAccount }: { onDeleteAccount?: () => void }) => (
     <section aria-label="Privacy & Data">
       <div>Privacy Settings Mock</div>
+      <button type="button" onClick={onDeleteAccount}>
+        Delete My Account & Data
+      </button>
     </section>
   ),
   CrashReportingSettings: () => <div>Crash Reporting Settings Mock</div>,
@@ -141,6 +157,15 @@ describe('SettingsPage', () => {
     setThemeMock.mockReset();
     mockUpdateSettings.mockReset();
     mockResetSettings.mockReset();
+    clearLocalAccountDataMock.mockReset();
+    clearLocalAccountDataMock.mockResolvedValue(undefined);
+    householdImpactMock.mockClear();
+    householdImpactMock.mockReturnValue({
+      soloOwnedHouseholds: 1,
+      memberHouseholds: 2,
+      pendingInvites: 3,
+    });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
     logoutMock.mockResolvedValue(undefined);
     deleteAccountMock.mockResolvedValue(undefined);
     offlineStatusMock.isOffline = false;
@@ -228,6 +253,31 @@ describe('SettingsPage', () => {
     // "Data" and "Privacy & Data" sections both exist
     const dataRegions = screen.getAllByRole('region', { name: /data/i });
     expect(dataRegions.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('gates account deletion behind typed confirmation and shows household impact', async () => {
+    render(<SettingsPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: /delete my account & data/i }));
+
+    const dialog = await screen.findByRole('dialog', { name: /delete account and all data/i });
+    expect(dialog).toHaveTextContent('1 solo-owned household will be permanently deleted.');
+    expect(dialog).toHaveTextContent('2 households will keep existing; you will be removed');
+    expect(dialog).toHaveTextContent('3 pending invites will be revoked.');
+
+    const destructiveButton = screen.getByRole('button', { name: /yes, delete everything/i });
+    const cancelButton = screen.getByRole('button', { name: /cancel/i });
+
+    expect(destructiveButton).toBeDisabled();
+    expect(destructiveButton).toHaveClass('settings-account-delete__confirm-button--danger');
+    expect(cancelButton).toHaveClass('settings-account-delete__cancel-button--secondary');
+
+    fireEvent.change(screen.getByLabelText(/type delete to confirm/i), {
+      target: { value: 'DELETE' },
+    });
+
+    expect(destructiveButton).toBeEnabled();
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   describe('Display settings section', () => {

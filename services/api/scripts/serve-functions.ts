@@ -38,6 +38,7 @@ import { handler as authRefresh } from '../supabase/functions/auth-refresh/index
 import { handler as authLogout } from '../supabase/functions/auth-logout/index.ts';
 import { handler as authOAuthStart } from '../supabase/functions/auth-oauth-start/index.ts';
 import { handler as authOAuthCallback } from '../supabase/functions/auth-oauth-callback/index.ts';
+import { handler as accountDeleteHandler } from '../supabase/functions/account-delete/index.ts';
 
 type Handler = (req: Request) => Promise<Response>;
 
@@ -50,6 +51,7 @@ const routes: Record<string, Handler> = {
   'auth-logout': authLogout,
   'auth-oauth-start': authOAuthStart,
   'auth-oauth-callback': authOAuthCallback,
+  'account-delete': accountDeleteHandler,
 };
 
 async function dispatch(req: Request): Promise<Response> {

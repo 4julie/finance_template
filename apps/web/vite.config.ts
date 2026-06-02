@@ -163,6 +163,14 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/auth\//, '/auth-'),
       },
+      '/api/account': {
+        target: process.env.VITE_AUTH_PROXY_TARGET ?? 'http://localhost:54321/functions/v1',
+        changeOrigin: true,
+        rewrite: (path) =>
+          path
+            .replace(/^\/api\/account\/delete-account$/, '/account-delete')
+            .replace(/^\/api\/account\//, '/account-'),
+      },
     },
     headers: {
       // Strict CSP - no inline scripts, no eval
