@@ -28,6 +28,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/import/wizard': 'Import Wizard',
   '/import/receipt-ocr': 'Receipt OCR',
   '/privacy-dashboard': 'Privacy Dashboard',
+  '/categories': 'Categories',
 };
 
 /** Routes that are wrapped in AppLayout (authenticated main app pages). */
@@ -50,6 +51,7 @@ const AUTHENTICATED_ROUTES = new Set([
   '/import/wizard',
   '/import/receipt-ocr',
   '/privacy-dashboard',
+  '/categories',
 ]);
 
 /**

@@ -19,6 +19,7 @@ const Transactions = lazy(() => import('./pages/TransactionsPage'));
 const TransactionDetail = lazy(() => import('./pages/TransactionDetailPage'));
 const Budgets = lazy(() => import('./pages/BudgetsPage'));
 const BudgetDetail = lazy(() => import('./pages/BudgetDetailPage'));
+const Categories = lazy(() => import('./pages/CategoriesPage'));
 const Goals = lazy(() => import('./pages/GoalsPage'));
 const GoalDetail = lazy(() => import('./pages/GoalDetailPage'));
 const Import = lazy(() => import('./pages/ImportPage'));
@@ -235,6 +236,16 @@ export const AppRoutes: FC = () => (
         <AuthenticatedRoute>
           <RouteBoundary name="Budget Detail">
             <BudgetDetail />
+          </RouteBoundary>
+        </AuthenticatedRoute>
+      }
+    />
+    <Route
+      path="/categories"
+      element={
+        <AuthenticatedRoute>
+          <RouteBoundary name="Categories">
+            <Categories />
           </RouteBoundary>
         </AuthenticatedRoute>
       }
