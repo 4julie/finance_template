@@ -63,7 +63,8 @@ export function useServiceWorkerUpdate(): UseServiceWorkerUpdateResult {
           monitorRegistration(registration);
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('[sw] registration failed', err);
         registrationRef.current = null;
         setUpdateAvailable(false);
       });
