@@ -15,6 +15,7 @@ import { registerAppServiceWorker } from './sw/register';
 import './theme/tokens.css';
 import './styles/responsive.css';
 import './styles/responsive-layout.css';
+import './styles/navigation-chrome.css';
 import './styles/accessibility.css';
 import './styles/reduced-motion.css';
 import './styles/font-scaling.css';
