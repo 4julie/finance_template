@@ -109,8 +109,12 @@ jobs:
           # Install Vercel CLI
           npm i -g vercel@latest
 
-          # Deploy to preview with PR-specific alias
-          DEPLOY_URL=$(vercel deploy \
+          # Deploy to preview with PR-specific alias. Use a tempfile so we
+          # check the exit code separately from the URL parse — piping into
+          # `tail` previously swallowed Vercel failures silently.
+          set -o pipefail
+          DEPLOY_LOG=$(mktemp)
+          if ! vercel deploy \
             --token="$VERCEL_TOKEN" \
             --scope="$VERCEL_ORG_ID" \
             --yes \
@@ -118,7 +122,12 @@ jobs:
             --meta pr="${PR_NUM}" \
             --meta commit="${{ github.sha }}" \
             --meta branch="${{ github.head_ref }}" \
-            apps/web/dist 2>&1 | tail -1)
+            apps/web/dist >"$DEPLOY_LOG" 2>&1; then
+            echo "::error::Vercel preview deploy failed:"
+            cat "$DEPLOY_LOG"
+            exit 1
+          fi
+          DEPLOY_URL=$(tail -1 "$DEPLOY_LOG")
 
           # Set alias for predictable URL
           ALIAS_URL="finance-pr-${PR_NUM}.vercel.app"

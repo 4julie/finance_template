@@ -113,27 +113,122 @@ jobs:
 
       - name: Deploy to Vercel (staging)
         id: deploy
+        if: ${{ env.VERCEL_TOKEN != '' }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
+          # Fail loudly on errors and propagate exit codes through pipes so we
+          # don't swallow Vercel failures into the output URL.
+          set -euo pipefail
+
           # Install Vercel CLI
           npm i -g vercel@latest
 
-          # Deploy to staging (preview environment)
-          DEPLOY_URL=$(vercel deploy \
+          # Deploy to staging (preview environment). Use a tempfile for output
+          # so we can inspect failures, but still rely on the command's exit
+          # code rather than capturing stderr into DEPLOY_URL.
+          DEPLOY_LOG=$(mktemp)
+          if ! vercel deploy \
             --token="$VERCEL_TOKEN" \
             --scope="$VERCEL_ORG_ID" \
             --yes \
             --archive=tgz \
-            apps/web/dist 2>&1 | tail -1)
+            apps/web/dist >"$DEPLOY_LOG" 2>&1; then
+            echo "::error::Vercel deploy failed:"
+            cat "$DEPLOY_LOG"
+            exit 1
+          fi
 
+          DEPLOY_URL=$(tail -1 "$DEPLOY_LOG")
           echo "url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
-          echo "### 🌐 Web Staging Deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "### 🌐 Web Staging (Vercel) Deployed" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**URL:** $DEPLOY_URL" >> "$GITHUB_STEP_SUMMARY"
           echo "**Commit:** \`${{ needs.pre-deploy-checks.outputs.sha_short }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Skip notice — Vercel not configured
+        if: ${{ env.VERCEL_TOKEN == '' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          echo "::warning::VERCEL_TOKEN not set — skipping Vercel deploy. Web is served from the Azure VM via deploy-web-vm."
+          echo "### ⚠️ Vercel Staging Skipped" >> "$GITHUB_STEP_SUMMARY"
+
+  # ---------------------------------------------------------------------------
+  # Web (VM): Build apps/web/dist on the staging VM and let Caddy serve it
+  # ---------------------------------------------------------------------------
+  #
+  # The Azure VM runs Caddy with a bind mount of `apps/web/dist` → /srv/web
+  # (see deploy/docker-compose.yml). For Caddy to serve fresh bits, the VM
+  # filesystem path must be rebuilt — `git pull` alone does NOT do that.
+  # This job SSHes in and runs `npm ci && npm run build -w apps/web` so the
+  # bind-mounted directory is updated. No container restart needed.
+  deploy-web-vm:
+    name: Deploy Web (Azure VM)
+    needs: pre-deploy-checks
+    if: needs.pre-deploy-checks.outputs.web_changed == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Rebuild apps/web/dist on staging VM
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '~/finance' }}
+          SHA_SHORT: ${{ needs.pre-deploy-checks.outputs.sha_short }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$DEPLOY_HOST" ]; then
+            echo "::warning::DEPLOY_HOST not configured — skipping web VM rebuild"
+            echo "### ⚠️ Web Azure VM Skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "Configure DEPLOY_HOST, DEPLOY_SSH_KEY, and DEPLOY_USER secrets." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # Set up SSH key
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          # SSH in and rebuild. Each line is a separate command so an early
+          # failure aborts the build (set -e inside the heredoc).
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" bash <<'DEPLOY'
+            set -euo pipefail
+            cd ~/finance
+            echo "→ git pull origin main"
+            git pull --ff-only origin main
+            echo "→ npm ci (this can take a few minutes on first run)"
+            npm ci --no-audit --no-fund --silent
+            echo "→ build design tokens"
+            npm run build -w packages/design-tokens --silent
+            echo "→ build apps/web"
+            npm run build -w apps/web --silent
+            echo "→ verify dist"
+            test -f apps/web/dist/index.html
+            ls -la apps/web/dist | head -10
+          DEPLOY
+
+          echo "### 🌐 Web Azure VM Deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Host:** \`$DEPLOY_HOST\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Path:** \`$DEPLOY_PATH/apps/web/dist\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Commit:** \`$SHA_SHORT\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Served at:** https://finance.jrmoulckers.com" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean up SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
 
   # ---------------------------------------------------------------------------
   # Backend: Deploy Docker Compose services to staging
@@ -196,7 +291,7 @@ jobs:
   # ---------------------------------------------------------------------------
   notify:
     name: Deployment Summary
-    needs: [pre-deploy-checks, deploy-web, deploy-backend]
+    needs: [pre-deploy-checks, deploy-web, deploy-web-vm, deploy-backend]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -208,7 +303,8 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "| Component | Status |" >> "$GITHUB_STEP_SUMMARY"
           echo "|-----------|--------|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Web | ${{ needs.deploy-web.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Web (Vercel) | ${{ needs.deploy-web.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Web (Azure VM) | ${{ needs.deploy-web-vm.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Backend | ${{ needs.deploy-backend.result || 'skipped' }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Commit:** \`${{ needs.pre-deploy-checks.outputs.sha_short }}\`" >> "$GITHUB_STEP_SUMMARY"
