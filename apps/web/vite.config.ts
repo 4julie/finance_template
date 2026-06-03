@@ -83,9 +83,24 @@ function swPrecacheManifest(): Plugin {
   };
 }
 
+function allowServiceWorkerRootScope(): Plugin {
+  return {
+    name: 'allow-service-worker-root-scope',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url?.includes('/src/sw/service-worker.ts')) {
+          res.setHeader('Service-Worker-Allowed', '/');
+        }
+        next();
+      });
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), copySqlJsWasm(), swPrecacheManifest()],
+  plugins: [react(), copySqlJsWasm(), swPrecacheManifest(), allowServiceWorkerRootScope()],
 
   resolve: {
     alias: {

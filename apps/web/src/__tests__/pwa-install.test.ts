@@ -10,7 +10,7 @@
  * - Meta tags for PWA (theme-color)
  */
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -74,6 +74,14 @@ describe('PWA manifest.json (#1329)', () => {
     }
   });
 
+  it('all referenced icon files exist on disk', () => {
+    const icons = manifest.icons as Array<{ src: string }>;
+    for (const icon of icons) {
+      const iconPath = resolve(__dirname, '../../public', icon.src.replace(/^\//, ''));
+      expect(existsSync(iconPath), `icon ${icon.src} missing`).toBe(true);
+    }
+  });
+
   it('has a description field', () => {
     expect(manifest.description).toBeDefined();
     expect(typeof manifest.description).toBe('string');
@@ -94,6 +102,10 @@ describe('PWA meta tags in index.html (#1329)', () => {
 
   it('has theme-color meta tag', () => {
     expect(html).toMatch(/<meta\s+name="theme-color"\s+content="[^"]+"/);
+  });
+
+  it('links the web app manifest', () => {
+    expect(html).toMatch(/<link\s+rel="manifest"\s+href="\/manifest\.json"\s*\/>/);
   });
 
   it('has viewport meta tag with width=device-width', () => {
