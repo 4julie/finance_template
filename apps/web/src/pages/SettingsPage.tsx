@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { useAuth } from '../auth/auth-context';
 import { CurrencyDisplay } from '../components/common/CurrencyDisplay';
@@ -28,11 +28,17 @@ import {
   MOOD_TAGS_SYNC_ENABLED_KEY,
   setMoodTagPreference,
 } from '../lib/mood-tags';
+import {
+  clearLocalAccountData,
+  getHouseholdDeletionImpact,
+  type HouseholdDeletionImpact,
+} from '../lib/account/account-deletion';
 
 const APP_VERSION = '0.1.0';
 const CURRENCY_STORAGE_KEY = 'finance-currency';
 const NOTIFICATIONS_STORAGE_KEY = 'finance-notifications';
 const MONITORING_CONSENT_STORAGE_KEY = 'finance-monitoring-consent';
+const ACCOUNT_DELETED_FLASH_KEY = 'finance:account-deleted-flash';
 
 type CurrencyPreference = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'JPY';
 
@@ -118,7 +124,6 @@ export const SettingsPage: React.FC = () => {
     isAuthenticated,
     isLoading,
     logout,
-    deleteAccount,
     user,
     registerNewPasskey,
     webAuthnSupported,
@@ -129,6 +134,15 @@ export const SettingsPage: React.FC = () => {
   const db = useSettingsDatabase();
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false);
   const [passkeyMessage, setPasskeyMessage] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [householdImpact, setHouseholdImpact] = useState<HouseholdDeletionImpact>({
+    soloOwnedHouseholds: 0,
+    memberHouseholds: 0,
+    pendingInvites: 0,
+  });
 
   const handleThemeChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -256,6 +270,59 @@ export const SettingsPage: React.FC = () => {
 
     await logout();
   }, [isAuthenticated, isLoading, logout]);
+
+  const openDeleteModal = useCallback(() => {
+    setDeleteConfirmationText('');
+    setDeleteError(null);
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  const closeDeleteModal = useCallback(() => {
+    if (isDeletingAccount) return;
+    setIsDeleteModalOpen(false);
+    setDeleteConfirmationText('');
+    setDeleteError(null);
+  }, [isDeletingAccount]);
+
+  useEffect(() => {
+    if (!isDeleteModalOpen) return;
+    try {
+      setHouseholdImpact(getHouseholdDeletionImpact(db, user?.id));
+    } catch {
+      setHouseholdImpact({ soloOwnedHouseholds: 0, memberHouseholds: 0, pendingInvites: 0 });
+    }
+  }, [db, isDeleteModalOpen, user?.id]);
+
+  const handleAccountDelete = useCallback(async () => {
+    if (!isAuthenticated || deleteConfirmationText !== 'DELETE' || isDeletingAccount) {
+      return;
+    }
+
+    setDeleteError(null);
+    setIsDeletingAccount(true);
+
+    try {
+      const response = await fetch('/api/account/delete-account', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation: 'DELETE' }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Account deletion failed.');
+      }
+
+      await clearLocalAccountData(db);
+      localStorage.clear();
+      sessionStorage.clear();
+      sessionStorage.setItem(ACCOUNT_DELETED_FLASH_KEY, 'Your account has been deleted.');
+      window.location.assign('/login?accountDeleted=1');
+    } catch {
+      setDeleteError("Couldn't delete account — please try again or contact support.");
+      setIsDeletingAccount(false);
+    }
+  }, [db, deleteConfirmationText, isAuthenticated, isDeletingAccount]);
 
   return (
     <>
@@ -705,11 +772,120 @@ export const SettingsPage: React.FC = () => {
           ) as HTMLButtonElement | null;
           exportBtn?.click();
         }}
-        onDeleteAccount={async () => {
+        onDeleteAccount={() => {
           if (!isAuthenticated) return;
-          await deleteAccount();
+          openDeleteModal();
         }}
       />
+      {isDeleteModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-account-title"
+          aria-describedby="delete-account-description"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            display: 'grid',
+            placeItems: 'center',
+            padding: 'var(--spacing-4, 1rem)',
+            background: 'rgba(15, 23, 42, 0.72)',
+          }}
+        >
+          <div
+            style={{
+              width: 'min(100%, 36rem)',
+              borderRadius: 'var(--radius-lg, 1rem)',
+              padding: 'var(--spacing-6, 1.5rem)',
+              background: 'var(--semantic-surface-primary, var(--color-surface))',
+              boxShadow: 'var(--shadow-xl, 0 24px 64px rgba(0, 0, 0, 0.28))',
+            }}
+          >
+            <h3 id="delete-account-title" className="settings-group__title">
+              Delete account and all data
+            </h3>
+            <p id="delete-account-description" className="settings-item__description">
+              This permanently deletes your account, personal finance data, passkeys, connected bank
+              links, audit entries, and authentication record. This cannot be undone.
+            </p>
+            <ul aria-label="Household deletion impact" className="settings-item__description">
+              <li>
+                {householdImpact.soloOwnedHouseholds} solo-owned household
+                {householdImpact.soloOwnedHouseholds === 1 ? '' : 's'} will be permanently deleted.
+              </li>
+              <li>
+                {householdImpact.memberHouseholds} household
+                {householdImpact.memberHouseholds === 1 ? '' : 's'} will keep existing; you will be
+                removed and ownership transfers if needed.
+              </li>
+              <li>
+                {householdImpact.pendingInvites} pending invite
+                {householdImpact.pendingInvites === 1 ? '' : 's'} will be revoked.
+              </li>
+            </ul>
+            <label className="settings-item__label" htmlFor="delete-account-confirmation">
+              Type DELETE to confirm
+            </label>
+            <input
+              id="delete-account-confirmation"
+              className="settings-item__input"
+              value={deleteConfirmationText}
+              onChange={(event) => setDeleteConfirmationText(event.target.value)}
+              disabled={isDeletingAccount}
+              autoComplete="off"
+            />
+            {deleteError && (
+              <p role="alert" style={{ color: 'var(--semantic-danger, #dc2626)' }}>
+                {deleteError}
+              </p>
+            )}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 'var(--spacing-3, 0.75rem)',
+                marginTop: 'var(--spacing-5, 1.25rem)',
+              }}
+            >
+              <button
+                type="button"
+                className="settings-account-delete__cancel-button settings-account-delete__cancel-button--secondary"
+                onClick={closeDeleteModal}
+                disabled={isDeletingAccount}
+                style={{
+                  border: '1px solid var(--semantic-border-primary, #d1d5db)',
+                  background: 'transparent',
+                  color: 'var(--semantic-text-secondary, #475569)',
+                  padding: '0.625rem 1rem',
+                  borderRadius: 'var(--radius-md, 0.5rem)',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="settings-account-delete__confirm-button settings-account-delete__confirm-button--danger"
+                onClick={() => {
+                  void handleAccountDelete();
+                }}
+                disabled={deleteConfirmationText !== 'DELETE' || isDeletingAccount}
+                style={{
+                  border: '1px solid var(--semantic-danger, #dc2626)',
+                  background: 'var(--semantic-danger, #dc2626)',
+                  color: '#fff',
+                  fontWeight: 700,
+                  padding: '0.625rem 1rem',
+                  borderRadius: 'var(--radius-md, 0.5rem)',
+                  opacity: deleteConfirmationText !== 'DELETE' || isDeletingAccount ? 0.55 : 1,
+                }}
+              >
+                {isDeletingAccount ? 'Deleting…' : 'Yes, Delete Everything'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <CrashReportingSettings enabled={monitoringEnabled} onToggle={handleMonitoringToggle} />
     </>
   );
