@@ -7,6 +7,7 @@ export { TransactionsPage } from './TransactionsPage';
 export { TransactionDetailPage } from './TransactionDetailPage';
 export { BudgetsPage } from './BudgetsPage';
 export { BudgetDetailPage } from './BudgetDetailPage';
+export { CategoriesPage } from './CategoriesPage';
 export { GoalsPage } from './GoalsPage';
 export { GoalDetailPage } from './GoalDetailPage';
 export { SettingsPage } from './SettingsPage';

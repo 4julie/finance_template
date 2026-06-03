@@ -95,6 +95,15 @@ export const NAV_ITEMS: NavItem[] = [
       </svg>
     ),
   },
+  {
+    path: '/categories',
+    label: 'Categories',
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M7 7h.01M3 11.172V5a2 2 0 012-2h6.172a2 2 0 011.414.586l7.828 7.828a2 2 0 010 2.828l-6.172 6.172a2 2 0 01-2.828 0l-7.828-7.828A2 2 0 013 11.172z" />
+      </svg>
+    ),
+  },
 ];
 
 /** Secondary navigation items shown in a collapsible "More" section. */
