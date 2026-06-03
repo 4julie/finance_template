@@ -211,13 +211,20 @@ jobs:
         run: |
           npm i -g vercel@latest
 
-          DEPLOY_URL=$(vercel deploy \
+          set -o pipefail
+          DEPLOY_LOG=$(mktemp)
+          if ! vercel deploy \
             --token="$VERCEL_TOKEN" \
             --scope="$VERCEL_ORG_ID" \
             --prod \
             --yes \
             --archive=tgz \
-            apps/web/dist 2>&1 | tail -1)
+            apps/web/dist >"$DEPLOY_LOG" 2>&1; then
+            echo "::error::Vercel production deploy failed:"
+            cat "$DEPLOY_LOG"
+            exit 1
+          fi
+          DEPLOY_URL=$(tail -1 "$DEPLOY_LOG")
 
           echo "url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
           echo "### 🌐 Web Production Deployed" >> "$GITHUB_STEP_SUMMARY"

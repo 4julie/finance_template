@@ -179,14 +179,21 @@ jobs:
           if [ "${{ needs.prepare.outputs.deploy_web }}" = "true" ]; then
             if [ -n "$VERCEL_TOKEN" ]; then
               npm i -g vercel@latest
-              CANARY_URL=$(vercel deploy \
+              set -o pipefail
+              CANARY_LOG=$(mktemp)
+              if ! vercel deploy \
                 --token="$VERCEL_TOKEN" \
                 --scope="$VERCEL_ORG_ID" \
                 --yes \
                 --archive=tgz \
                 --meta canary=true \
                 --meta traffic_pct="$CANARY_PERCENTAGE" \
-                apps/web/dist 2>&1 | tail -1)
+                apps/web/dist >"$CANARY_LOG" 2>&1; then
+                echo "::error::Vercel canary deploy failed:"
+                cat "$CANARY_LOG"
+                exit 1
+              fi
+              CANARY_URL=$(tail -1 "$CANARY_LOG")
               echo "canary_url=$CANARY_URL" >> "$GITHUB_OUTPUT"
               echo "### 🌐 Web Canary Deployed" >> "$GITHUB_STEP_SUMMARY"
               echo "**URL:** $CANARY_URL" >> "$GITHUB_STEP_SUMMARY"
@@ -405,13 +412,20 @@ jobs:
           npm run build -w apps/web
 
           npm i -g vercel@latest
-          DEPLOY_URL=$(vercel deploy \
+          set -o pipefail
+          DEPLOY_LOG=$(mktemp)
+          if ! vercel deploy \
             --token="$VERCEL_TOKEN" \
             --scope="$VERCEL_ORG_ID" \
             --prod \
             --yes \
             --archive=tgz \
-            apps/web/dist 2>&1 | tail -1)
+            apps/web/dist >"$DEPLOY_LOG" 2>&1; then
+            echo "::error::Vercel promotion to production failed:"
+            cat "$DEPLOY_LOG"
+            exit 1
+          fi
+          DEPLOY_URL=$(tail -1 "$DEPLOY_LOG")
 
           echo "### 🌐 Web Promoted to Production" >> "$GITHUB_STEP_SUMMARY"
           echo "**URL:** $DEPLOY_URL" >> "$GITHUB_STEP_SUMMARY"
