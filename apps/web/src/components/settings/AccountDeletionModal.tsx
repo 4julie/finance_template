@@ -248,8 +248,7 @@ export function useAccountDeletion(): {
               padding: '0.625rem 1rem',
               borderRadius: 'var(--radius-md, 0.5rem)',
               opacity: confirmationText !== 'DELETE' || isDeleting ? 0.55 : 1,
-              cursor:
-                confirmationText !== 'DELETE' || isDeleting ? 'not-allowed' : 'pointer',
+              cursor: confirmationText !== 'DELETE' || isDeleting ? 'not-allowed' : 'pointer',
             }}
           >
             {isDeleting ? 'Deleting…' : 'Yes, Delete Everything'}
