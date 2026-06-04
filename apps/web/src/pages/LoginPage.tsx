@@ -4,6 +4,10 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../auth/auth-context';
+import {
+  getPreferredAuthMethod,
+  setPreferredAuthMethod,
+} from '../auth/preferred-auth-method';
 import { PasskeySetupPrompt } from '../components/auth/PasskeySetupPrompt';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { hasRegisteredPasskey } from '../lib/passkey-preferences';
@@ -41,8 +45,46 @@ export const LoginPage: React.FC = () => {
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  /** Whether the user has a passkey registered (drives layout priority). */
-  const passkeyPrimary = webAuthnSupported && hasRegisteredPasskey();
+  /**
+   * Async platform-authenticator capability check (#1983).
+   *
+   * `webAuthnSupported` only tells us that the WebAuthn API surface exists
+   * — it doesn't confirm there's a usable platform authenticator (Windows
+   * Hello, Touch ID, etc.). We start `null` (== "unknown / still checking")
+   * so the biometric-first layout only activates once the browser confirms
+   * an authenticator is actually available.
+   */
+  const [platformAuthAvailable, setPlatformAuthAvailable] = useState<boolean | null>(null);
+
+  /**
+   * Snapshot of the persisted preferred-auth-method at mount time.
+   *
+   * Read once via `useState` initialiser so that changes mid-render (e.g.
+   * during a passkey-login round-trip) don't reflow the form layout
+   * underneath the user.
+   */
+  const [preferredMethod] = useState(() => getPreferredAuthMethod());
+
+  /**
+   * `true` when biometric sign-in should be the primary CTA — requires
+   * (a) WebAuthn support, (b) a confirmed platform authenticator, and
+   * (c) either a stored "passkey" preference (#1983) or a previously
+   * registered passkey (legacy fallback).
+   */
+  const passkeyPrimary =
+    webAuthnSupported &&
+    platformAuthAvailable === true &&
+    (preferredMethod === 'passkey' || hasRegisteredPasskey());
+
+  /**
+   * Whether the email/password disclosure under the biometric CTA is
+   * expanded. Only meaningful when `passkeyPrimary` is true; otherwise the
+   * form is always visible.
+   */
+  const [showEmailForm, setShowEmailForm] = useState(false);
+
+  /** Computed visibility: form is always shown unless biometric is primary. */
+  const emailFormVisible = !passkeyPrimary || showEmailForm;
 
   const uid = useId();
   const emailId = `${uid}-email`;
@@ -60,6 +102,42 @@ export const LoginPage: React.FC = () => {
       navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, navigate]);
+
+  /**
+   * Confirm a platform authenticator is actually available on this device
+   * before promoting the biometric CTA (#1983). The check is async per the
+   * WebAuthn spec — we cancel via `cancelled` if the page unmounts first.
+   */
+  useEffect(() => {
+    if (!webAuthnSupported) {
+      setPlatformAuthAvailable(false);
+      return;
+    }
+
+    let cancelled = false;
+    const PKC = (typeof window !== 'undefined' ? window.PublicKeyCredential : undefined) as
+      | (typeof PublicKeyCredential & {
+          isUserVerifyingPlatformAuthenticatorAvailable?: () => Promise<boolean>;
+        })
+      | undefined;
+
+    if (!PKC || typeof PKC.isUserVerifyingPlatformAuthenticatorAvailable !== 'function') {
+      setPlatformAuthAvailable(false);
+      return;
+    }
+
+    PKC.isUserVerifyingPlatformAuthenticatorAvailable()
+      .then((available) => {
+        if (!cancelled) setPlatformAuthAvailable(available === true);
+      })
+      .catch(() => {
+        if (!cancelled) setPlatformAuthAvailable(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [webAuthnSupported]);
 
   useEffect(() => {
     if (error) {
@@ -116,6 +194,9 @@ export const LoginPage: React.FC = () => {
 
     try {
       await loginWithPasskey(email.trim() || undefined);
+      // Reaffirm the user's preference whenever they successfully sign in
+      // with biometrics (#1983). Idempotent.
+      setPreferredAuthMethod('passkey');
     } finally {
       setIsSubmitting(false);
     }
@@ -161,7 +242,7 @@ export const LoginPage: React.FC = () => {
           </div>
         )}
 
-        {/* ── Passkey-first layout: biometric primary when passkey exists ── */}
+        {/* ── Passkey-first layout: biometric primary when preferred (#1983) ── */}
         {passkeyPrimary && (
           <div className="auth-actions" style={{ marginBottom: 'var(--spacing-4)' }}>
             <button
@@ -181,13 +262,26 @@ export const LoginPage: React.FC = () => {
               )}
             </button>
 
-            <div className="auth-divider" aria-hidden="true">
-              <span className="auth-divider__text">or sign in with email</span>
-            </div>
+            <button
+              type="button"
+              className="auth-disclosure"
+              onClick={() => setShowEmailForm((v) => !v)}
+              aria-expanded={emailFormVisible}
+              aria-controls="login-email-form"
+            >
+              {emailFormVisible ? 'Hide email & password' : 'Use email & password'}
+            </button>
           </div>
         )}
 
-        <form className="auth-form" onSubmit={handleEmailLogin} aria-label="Sign in" noValidate>
+        <form
+          id="login-email-form"
+          className="auth-form"
+          onSubmit={handleEmailLogin}
+          aria-label="Sign in"
+          noValidate
+          hidden={!emailFormVisible}
+        >
           <div className="form-fields">
             <div className="form-group">
               <label htmlFor={emailId} className="form-group__label form-group__label--required">

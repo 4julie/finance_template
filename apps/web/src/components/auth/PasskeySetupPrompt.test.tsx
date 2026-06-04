@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -11,12 +11,22 @@ import { PasskeySetupPrompt } from './PasskeySetupPrompt';
 // ---------------------------------------------------------------------------
 
 const registerNewPasskeyMock = vi.fn();
+const authState = vi.hoisted(() => ({
+  registerNewPasskey: vi.fn(),
+  isSigningOut: false,
+}));
 
 vi.mock('../../auth/auth-context', () => ({
-  useAuth: () => ({
-    registerNewPasskey: registerNewPasskeyMock,
-  }),
+  useAuth: () => authState,
 }));
+
+const preferredAuthMethodMock = vi.hoisted(() => ({
+  shouldShowPasskeyPrompt: vi.fn(() => true),
+  setPreferredAuthMethod: vi.fn(),
+  markPasskeyPromptDismissed: vi.fn(),
+}));
+
+vi.mock('../../auth/preferred-auth-method', () => preferredAuthMethodMock);
 
 vi.mock('../../lib/passkey-preferences', () => ({
   setPasskeyPromptState: vi.fn(),
@@ -41,6 +51,11 @@ function renderPrompt(isOpen = true, onClose = vi.fn()) {
 describe('PasskeySetupPrompt', () => {
   beforeEach(() => {
     registerNewPasskeyMock.mockReset();
+    authState.registerNewPasskey = registerNewPasskeyMock;
+    authState.isSigningOut = false;
+    preferredAuthMethodMock.shouldShowPasskeyPrompt.mockReset().mockReturnValue(true);
+    preferredAuthMethodMock.setPreferredAuthMethod.mockReset();
+    preferredAuthMethodMock.markPasskeyPromptDismissed.mockReset();
   });
 
   it('renders nothing when isOpen is false', () => {
@@ -82,6 +97,17 @@ describe('PasskeySetupPrompt', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('marks the prompt dismissed (cooldown) on "Remind Me Later"', async () => {
+    const user = userEvent.setup();
+    renderPrompt(true);
+
+    await user.click(screen.getByRole('button', { name: /remind me later/i }));
+
+    expect(preferredAuthMethodMock.markPasskeyPromptDismissed).toHaveBeenCalledTimes(1);
+    // Remind Me Later does NOT lock in a preference — user hasn't decided.
+    expect(preferredAuthMethodMock.setPreferredAuthMethod).not.toHaveBeenCalled();
+  });
+
   it('calls onClose when "Skip" is clicked', async () => {
     const user = userEvent.setup();
     const { onClose } = renderPrompt(true);
@@ -89,6 +115,16 @@ describe('PasskeySetupPrompt', () => {
     await user.click(screen.getByRole('button', { name: /skip/i }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('records password preference + dismissal on "Skip"', async () => {
+    const user = userEvent.setup();
+    renderPrompt(true);
+
+    await user.click(screen.getByRole('button', { name: /skip/i }));
+
+    expect(preferredAuthMethodMock.setPreferredAuthMethod).toHaveBeenCalledWith('password');
+    expect(preferredAuthMethodMock.markPasskeyPromptDismissed).toHaveBeenCalledTimes(1);
   });
 
   it('calls registerNewPasskey when "Set Up Now" is clicked', async () => {
@@ -100,6 +136,30 @@ describe('PasskeySetupPrompt', () => {
     await user.click(screen.getByRole('button', { name: /set up now/i }));
 
     expect(registerNewPasskeyMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('records passkey preference after successful registration', async () => {
+    const user = userEvent.setup();
+    registerNewPasskeyMock.mockResolvedValue(undefined);
+
+    renderPrompt(true);
+
+    await user.click(screen.getByRole('button', { name: /set up now/i }));
+
+    await waitFor(() =>
+      expect(preferredAuthMethodMock.setPreferredAuthMethod).toHaveBeenCalledWith('passkey'),
+    );
+  });
+
+  it('does NOT record a preference when registration fails', async () => {
+    const user = userEvent.setup();
+    registerNewPasskeyMock.mockRejectedValue(new Error('Credential creation was cancelled'));
+
+    renderPrompt(true);
+
+    await user.click(screen.getByRole('button', { name: /set up now/i }));
+
+    expect(preferredAuthMethodMock.setPreferredAuthMethod).not.toHaveBeenCalled();
   });
 
   it('shows error when registration fails', async () => {
@@ -134,4 +194,25 @@ describe('PasskeySetupPrompt', () => {
     // the description should always mention signing in faster
     expect(screen.getByText(/sign in faster/i)).toBeInTheDocument();
   });
+
+  it('renders nothing while sign-out is in progress (#1983)', () => {
+    authState.isSigningOut = true;
+    const onClose = vi.fn();
+
+    renderPrompt(true, onClose);
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('renders nothing when the new preference utility says to suppress (#1983)', () => {
+    preferredAuthMethodMock.shouldShowPasskeyPrompt.mockReturnValue(false);
+    const onClose = vi.fn();
+
+    renderPrompt(true, onClose);
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(onClose).toHaveBeenCalled();
+  });
 });
+

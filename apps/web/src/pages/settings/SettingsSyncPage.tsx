@@ -3,6 +3,11 @@
 import React, { useCallback, useState } from 'react';
 
 import { useAuth } from '../../auth/auth-context';
+import {
+  getPreferredAuthMethod,
+  setPreferredAuthMethod,
+  type PreferredAuthMethod,
+} from '../../auth/preferred-auth-method';
 import { SettingInfoWidget } from '../../components/settings';
 import { useOfflineStatus } from '../../hooks/useOfflineStatus';
 
@@ -21,6 +26,19 @@ export const SettingsSyncPage: React.FC = () => {
   const { isOffline } = useOfflineStatus();
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false);
   const [passkeyMessage, setPasskeyMessage] = useState<string | null>(null);
+  /**
+   * Persisted preferred sign-in method (#1983). Stored in localStorage by
+   * `preferred-auth-method.ts`. `null` means the user hasn't decided yet.
+   */
+  const [preferredAuth, setPreferredAuthState] = useState<PreferredAuthMethod | null>(() =>
+    getPreferredAuthMethod(),
+  );
+
+  const handlePreferredAuthChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+    const next = event.target.value as PreferredAuthMethod;
+    setPreferredAuthMethod(next);
+    setPreferredAuthState(next);
+  }, []);
 
   const handlePasskeyRegistration = useCallback(async () => {
     if (!isAuthenticated || isPasskeyLoading) {
@@ -118,6 +136,28 @@ export const SettingsSyncPage: React.FC = () => {
           {!demoModeActive && passkeyMessage && (
             <div className="settings-item settings-item--static" role="status" aria-live="polite">
               <span className="settings-item__value">{passkeyMessage}</span>
+            </div>
+          )}
+          {!demoModeActive && (
+            <div className="settings-item settings-item--select">
+              <label htmlFor="settings-preferred-auth-method" className="settings-item__label">
+                Preferred sign-in method
+              </label>
+              <select
+                id="settings-preferred-auth-method"
+                className="settings-item__value"
+                value={preferredAuth ?? ''}
+                onChange={handlePreferredAuthChange}
+                aria-describedby="settings-preferred-auth-method-help"
+              >
+                <option value="" disabled>
+                  Not set
+                </option>
+                <option value="passkey">Passkey (biometrics)</option>
+              </select>
+              <p id="settings-preferred-auth-method-help" className="settings-item__help">
+                Controls which option is shown first on the sign-in page.
+              </p>
             </div>
           )}
         </div>

@@ -61,8 +61,12 @@ import { getPasskeyErrorMessage } from './passkey-errors';
 import {
   incrementLoginCount,
   setHasRegisteredPasskey,
-  shouldShowPasskeyPrompt,
+  shouldShowPasskeyPrompt as shouldShowPasskeyPromptLegacy,
 } from '../lib/passkey-preferences';
+import {
+  setPreferredAuthMethod,
+  shouldShowPasskeyPrompt as shouldShowPasskeyPromptByPreference,
+} from './preferred-auth-method';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -132,6 +136,14 @@ export interface AuthContextValue extends AuthActions {
   showPasskeyPrompt: boolean;
   /** Dismiss the passkey setup prompt. */
   dismissPasskeyPrompt: () => void;
+  /**
+   * Whether a sign-out is currently in progress (#1983).
+   *
+   * Components mounted in the authenticated tree (e.g. the passkey setup
+   * prompt) should suppress themselves while this is `true` so that they
+   * don't briefly flash during the redirect to `/login`.
+   */
+  isSigningOut: boolean;
 }
 
 /** Configuration for the AuthProvider. */
@@ -187,6 +199,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
   const [error, setError] = useState<string | null>(null);
   const [webAuthnSupported] = useState(() => isWebAuthnSupported());
   const [showPasskeyPrompt, setShowPasskeyPrompt] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const onlineRetryHandlerRef = useRef<(() => void) | null>(null);
   /**
@@ -384,7 +397,16 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
    */
   function triggerPasskeyPromptCheck(): void {
     incrementLoginCount();
-    if (webAuthnSupported && shouldShowPasskeyPrompt()) {
+    // Suppress the prompt when:
+    //   - WebAuthn isn't supported, or
+    //   - the legacy "show / remind / skip" state says no (back-compat), or
+    //   - the user already has a recorded preference, or dismissed within the
+    //     30-day cooldown window (#1983).
+    if (
+      webAuthnSupported &&
+      shouldShowPasskeyPromptLegacy() &&
+      shouldShowPasskeyPromptByPreference()
+    ) {
       setShowPasskeyPrompt(true);
     }
   }
@@ -465,6 +487,9 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
           hasPasskey: true,
         });
         setIsOffline(false);
+        // A successful passkey sign-in reaffirms the user's preference
+        // (#1983). Idempotent — safe to call on every login.
+        setPreferredAuthMethod('passkey');
       } else {
         // Defensive fallback — should not occur with a correctly
         // configured server, but avoids a blank screen if the server
@@ -499,6 +524,9 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
         return nextUser;
       });
       setHasRegisteredPasskey();
+      // Recording a passkey implies the user prefers it as their primary
+      // sign-in method (#1983). Idempotent.
+      setPreferredAuthMethod('passkey');
       setShowPasskeyPrompt(false);
     } catch (err) {
       setError(getPasskeyErrorMessage(err, 'registration'));
@@ -508,6 +536,11 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
 
   const logout = useCallback(async (): Promise<void> => {
     setError(null);
+    // Flip the sign-out flag immediately so any mounted authenticated-tree
+    // components (e.g. PasskeySetupPrompt) can suppress themselves and avoid
+    // flashing as the redirect to /login resolves (#1983).
+    setIsSigningOut(true);
+    setShowPasskeyPrompt(false);
 
     try {
       if (!demoModeActive) {
@@ -525,6 +558,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
         clearDemoSession();
       }
       config.onUnauthenticated?.();
+      setIsSigningOut(false);
     }
   }, [config, demoModeActive]);
 
@@ -734,6 +768,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       isOffline,
       showPasskeyPrompt,
       dismissPasskeyPrompt,
+      isSigningOut,
       loginWithEmail,
       loginWithPasskey,
       loginWithOAuth,
@@ -753,6 +788,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       isOffline,
       showPasskeyPrompt,
       dismissPasskeyPrompt,
+      isSigningOut,
       loginWithEmail,
       loginWithPasskey,
       loginWithOAuth,

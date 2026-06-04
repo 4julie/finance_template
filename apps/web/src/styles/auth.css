@@ -189,6 +189,25 @@
   color: var(--semantic-text-secondary);
 }
 
+/* ─── Disclosure: "Use email & password" under biometric CTA (#1983) ────── */
+
+.auth-disclosure {
+  display: inline-block;
+  margin: var(--spacing-3) auto 0;
+  padding: var(--spacing-1) var(--spacing-2);
+  background: transparent;
+  border: none;
+  color: var(--semantic-text-secondary);
+  font-size: var(--type-scale-caption-font-size, 0.875rem);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.auth-disclosure:hover,
+.auth-disclosure:focus-visible {
+  color: var(--semantic-text-primary);
+}
+
 /* ─── Footer link ────────────────────────────────────────────────────────── */
 
 .auth-footer {
