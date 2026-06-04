@@ -44,7 +44,6 @@ export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
   const {
     signupWithEmail,
-    error: authError,
     isLoading,
     isDemoMode: demoMode,
     isAuthenticated,
@@ -87,12 +86,13 @@ export const SignupPage: React.FC = () => {
   }, [confirmPassword, fieldErrors.confirmPassword, password]);
 
   const displayMessage = useMemo<SubmitMessage | null>(() => {
-    if (submitMessage) {
-      return submitMessage;
-    }
-
-    return authError ? { type: 'error', text: authError } : null;
-  }, [authError, submitMessage]);
+    // Only show messages produced by the signup form itself. The auth
+    // context's `error` field carries login-flow errors (e.g. "No account
+    // found for that email.") that would otherwise leak in here when the user
+    // navigates from /login -> /signup. Signup failures are captured in
+    // `submitMessage` directly via the catch handler below. See #1978.
+    return submitMessage;
+  }, [submitMessage]);
 
   const validate = useCallback((): boolean => {
     const errors: SignupFieldErrors = {};
@@ -197,7 +197,7 @@ export const SignupPage: React.FC = () => {
 
         {demoMode && (
           <div className="auth-demo-banner" role="status">
-            🧪 Demo Mode — No backend configured. Data is stored locally.
+            Demo Mode — No backend configured. Data is stored locally.
           </div>
         )}
 
