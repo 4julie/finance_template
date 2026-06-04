@@ -249,8 +249,7 @@ export const CategoriesPage: React.FC = () => {
                           aria-hidden="true"
                           className="category-card__icon"
                           style={{
-                            background:
-                              category.color ?? 'var(--semantic-background-secondary)',
+                            background: category.color ?? 'var(--semantic-background-secondary)',
                           }}
                         >
                           {getCategoryIcon(category.icon)}

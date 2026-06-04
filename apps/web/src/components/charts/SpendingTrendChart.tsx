@@ -128,13 +128,7 @@ const BarIcon: FC = () => (
 );
 
 const AreaIcon: FC = () => (
-  <svg
-    viewBox="0 0 16 16"
-    width="16"
-    height="16"
-    aria-hidden="true"
-    focusable="false"
-  >
+  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
     <path
       d="M2 12 L6 7 L9 10 L14 3 L14 14 L2 14 Z"
       fill="currentColor"
