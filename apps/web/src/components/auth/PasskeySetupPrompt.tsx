@@ -16,6 +16,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '../../auth/auth-context';
+import {
+  markPasskeyPromptDismissed,
+  setPreferredAuthMethod,
+  shouldShowPasskeyPrompt,
+} from '../../auth/preferred-auth-method';
 import { setHasRegisteredPasskey, setPasskeyPromptState } from '../../lib/passkey-preferences';
 
 import './passkey-setup-prompt.css';
@@ -85,7 +90,7 @@ export interface PasskeySetupPromptProps {
  * ```
  */
 export function PasskeySetupPrompt({ isOpen, onClose }: PasskeySetupPromptProps) {
-  const { registerNewPasskey } = useAuth();
+  const { registerNewPasskey, isSigningOut } = useAuth();
   const panelRef = useRef<HTMLDivElement>(null);
   const primaryButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -93,6 +98,12 @@ export function PasskeySetupPrompt({ isOpen, onClose }: PasskeySetupPromptProps)
   const [registrationError, setRegistrationError] = useState<string | null>(null);
 
   const biometricLabel = getPlatformBiometricLabel();
+
+  // Suppress the prompt when the user has already chosen a preferred auth
+  // method, or dismissed within the 30-day cooldown window (#1983). This is
+  // checked at render time so that toggling the preference elsewhere takes
+  // effect immediately.
+  const allowedByPreference = shouldShowPasskeyPrompt();
 
   // -----------------------------------------------------------------------
   // Focus management
@@ -106,6 +117,15 @@ export function PasskeySetupPrompt({ isOpen, onClose }: PasskeySetupPromptProps)
       });
     }
   }, [isOpen]);
+
+  // While a sign-out is in progress (#1983), close the modal immediately so
+  // it doesn't flash on top of the redirect to /login. Also closes the modal
+  // when the user's preference changes elsewhere mid-session.
+  useEffect(() => {
+    if (isOpen && (isSigningOut || !allowedByPreference)) {
+      onClose();
+    }
+  }, [isOpen, isSigningOut, allowedByPreference, onClose]);
 
   // Trap focus within the dialog
   useEffect(() => {
@@ -155,6 +175,9 @@ export function PasskeySetupPrompt({ isOpen, onClose }: PasskeySetupPromptProps)
     try {
       await registerNewPasskey();
       setHasRegisteredPasskey();
+      // Accepting the prompt records passkey as the persistent preferred
+      // auth method (#1983).
+      setPreferredAuthMethod('passkey');
       onClose();
     } catch (err) {
       const message =
@@ -167,11 +190,19 @@ export function PasskeySetupPrompt({ isOpen, onClose }: PasskeySetupPromptProps)
 
   const handleRemindLater = useCallback(() => {
     setPasskeyPromptState('remind');
+    // Start the 30-day cooldown but don't lock in a preference — the user
+    // hasn't decided yet, just postponed (#1983).
+    markPasskeyPromptDismissed();
     onClose();
   }, [onClose]);
 
   const handleSkip = useCallback(() => {
     setPasskeyPromptState('skipped');
+    // Skipping is an explicit decline — record password as preferred and
+    // also start the dismissal cooldown for any future logic that consults
+    // it (#1983).
+    setPreferredAuthMethod('password');
+    markPasskeyPromptDismissed();
     onClose();
   }, [onClose]);
 
@@ -179,7 +210,7 @@ export function PasskeySetupPrompt({ isOpen, onClose }: PasskeySetupPromptProps)
   // Render
   // -----------------------------------------------------------------------
 
-  if (!isOpen) return null;
+  if (!isOpen || isSigningOut || !allowedByPreference) return null;
 
   return (
     <div className="passkey-prompt" role="presentation">
