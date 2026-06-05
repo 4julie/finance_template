@@ -10,6 +10,7 @@ import {
   getActiveGoals,
   getAllGoals,
   getGoalById,
+  updateGoal,
   type CreateGoalInput,
 } from './goals';
 
@@ -41,6 +42,7 @@ describe('goals repository', () => {
           id: 'goal-1',
           household_id: 'hh-1',
           name: 'Emergency Fund',
+          description: 'Keep three months of expenses saved.',
           target_amount: 1000000,
           current_amount: 500000,
           currency: 'USD',
@@ -83,6 +85,7 @@ describe('goals repository', () => {
       expect(goals[0]).toMatchObject({
         id: 'goal-1',
         name: 'Emergency Fund',
+        description: 'Keep three months of expenses saved.',
         targetAmount: { amount: 1000000 },
         currentAmount: { amount: 500000 },
         currency: Currencies.USD,
@@ -216,6 +219,7 @@ describe('goals repository', () => {
         id: 'new-goal',
         household_id: 'hh-1',
         name: 'New Goal',
+        description: 'For the new roof',
         target_amount: 100000,
         current_amount: 0,
         currency: 'USD',
@@ -248,6 +252,7 @@ describe('goals repository', () => {
           expect.any(String), // UUID
           'hh-1',
           'New Goal',
+          null, // Default description
           100000,
           0, // Default currentAmount
           'USD', // Default currency
@@ -287,10 +292,10 @@ describe('goals repository', () => {
       createGoal(mockDb, input);
 
       const params = mockExecute.mock.calls[0][2] as unknown[];
-      expect(params[3]).toBe(999888); // targetAmount
-      expect(params[4]).toBe(111222); // currentAmount
-      expect(Number.isInteger(params[3] as number)).toBe(true);
+      expect(params[4]).toBe(999888); // targetAmount
+      expect(params[5]).toBe(111222); // currentAmount
       expect(Number.isInteger(params[4] as number)).toBe(true);
+      expect(Number.isInteger(params[5] as number)).toBe(true);
     });
 
     it('should default currentAmount to 0 when not provided', () => {
@@ -303,7 +308,7 @@ describe('goals repository', () => {
       createGoal(mockDb, input);
 
       const params = mockExecute.mock.calls[0][2] as unknown[];
-      expect(params[4]).toBe(0);
+      expect(params[5]).toBe(0);
     });
 
     it('should default to USD when currency not provided', () => {
@@ -316,7 +321,7 @@ describe('goals repository', () => {
       createGoal(mockDb, input);
 
       const params = mockExecute.mock.calls[0][2] as unknown[];
-      expect(params[5]).toBe('USD');
+      expect(params[6]).toBe('USD');
     });
 
     it('should default status to ACTIVE when not provided', () => {
@@ -329,13 +334,14 @@ describe('goals repository', () => {
       createGoal(mockDb, input);
 
       const params = mockExecute.mock.calls[0][2] as unknown[];
-      expect(params[7]).toBe('ACTIVE');
+      expect(params[8]).toBe('ACTIVE');
     });
 
     it('should handle optional fields', () => {
       const input: CreateGoalInput = {
         householdId: 'hh-1',
         name: 'Custom Goal',
+        description: 'For the new roof',
         targetAmount: { amount: 500000 },
         currentAmount: { amount: 100000 },
         currency: Currencies.EUR,
@@ -349,13 +355,79 @@ describe('goals repository', () => {
       createGoal(mockDb, input);
 
       const params = mockExecute.mock.calls[0][2] as unknown[];
-      expect(params[4]).toBe(100000); // currentAmount
-      expect(params[5]).toBe('EUR');
-      expect(params[6]).toBe('2025-06-30');
-      expect(params[7]).toBe('COMPLETED');
-      expect(params[8]).toBe('trophy');
-      expect(params[9]).toBe('#fbbf24');
-      expect(params[10]).toBe('acc-1');
+      expect(params[3]).toBe('For the new roof');
+      expect(params[5]).toBe(100000); // currentAmount
+      expect(params[6]).toBe('EUR');
+      expect(params[7]).toBe('2025-06-30');
+      expect(params[8]).toBe('COMPLETED');
+      expect(params[9]).toBe('trophy');
+      expect(params[10]).toBe('#fbbf24');
+      expect(params[11]).toBe('acc-1');
+    });
+
+    it('should store and return descriptions', () => {
+      const input: CreateGoalInput = {
+        householdId: 'hh-1',
+        name: 'New Goal',
+        description: 'For the new roof',
+        targetAmount: { amount: 100000 },
+      };
+
+      const goal = createGoal(mockDb, input);
+      const params = mockExecute.mock.calls[0][2] as unknown[];
+
+      expect(params[3]).toBe('For the new roof');
+      expect(goal.description).toBe('For the new roof');
+    });
+  });
+
+  describe('updateGoal', () => {
+    it('should update and return descriptions', () => {
+      mockQueryOne
+        .mockReturnValueOnce({
+          id: 'goal-1',
+          household_id: 'hh-1',
+          name: 'Goal',
+          description: null,
+          target_amount: 100000,
+          current_amount: 0,
+          currency: 'USD',
+          target_date: null,
+          status: 'ACTIVE',
+          icon: null,
+          color: null,
+          account_id: null,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+          deleted_at: null,
+          sync_version: 1,
+          is_synced: 0,
+        })
+        .mockReturnValueOnce({
+          id: 'goal-1',
+          household_id: 'hh-1',
+          name: 'Goal',
+          description: 'For the new roof',
+          target_amount: 100000,
+          current_amount: 0,
+          currency: 'USD',
+          target_date: null,
+          status: 'ACTIVE',
+          icon: null,
+          color: null,
+          account_id: null,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-02T00:00:00Z',
+          deleted_at: null,
+          sync_version: 1,
+          is_synced: 0,
+        });
+
+      const goal = updateGoal(mockDb, 'goal-1', { description: 'For the new roof' });
+      const params = mockExecute.mock.calls[0][2] as unknown[];
+
+      expect(params[2]).toBe('For the new roof');
+      expect(goal?.description).toBe('For the new roof');
     });
   });
 

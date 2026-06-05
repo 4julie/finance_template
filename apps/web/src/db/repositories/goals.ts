@@ -16,6 +16,7 @@ const GOAL_COLUMNS = [
   'id',
   'household_id',
   'name',
+  'description',
   'target_amount',
   'current_amount',
   'currency',
@@ -37,6 +38,7 @@ const GOAL_BASE_QUERY = `SELECT ${GOAL_COLUMNS} FROM goal WHERE deleted_at IS NU
 export interface CreateGoalInput {
   householdId: SyncId;
   name: string;
+  description?: string | null;
   targetAmount: { amount: number };
   currentAmount?: { amount: number };
   currency?: Currency;
@@ -51,6 +53,7 @@ export interface CreateGoalInput {
 export interface UpdateGoalInput {
   householdId?: SyncId;
   name?: string;
+  description?: string | null;
   targetAmount?: { amount: number };
   currentAmount?: { amount: number };
   currency?: Currency;
@@ -66,6 +69,7 @@ function mapGoal(row: Row): Goal {
     id: requireString(row.id, 'goal.id'),
     householdId: requireString(row.household_id, 'goal.household_id'),
     name: requireString(row.name, 'goal.name'),
+    description: optionalString(row.description),
     targetAmount: mapCents(row.target_amount, 'goal.target_amount'),
     currentAmount: mapCents(row.current_amount, 'goal.current_amount'),
     currency: mapCurrency(row.currency),
@@ -103,6 +107,7 @@ export function createGoal(db: SqliteDb, input: CreateGoalInput): Goal {
       id,
       household_id,
       name,
+      description,
       target_amount,
       current_amount,
       currency,
@@ -117,7 +122,7 @@ export function createGoal(db: SqliteDb, input: CreateGoalInput): Goal {
       sync_version,
       is_synced
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
       ${SQLITE_NOW_EXPRESSION},
       ${SQLITE_NOW_EXPRESSION},
       NULL,
@@ -128,6 +133,7 @@ export function createGoal(db: SqliteDb, input: CreateGoalInput): Goal {
       id,
       input.householdId,
       input.name,
+      input.description ?? null,
       input.targetAmount.amount,
       input.currentAmount?.amount ?? 0,
       currency.code,
@@ -157,6 +163,7 @@ export function updateGoal(db: SqliteDb, goalId: SyncId, updates: UpdateGoalInpu
   const mergedGoal = {
     householdId: updates.householdId ?? existingGoal.householdId,
     name: updates.name ?? existingGoal.name,
+    description: updates.description !== undefined ? updates.description : existingGoal.description,
     targetAmount: updates.targetAmount ?? existingGoal.targetAmount,
     currentAmount: updates.currentAmount ?? existingGoal.currentAmount,
     currency: updates.currency ?? existingGoal.currency,
@@ -172,6 +179,7 @@ export function updateGoal(db: SqliteDb, goalId: SyncId, updates: UpdateGoalInpu
     `UPDATE goal
         SET household_id = ?,
             name = ?,
+            description = ?,
             target_amount = ?,
             current_amount = ?,
             currency = ?,
@@ -188,6 +196,7 @@ export function updateGoal(db: SqliteDb, goalId: SyncId, updates: UpdateGoalInpu
     [
       mergedGoal.householdId,
       mergedGoal.name,
+      mergedGoal.description,
       mergedGoal.targetAmount.amount,
       mergedGoal.currentAmount.amount,
       mergedGoal.currency.code,

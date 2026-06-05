@@ -134,6 +134,8 @@ export const GoalDetailPage: React.FC = () => {
         })
       : null;
 
+  const goalDescription = goal.description?.trim() || null;
+
   return (
     <>
       <Link
@@ -180,6 +182,12 @@ export const GoalDetailPage: React.FC = () => {
         aria-label="Goal details"
         style={{ marginBottom: 'var(--spacing-6)' }}
       >
+        {goalDescription && (
+          <div style={{ marginBottom: 'var(--spacing-4)' }}>
+            <h3 className="card__title">Description</h3>
+            <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{goalDescription}</p>
+          </div>
+        )}
         <dl style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-4)' }}>
           <div>
             <dt className="card__title">Target Amount</dt>

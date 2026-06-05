@@ -209,6 +209,7 @@ export interface Goal extends SyncMetadata {
   readonly id: SyncId;
   readonly householdId: SyncId;
   readonly name: string;
+  readonly description: string | null;
   readonly targetAmount: Cents;
   readonly currentAmount: Cents;
   readonly currency: Currency;
