@@ -4,10 +4,7 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../auth/auth-context';
-import {
-  getPreferredAuthMethod,
-  setPreferredAuthMethod,
-} from '../auth/preferred-auth-method';
+import { getPreferredAuthMethod, setPreferredAuthMethod } from '../auth/preferred-auth-method';
 import { PasskeySetupPrompt } from '../components/auth/PasskeySetupPrompt';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { hasRegisteredPasskey } from '../lib/passkey-preferences';
