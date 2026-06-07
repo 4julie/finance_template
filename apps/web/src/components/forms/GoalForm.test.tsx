@@ -90,11 +90,40 @@ describe('GoalForm', () => {
     expect(onSubmit).toHaveBeenCalledWith({
       householdId: 'household-1',
       name: 'Emergency Fund',
+      description: 'Keep three months of expenses saved.',
       targetAmount: { amount: 100025 },
       currentAmount: { amount: 25010 },
       targetDate: '2025-07-01',
       status: 'ACTIVE',
     });
+  });
+
+  it('prefills the description when editing an existing goal', () => {
+    renderGoalForm({
+      initialData: {
+        id: 'goal-1',
+        householdId: 'household-1',
+        name: 'Emergency Fund',
+        description: 'Keep three months of expenses saved.',
+        targetAmount: { amount: 100000 },
+        currentAmount: { amount: 25000 },
+        currency: { code: 'USD', decimalPlaces: 2 },
+        targetDate: '2025-07-01',
+        status: 'ACTIVE',
+        icon: null,
+        color: null,
+        accountId: null,
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+        deletedAt: null,
+        syncVersion: 1,
+        isSynced: true,
+      },
+    });
+
+    expect(screen.getByLabelText('Description')).toHaveValue(
+      'Keep three months of expenses saved.',
+    );
   });
 
   it('shows a household error when no household is available', () => {

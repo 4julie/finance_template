@@ -83,12 +83,6 @@ function formatAmountForInput(amountInMinorUnits: number, decimalPlaces = 2): st
   return (amountInMinorUnits / divisor).toFixed(decimalPlaces);
 }
 
-/** Return an optional goal description when the runtime object includes one. */
-function getGoalDescription(goal?: Goal): string {
-  const goalWithDescription = goal as (Goal & { description?: string | null }) | undefined;
-  return goalWithDescription?.description ?? '';
-}
-
 function validate(
   name: string,
   targetAmountStr: string,
@@ -193,7 +187,7 @@ export function GoalForm({ isOpen, onCancel, onSubmit, initialData }: GoalFormPr
       initialData ? formatAmountForInput(initialData.currentAmount.amount, decimalPlaces) : '0.00',
     );
     setTargetDate(initialData?.targetDate ?? '');
-    setDescription(getGoalDescription(initialData));
+    setDescription(initialData?.description ?? '');
     setErrors({});
     setSubmitting(false);
     setSubmitError(null);
@@ -233,6 +227,7 @@ export function GoalForm({ isOpen, onCancel, onSubmit, initialData }: GoalFormPr
       const input: CreateGoalInput = {
         householdId,
         name: name.trim(),
+        description: description.trim() || null,
         targetAmount: { amount: Math.round(parseFloat(targetAmount) * 100) },
         currentAmount: { amount: Math.round(parseFloat(currentAmount || '0') * 100) },
         targetDate: targetDate || null,
@@ -257,7 +252,17 @@ export function GoalForm({ isOpen, onCancel, onSubmit, initialData }: GoalFormPr
         setSubmitting(false);
       }
     },
-    [currentAmount, db, initialData, isEditing, name, onSubmit, targetAmount, targetDate],
+    [
+      currentAmount,
+      db,
+      description,
+      initialData,
+      isEditing,
+      name,
+      onSubmit,
+      targetAmount,
+      targetDate,
+    ],
   );
 
   if (!isOpen) {

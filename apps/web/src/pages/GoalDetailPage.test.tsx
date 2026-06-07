@@ -48,6 +48,7 @@ describe('GoalDetailPage', () => {
           id: 'goal-1',
           householdId: 'household-1',
           name: 'Emergency Fund',
+          description: 'Keep three months of expenses saved.',
           targetAmount: { amount: 2000000 },
           currentAmount: { amount: 1500000 },
           currency: { code: 'USD', decimalPlaces: 2 },
@@ -159,6 +160,13 @@ describe('GoalDetailPage', () => {
     expect(screen.getByText('Active')).toBeInTheDocument();
   });
 
+  it('displays the goal description', () => {
+    renderWithRoute();
+
+    expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.getByText('Keep three months of expenses saved.')).toBeInTheDocument();
+  });
+
   it('displays formatted target date', () => {
     renderWithRoute();
 
@@ -211,6 +219,7 @@ describe('GoalDetailPage', () => {
           id: 'goal-1',
           householdId: 'household-1',
           name: 'Emergency Fund',
+          description: 'Keep three months of expenses saved.',
           targetAmount: { amount: 2000000 },
           currentAmount: { amount: 2000000 },
           currency: { code: 'USD', decimalPlaces: 2 },
@@ -242,6 +251,7 @@ describe('GoalDetailPage', () => {
           id: 'goal-1',
           householdId: 'household-1',
           name: 'Emergency Fund',
+          description: null,
           targetAmount: { amount: 2000000 },
           currentAmount: { amount: 1500000 },
           currency: { code: 'USD', decimalPlaces: 2 },

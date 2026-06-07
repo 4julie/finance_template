@@ -463,6 +463,11 @@ export const MIGRATIONS: Migration[] = [
         WHERE deleted_at IS NULL;`,
     ],
   },
+  {
+    version: 6,
+    label: 'add-description-to-goals',
+    up: [`ALTER TABLE goal ADD COLUMN description TEXT;`],
+  },
 ];
 // ---------------------------------------------------------------------------
 // OPFS / IndexedDB feature detection

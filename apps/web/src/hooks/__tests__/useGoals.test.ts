@@ -45,6 +45,7 @@ function makeGoal(overrides: Partial<Goal> = {}): Goal {
     id: 'goal-1',
     householdId: 'hh-1',
     name: 'Emergency Fund',
+    description: 'Keep three months of expenses saved.',
     targetAmount: { amount: 1000000 },
     currentAmount: { amount: 250000 },
     currency: { code: 'USD', decimalPlaces: 2 },
