@@ -15,6 +15,7 @@
 
 import React from 'react';
 import { CurrencyDisplay, EmptyState, ErrorBanner, LoadingSpinner } from '../components/common';
+import { AppIcon } from '../components/icons';
 import { useNetWorth } from '../hooks/useNetWorth';
 import type { AssetClassBreakdown, NetWorthMilestone } from '../lib/analytics/net-worth';
 import { CHART_COLORS } from '../components/charts/chart-palette';
@@ -78,7 +79,7 @@ const MilestoneList: React.FC<MilestoneListProps> = ({ milestones }) => (
         aria-label={`${ms.label}: ${ms.reached ? 'reached' : 'not yet reached'}`}
       >
         <span className="analytics-milestone__icon" aria-hidden="true">
-          {ms.reached ? '✅' : '⬜'}
+          <AppIcon name={ms.reached ? 'check-circle' : 'circle'} />
         </span>
         <span className="analytics-milestone__label">{ms.label}</span>
       </div>
