@@ -211,9 +211,10 @@ const SidebarGroup: React.FC<SidebarGroupProps> = ({
       </h2>
       <ul
         id={sectionId}
-        className="sidebar-nav__list sidebar-nav__list--nested"
+        className={`sidebar-nav__list sidebar-nav__list--nested${expanded ? '' : ' sidebar-nav__list--collapsed'}`}
         role="list"
         hidden={!expanded}
+        aria-hidden={!expanded}
       >
         {items.map((item) => {
           const active = isActive(activePath, item.href);
