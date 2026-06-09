@@ -50,6 +50,7 @@ const PRE_AUTH_ROUTES = new Set([
   '/forgot-password',
   '/reset-password',
   '/legal',
+  '/beta',
 ]);
 
 function isPreAuthRoute(pathname: string): boolean {

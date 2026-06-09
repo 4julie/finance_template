@@ -44,6 +44,7 @@ const LegalIndex = lazy(() =>
 const LegalDocument = lazy(() =>
   import('./pages/legal/LegalPage').then((module) => ({ default: module.LegalDocumentPage })),
 );
+const BetaLanding = lazy(() => import('./pages/BetaLanding'));
 const NotFound = lazy(() => import('./pages/NotFoundPage'));
 const Watchlists = lazy(() => import('./pages/WatchlistsPage'));
 const Household = lazy(() => import('./pages/HouseholdPage'));
@@ -222,6 +223,14 @@ export const AppRoutes: FC = () => (
       element={
         <RouteBoundary name="California Privacy Notice">
           <LegalDocument documentId="ccpa" />
+        </RouteBoundary>
+      }
+    />
+    <Route
+      path="/beta"
+      element={
+        <RouteBoundary name="Beta">
+          <BetaLanding />
         </RouteBoundary>
       }
     />
