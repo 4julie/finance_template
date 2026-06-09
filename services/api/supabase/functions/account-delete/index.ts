@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 
 /**
- * POST /api/account/delete-account — permanently delete the signed-in account.
+ * DELETE /api/account — permanently delete the signed-in account.
  *
  * Authenticates with either the browser's HttpOnly refresh cookie or a bearer
  * token, deletes user/household data with a service-role client, deletes the
@@ -114,10 +114,10 @@ export function createAccountDeleteHandler(deps: AccountDeleteDeps = {}) {
     const envError = validateEnv('auth-logout', req);
     if (envError) return envError;
 
-    if (req.method !== 'POST') {
+    if (req.method !== 'DELETE' && req.method !== 'POST') {
       return new Response(JSON.stringify({ error: 'Method not allowed' }), {
         status: 405,
-        headers: { ...NO_STORE_JSON_HEADERS, Allow: 'POST' },
+        headers: { ...NO_STORE_JSON_HEADERS, Allow: 'DELETE, POST' },
       });
     }
 

@@ -124,11 +124,18 @@
 		}
 	}
 
-	# /api/account/delete-account must be rewritten BEFORE the generic
-	# /api/account/ rule because the edge function directory is named
-	# `account-delete` (without the trailing word "account"), not
-	# `account-delete-account`. Order matters here — Caddy evaluates the
-	# `uri replace` directives in the order they appear.
+	# /api/account and /api/account/delete-account must be rewritten BEFORE
+	# the generic /api/account/ rule because the edge function directory is
+	# named `account-delete` (without the trailing word "account"), not
+	# `account-delete-account`.
+	@apiAccountRoot path /api/account
+	handle @apiAccountRoot {
+		uri replace /api/account /functions/v1/account-delete
+		reverse_proxy edge-functions:9000 {
+			header_up X-Real-IP {remote_host}
+		}
+	}
+
 	@apiAccount path /api/account/*
 	handle @apiAccount {
 		uri replace /api/account/delete-account /functions/v1/account-delete
