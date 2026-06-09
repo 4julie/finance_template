@@ -109,7 +109,7 @@ jobs:
         run: npx -w apps/web playwright install --with-deps chromium
 
       - name: Run E2E tests
-        run: npx -w apps/web playwright test
+        run: npx -w apps/web playwright test --project=chromium
 
       - name: Lighthouse audit
         uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12.6.2

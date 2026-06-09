@@ -180,7 +180,7 @@ jobs:
             report += `- ✅ Read-only Gradle cache on feature branches\n`;
             report += `- ✅ Concurrency groups with cancel-in-progress\n`;
             report += `- ✅ Path-filtered triggers (affected-only builds)\n`;
-            report += `- ✅ E2E test sharding (4 parallel runners)\n`;
+            report += `- ✅ E2E browser matrix with mobile smoke coverage\n`;
 
             core.summary.addRaw(report);
             await core.summary.write();
