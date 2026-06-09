@@ -9,7 +9,12 @@ export interface DangerZoneProps {
   className?: string;
 }
 
-export function DangerZone({ title = 'Danger Zone', description, children, className }: DangerZoneProps) {
+export function DangerZone({
+  title = 'Danger Zone',
+  description,
+  children,
+  className,
+}: DangerZoneProps) {
   const headingId = useId();
   const sectionClassName = ['page-section', 'danger-zone-section', className]
     .filter(Boolean)
