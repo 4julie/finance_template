@@ -188,6 +188,7 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) =>
           path
+            .replace(/^\/api\/account$/, '/account-delete')
             .replace(/^\/api\/account\/delete-account$/, '/account-delete')
             .replace(/^\/api\/account\//, '/account-'),
       },

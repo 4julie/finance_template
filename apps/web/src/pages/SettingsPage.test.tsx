@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -10,18 +10,23 @@ const offlineStatusMock = {
   isOffline: false,
   isOnline: true,
 };
-const { clearLocalAccountDataMock, householdImpactMock } = vi.hoisted(() => ({
+const { clearLocalAccountDataMock, householdImpactMock, wipeLocalDataMock } = vi.hoisted(() => ({
   clearLocalAccountDataMock: vi.fn<() => Promise<void>>(),
   householdImpactMock: vi.fn(() => ({
     soloOwnedHouseholds: 1,
     memberHouseholds: 2,
     pendingInvites: 3,
   })),
+  wipeLocalDataMock: vi.fn<() => Promise<void>>(),
 }));
 
 vi.mock('../lib/account/account-deletion', () => ({
   clearLocalAccountData: clearLocalAccountDataMock,
   getHouseholdDeletionImpact: householdImpactMock,
+}));
+
+vi.mock('../storage/wipeLocalData', () => ({
+  wipeLocalData: wipeLocalDataMock,
 }));
 
 vi.mock('../auth/auth-context', () => ({
@@ -195,6 +200,8 @@ describe('SettingsPage', () => {
     mockResetSettings.mockReset();
     clearLocalAccountDataMock.mockReset();
     clearLocalAccountDataMock.mockResolvedValue(undefined);
+    wipeLocalDataMock.mockReset();
+    wipeLocalDataMock.mockResolvedValue(undefined);
     householdImpactMock.mockClear();
     householdImpactMock.mockReturnValue({
       soloOwnedHouseholds: 1,
@@ -319,6 +326,39 @@ describe('SettingsPage', () => {
       expect(fetch).not.toHaveBeenCalled();
     });
 
+    it('calls the backend delete endpoint, wipes local data, signs out, and redirects', async () => {
+      const assignSpy = vi.fn();
+      Object.defineProperty(window, 'location', {
+        writable: true,
+        value: { ...window.location, assign: assignSpy },
+      });
+      const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+      vi.stubGlobal('fetch', fetchMock);
+
+      renderSettingsAt('/settings/account');
+      fireEvent.click(screen.getByRole('button', { name: /^delete account$/i }));
+      await screen.findByRole('dialog', { name: /delete account and all data/i });
+
+      fireEvent.change(screen.getByLabelText(/type delete to confirm/i), {
+        target: { value: 'DELETE' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /yes, delete everything/i }));
+
+      await waitFor(() => {
+        expect(fetch).toHaveBeenCalledWith(
+          '/api/account',
+          expect.objectContaining({ method: 'DELETE', credentials: 'include' }),
+        );
+      });
+      expect(JSON.parse(fetchMock.mock.calls[0][1].body as string)).toEqual({
+        confirmation: 'DELETE',
+      });
+      await waitFor(() => expect(clearLocalAccountDataMock).toHaveBeenCalledTimes(1));
+      expect(wipeLocalDataMock).toHaveBeenCalledTimes(1);
+      expect(logoutMock).toHaveBeenCalledTimes(1);
+      expect(assignSpy).toHaveBeenCalledWith('/login');
+    });
+
     it('treats an HTML 200 response from the delete endpoint as a failure (#1960)', async () => {
       // Production Caddy used to be missing the /api/account/* proxy rule,
       // so this fetch silently returned 200 OK + index.html. The client
@@ -350,6 +390,8 @@ describe('SettingsPage', () => {
       });
 
       expect(clearLocalAccountDataMock).not.toHaveBeenCalled();
+      expect(wipeLocalDataMock).not.toHaveBeenCalled();
+      expect(logoutMock).not.toHaveBeenCalled();
       expect(assignSpy).not.toHaveBeenCalled();
       expect(await screen.findByText(/couldn't delete account/i)).toBeInTheDocument();
     });

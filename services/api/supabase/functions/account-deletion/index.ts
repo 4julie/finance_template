@@ -15,8 +15,8 @@
  *     audit / invitation rows,
  *   - calls `supabase.auth.admin.deleteUser` LAST so re-sign-in goes
  *     through a fresh signup flow,
- * and is the one exposed at `/api/account/delete-account` via both the
- * Vite dev proxy and the production Caddyfile.
+ * and is the one exposed at `/api/account` via both the Vite dev proxy
+ * and the production Caddyfile.
  *
  * This file is kept for backwards compatibility with the public
  * OpenAPI spec (`services/api/docs/README.md`) and existing audit-log

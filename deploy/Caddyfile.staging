@@ -79,6 +79,14 @@
 		}
 	}
 
+	@apiAccountRoot path /api/account
+	handle @apiAccountRoot {
+		uri replace /api/account /functions/v1/account-delete
+		reverse_proxy edge-functions:9000 {
+			header_up X-Real-IP {remote_host}
+		}
+	}
+
 	@apiAccount path /api/account/*
 	handle @apiAccount {
 		uri replace /api/account/delete-account /functions/v1/account-delete

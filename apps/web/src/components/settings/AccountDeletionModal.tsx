@@ -9,8 +9,7 @@ import {
   getHouseholdDeletionImpact,
   type HouseholdDeletionImpact,
 } from '../../lib/account/account-deletion';
-
-const ACCOUNT_DELETED_FLASH_KEY = 'finance:account-deleted-flash';
+import { wipeLocalData } from '../../storage/wipeLocalData';
 
 /**
  * Tolerate missing DatabaseProvider (e.g. in some test harnesses).
@@ -34,7 +33,7 @@ export function useAccountDeletion(): {
   openDeleteModal: () => void;
   deleteModal: React.ReactElement | null;
 } {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const db = useOptionalDatabase();
   const [isOpen, setIsOpen] = useState(false);
   const [confirmationText, setConfirmationText] = useState('');
@@ -82,8 +81,8 @@ export function useAccountDeletion(): {
     setIsDeleting(true);
 
     try {
-      const response = await fetch('/api/account/delete-account', {
-        method: 'POST',
+      const response = await fetch('/api/account', {
+        method: 'DELETE',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({ confirmation: 'DELETE' }),
@@ -98,22 +97,26 @@ export function useAccountDeletion(): {
       // Guard against any future regression of that nature by insisting
       // the response is either 204 (success contract — see the edge
       // function), or a non-HTML payload with a 2xx status.
-      const contentType = response.headers.get('Content-Type') ?? '';
+      const contentType = response.headers?.get('Content-Type') ?? '';
       const looksLikeHtml = contentType.includes('text/html');
       if (!response.ok || looksLikeHtml) {
         throw new Error('Account deletion failed.');
       }
 
       await clearLocalAccountData(db);
-      localStorage.clear();
-      sessionStorage.clear();
-      sessionStorage.setItem(ACCOUNT_DELETED_FLASH_KEY, 'Your account has been deleted.');
-      window.location.assign('/login?accountDeleted=1');
+      await db?.close().catch(() => undefined);
+      await wipeLocalData();
+      try {
+        await logout();
+      } catch {
+        // The account-delete endpoint already revoked the session; continue to login.
+      }
+      window.location.assign('/login');
     } catch {
       setError("Couldn't delete account — please try again or contact support.");
       setIsDeleting(false);
     }
-  }, [db, confirmationText, isAuthenticated, isDeleting]);
+  }, [db, confirmationText, isAuthenticated, isDeleting, logout]);
 
   const deleteModal = isOpen ? (
     <div

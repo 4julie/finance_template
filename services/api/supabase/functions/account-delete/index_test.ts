@@ -6,15 +6,18 @@ import { createAccountDeleteHandler } from './index.ts';
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 
-Deno.test('account-delete returns 405 for non-POST requests', async () => {
+Deno.test('account-delete returns 405 for unsupported requests', async () => {
   withEnv();
   const handler = createAccountDeleteHandler({
     createClient: () => createFakeSupabase().client as unknown as AdminClient,
   });
 
-  const response = await handler(new Request('http://localhost/functions/v1/account-delete'));
+  const response = await handler(
+    new Request('http://localhost/functions/v1/account-delete', { method: 'GET' }),
+  );
 
   assertEquals(response.status, 405);
+  assertEquals(response.headers.get('Allow'), 'DELETE, POST');
 });
 
 Deno.test('account-delete requires authentication before deleting anything', async () => {
@@ -46,7 +49,7 @@ Deno.test('account-delete cascades sole-household data before deleting auth user
 
   const response = await handler(
     new Request('http://localhost/functions/v1/account-delete', {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer access-token',
@@ -100,7 +103,7 @@ Deno.test(
 
     const response = await handler(
       new Request('http://localhost/functions/v1/account-delete', {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Bearer access-token',
