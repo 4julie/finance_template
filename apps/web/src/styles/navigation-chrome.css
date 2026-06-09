@@ -102,12 +102,13 @@
   padding-bottom: var(--spacing-1);
 }
 
-/* Honour the `hidden` HTML attribute on collapsed group lists.
- * Needed because `.sidebar-nav__list { display: flex }` in responsive.css is
- * author-origin and otherwise overrides the browser's `[hidden]` UA default
- * (#2005). */
+/* Honour the collapsed state on group lists. The explicit class mirrors the
+ * React state, while the `[hidden]` selector preserves native semantics. Use
+ * `!important` so base list display rules cannot leave a collapsed menu visible
+ * when stylesheet order changes (#2005). */
+.sidebar-nav__list--collapsed,
 .sidebar-nav__list[hidden] {
-  display: none;
+  display: none !important;
 }
 
 /* ── Enhanced active state for sidebar items ──────────────────────────── */
