@@ -66,6 +66,7 @@ const STANDALONE_ROUTES: readonly string[] = [
   '/forgot-password',
   '/reset-password',
   '/legal',
+  '/beta',
   '/onboarding',
 ];
 
