@@ -65,9 +65,22 @@ async function deleteIndexedDbDatabases(): Promise<void> {
   if (typeof indexedDB === 'undefined') return;
 
   await Promise.allSettled(
-    INDEXED_DB_STORES.map(({ database, store }) => clearIndexedDbStore(database, store)),
+    INDEXED_DB_STORES.map(({ database, store }) =>
+      resolveAfterTimeout(clearIndexedDbStore(database, store)),
+    ),
   );
-  await Promise.all(INDEXED_DB_DATABASES.map((name) => deleteIndexedDbDatabase(name)));
+  await Promise.all(
+    INDEXED_DB_DATABASES.map((name) => resolveAfterTimeout(deleteIndexedDbDatabase(name))),
+  );
+}
+
+function resolveAfterTimeout(promise: Promise<void>, timeoutMs = 2_000): Promise<void> {
+  return new Promise((resolve) => {
+    const timeoutId = globalThis.setTimeout(resolve, timeoutMs);
+    promise.then(resolve, resolve).finally(() => {
+      globalThis.clearTimeout(timeoutId);
+    });
+  });
 }
 
 function clearIndexedDbStore(databaseName: string, storeName: string): Promise<void> {

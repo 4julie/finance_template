@@ -187,8 +187,14 @@ async function waitForAuthenticatedApp(page: Page): Promise<void> {
   await page.waitForLoadState('domcontentloaded');
 
   // Wait for the authenticated app shell to appear.  With the E2E stub DB
-  // (no real WASM init), this should complete in a few seconds.
-  await page.getByRole('heading').first().waitFor({ state: 'visible', timeout: 30_000 });
+  // (no real WASM init), this should complete in a few seconds.  Assert the
+  // authenticated route specifically so a login redirect cannot satisfy this.
+  await page.waitForURL('**/dashboard', { timeout: 30_000 });
+  await page
+    .getByRole('main')
+    .getByRole('heading', { name: /dashboard/i })
+    .first()
+    .waitFor({ state: 'visible', timeout: 30_000 });
 }
 
 // ---------------------------------------------------------------------------
@@ -213,7 +219,7 @@ export const test = base.extend<{ authenticatedPage: Page }>({
     //     doesn't block the UI.  The consent dialog renders a fixed
     //     overlay (z-index 9999) that intercepts all clicks — without
     //     this, every test that interacts with the app will timeout.
-    await page.addInitScript(() => {
+    await page.addInitScript((testUserEmail) => {
       const consentRecord = {
         categories: {
           essential: true,
@@ -228,7 +234,12 @@ export const test = base.extend<{ authenticatedPage: Page }>({
         hasCompletedFirstRun: true,
       };
       localStorage.setItem('finance-gdpr-consent', JSON.stringify(consentRecord));
-    });
+
+      // Local dev runs without Supabase configured, which activates demo auth
+      // instead of the mocked refresh endpoint. Seed a demo session so the
+      // authenticated fixture stays authenticated after page.goto() calls.
+      localStorage.setItem('finance_demo_session', testUserEmail);
+    }, TEST_USER.email);
 
     // 1. Install route mocks before any navigation.
     //    The refresh mock returns 200 — AuthProvider auto-authenticates.

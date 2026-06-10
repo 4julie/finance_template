@@ -236,6 +236,30 @@ function tableNameFromSql(sql: string): string | null {
   return /(?:FROM|INTO|DELETE FROM)\s+"?([a-zA-Z_][\w]*)"?/i.exec(sql)?.[1] ?? null;
 }
 
+function createE2eBudgetWithSpendingRow(
+  tables: Record<string, Array<Record<string, unknown>>>,
+  budgetId: unknown,
+): Record<string, unknown> | null {
+  const budget = (tables.budget ?? []).find(
+    (row) => row.deleted_at == null && (budgetId == null || row.id === budgetId),
+  );
+  if (!budget) return null;
+
+  const spentAmount = (tables.transaction ?? [])
+    .filter(
+      (transaction) =>
+        transaction.deleted_at == null &&
+        transaction.category_id === budget.category_id &&
+        transaction.household_id === budget.household_id &&
+        String(transaction.date) >= String(budget.start_date) &&
+        (budget.end_date == null || String(transaction.date) <= String(budget.end_date)) &&
+        transaction.type === 'EXPENSE',
+    )
+    .reduce((sum, transaction) => sum + Math.abs(Number(transaction.amount ?? 0)), 0);
+
+  return { ...budget, spent_amount: spentAmount };
+}
+
 function createE2eStubDb(): SqliteDb {
   const tables = createE2eTableData();
   return {
@@ -252,7 +276,12 @@ function createE2eStubDb(): SqliteDb {
         tables[insert[1]] = [...(tables[insert[1]] ?? []), row];
       }
     },
-    selectAll: (sql) => {
+    selectAll: (sql, params) => {
+      if (/FROM\s+budget\s+b/i.test(sql)) {
+        const row = createE2eBudgetWithSpendingRow(tables, params?.[0]);
+        return row ? [row] : [];
+      }
+
       const table = tableNameFromSql(sql);
       if (!table) return [];
       const rows = (tables[table] ?? []).filter((row) => row.deleted_at == null);
