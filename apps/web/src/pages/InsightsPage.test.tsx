@@ -4,106 +4,128 @@ import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { InsightsPage } from './InsightsPage';
-import type { UseInsightsResult } from '../hooks/useInsights';
+import type { UseWealthInsightsResult } from '../hooks/useWealthInsights';
 
-vi.mock('../hooks/useInsights', () => ({
-  useInsights: vi.fn(),
+vi.mock('../hooks/useWealthInsights', () => ({
+  useWealthInsights: vi.fn(),
 }));
 
-import { useInsights } from '../hooks/useInsights';
-const mockedUseInsights = vi.mocked(useInsights);
+import { useWealthInsights } from '../hooks/useWealthInsights';
+const mockedUseWealthInsights = vi.mocked(useWealthInsights);
 
-const makeInsightsData = (
-  overrides: Partial<UseInsightsResult['insights']> = {},
-): UseInsightsResult['insights'] => ({
-  categorySpending: [
-    {
-      categoryId: 'cat-1',
-      categoryName: 'Food',
-      amount: 50000,
-      transactionCount: 10,
-      percentOfTotal: 50,
+function makeDigest(): NonNullable<UseWealthInsightsResult['digest']> {
+  return {
+    period: 'weekly',
+    currencyCode: 'USD',
+    generatedAt: '2025-01-20T12:00:00.000Z',
+    netWorth: {
+      current: 250_000,
+      previous: 225_000,
+      assets: 300_000,
+      liabilities: 50_000,
+      change: { amount: 25_000, percent: 11.1, direction: 'up' },
+      history: [
+        {
+          label: 'Jan 13',
+          startDate: '2025-01-07',
+          endDate: '2025-01-13',
+          netWorth: 225_000,
+          income: 80_000,
+          spending: 40_000,
+          savingsRate: 50,
+        },
+        {
+          label: 'Jan 20',
+          startDate: '2025-01-14',
+          endDate: '2025-01-20',
+          netWorth: 250_000,
+          income: 90_000,
+          spending: 45_000,
+          savingsRate: 50,
+        },
+      ],
     },
-    {
-      categoryId: 'cat-2',
-      categoryName: 'Transport',
-      amount: 30000,
-      transactionCount: 5,
-      percentOfTotal: 30,
+    spending: {
+      totalCurrentSpending: 60_000,
+      totalPreviousSpending: 50_000,
+      change: { amount: 10_000, percent: 20, direction: 'up' },
+      topCategories: [
+        {
+          categoryId: 'food',
+          categoryName: 'Food',
+          currentAmount: 25_000,
+          previousAmount: 18_000,
+          shareOfSpending: 42,
+          change: { amount: 7_000, percent: 38.9, direction: 'up' },
+        },
+      ],
     },
-    {
-      categoryId: 'cat-3',
-      categoryName: 'Entertainment',
-      amount: 20000,
-      transactionCount: 3,
-      percentOfTotal: 20,
+    savingsRate: {
+      currentRate: 22,
+      previousRate: 18,
+      rateChangePoints: 4,
+      change: { amount: 4, percent: 22.2, direction: 'up' },
+      currentIncome: 120_000,
+      currentSpending: 60_000,
+      currentSavings: 60_000,
+      history: [],
     },
-  ],
-  dailySpending: [
-    { date: '2025-01-01', amount: 5000 },
-    { date: '2025-01-02', amount: 8000 },
-  ],
-  previousDailySpending: [{ date: '2024-12-01', amount: 6000 }],
-  totalSpentThisMonth: 100000,
-  totalSpentLastMonth: 80000,
-  totalIncomeThisMonth: 200000,
-  totalIncomeLastMonth: 180000,
-  spendingComparison: {
-    current: 100000,
-    previous: 80000,
-    changePercent: 25,
-    direction: 'up',
-  },
-  incomeComparison: {
-    current: 200000,
-    previous: 180000,
-    changePercent: 11,
-    direction: 'up',
-  },
-  topCategories: [
-    {
-      categoryId: 'cat-1',
-      categoryName: 'Food',
-      amount: 50000,
-      transactionCount: 10,
-      percentOfTotal: 50,
+    goals: [
+      {
+        id: 'goal-1',
+        name: 'Emergency fund',
+        status: 'ACTIVE',
+        progressPercent: 68,
+        targetAmount: 200_000,
+        currentAmount: 136_000,
+        remainingAmount: 64_000,
+        targetDate: '2025-06-01',
+        pace: 'on-track',
+        monthlyContributionNeeded: 16_000,
+      },
+    ],
+    healthScore: {
+      score: 82,
+      label: 'Strong',
+      breakdown: {
+        savingsRate: 25,
+        budgetAdherence: 20,
+        emergencyFund: 17.5,
+        debtToIncome: 20,
+      },
+      metrics: {
+        savingsRate: 22,
+        onTrackBudgetRatio: 0.8,
+        monthsOfExpensesSaved: 3.5,
+        debtToIncomeRatio: 19,
+      },
     },
-    {
-      categoryId: 'cat-2',
-      categoryName: 'Transport',
-      amount: 30000,
-      transactionCount: 5,
-      percentOfTotal: 30,
-    },
-  ],
-  averageDailySpending: 5000,
-  recommendations: [
-    {
-      id: 'spending-increased',
-      title: 'Spending increased significantly',
-      description: 'Your spending is up 25% compared to last month.',
-      severity: 'warning',
-    },
-    {
-      id: 'high-savings-rate',
-      title: 'Excellent savings rate!',
-      description: "You're saving 50% of your income.",
-      severity: 'success',
-    },
-  ],
-  netCashFlow: 100000,
-  savingsRate: 50,
-  ...overrides,
-});
+    highlights: [
+      {
+        id: 'net-worth-growth',
+        title: 'Your net worth moved in the right direction',
+        description:
+          '11.1% week-over-week growth suggests your current habits are compounding well.',
+        tone: 'success',
+        icon: 'trending-up',
+        actionLabel: 'View net worth',
+        actionHref: '/net-worth',
+      },
+    ],
+  };
+}
 
 describe('InsightsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders loading spinner when loading', () => {
-    mockedUseInsights.mockReturnValue({
-      insights: null,
+  it('renders loading state', () => {
+    mockedUseWealthInsights.mockReturnValue({
+      digest: null,
+      digests: {},
+      activePeriod: 'weekly',
+      setActivePeriod: vi.fn(),
       loading: true,
       error: null,
       refresh: vi.fn(),
@@ -115,14 +137,17 @@ describe('InsightsPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByLabelText('Loading insights')).toBeInTheDocument();
+    expect(screen.getByLabelText('Loading wealth insights')).toBeTruthy();
   });
 
-  it('renders error banner when there is an error', () => {
-    mockedUseInsights.mockReturnValue({
-      insights: null,
+  it('renders error state', () => {
+    mockedUseWealthInsights.mockReturnValue({
+      digest: null,
+      digests: {},
+      activePeriod: 'weekly',
+      setActivePeriod: vi.fn(),
       loading: false,
-      error: 'Database error',
+      error: 'Failed to compute digest',
       refresh: vi.fn(),
     });
 
@@ -132,34 +157,22 @@ describe('InsightsPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('Database error')).toBeInTheDocument();
+    expect(screen.getByText('Failed to compute digest')).toBeTruthy();
   });
 
-  it('renders empty state when no data', () => {
-    mockedUseInsights.mockReturnValue({
-      insights: makeInsightsData({
-        totalSpentThisMonth: 0,
-        totalIncomeThisMonth: 0,
-        categorySpending: [],
-        dailySpending: [],
-      }),
-      loading: false,
-      error: null,
-      refresh: vi.fn(),
-    });
-
-    render(
-      <MemoryRouter>
-        <InsightsPage />
-      </MemoryRouter>,
-    );
-
-    expect(screen.getByText('No insights yet')).toBeInTheDocument();
-  });
-
-  it('renders key metrics section', () => {
-    mockedUseInsights.mockReturnValue({
-      insights: makeInsightsData(),
+  it('renders empty state when digest has no meaningful data', () => {
+    const digest = makeDigest();
+    mockedUseWealthInsights.mockReturnValue({
+      digest: {
+        ...digest,
+        netWorth: { ...digest.netWorth, current: 0 },
+        spending: { ...digest.spending, totalCurrentSpending: 0, topCategories: [] },
+        savingsRate: { ...digest.savingsRate, currentIncome: 0 },
+        goals: [],
+      },
+      digests: {},
+      activePeriod: 'weekly',
+      setActivePeriod: vi.fn(),
       loading: false,
       error: null,
       refresh: vi.fn(),
@@ -171,21 +184,16 @@ describe('InsightsPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('Financial Insights')).toBeInTheDocument();
-    expect(screen.getByLabelText('Key metrics')).toBeInTheDocument();
-    expect(screen.getByText('Spent This Month')).toBeInTheDocument();
-    expect(screen.getByText('Income This Month')).toBeInTheDocument();
-    expect(screen.getByText('Net Cash Flow')).toBeInTheDocument();
-    expect(screen.getByText('Savings Rate')).toBeInTheDocument();
-    // The savings rate "50%" appears both in metric card and category bar,
-    // so use getAllByText to avoid ambiguity
-    const savingsRateCard = screen.getByLabelText('Savings Rate');
-    expect(savingsRateCard).toHaveTextContent('50%');
+    expect(screen.getByText('No wealth insights yet')).toBeTruthy();
   });
 
-  it('renders top spending categories', () => {
-    mockedUseInsights.mockReturnValue({
-      insights: makeInsightsData(),
+  it('renders the wealth digest experience', () => {
+    const digest = makeDigest();
+    mockedUseWealthInsights.mockReturnValue({
+      digest,
+      digests: { weekly: digest },
+      activePeriod: 'weekly',
+      setActivePeriod: vi.fn(),
       loading: false,
       error: null,
       refresh: vi.fn(),
@@ -197,81 +205,12 @@ describe('InsightsPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByLabelText('Spending by category')).toBeInTheDocument();
-    expect(screen.getByText('Food')).toBeInTheDocument();
-    expect(screen.getByText('Transport')).toBeInTheDocument();
-  });
-
-  it('renders recommendations', () => {
-    mockedUseInsights.mockReturnValue({
-      insights: makeInsightsData(),
-      loading: false,
-      error: null,
-      refresh: vi.fn(),
-    });
-
-    render(
-      <MemoryRouter>
-        <InsightsPage />
-      </MemoryRouter>,
-    );
-
-    expect(screen.getByLabelText('Recommendations')).toBeInTheDocument();
-    expect(screen.getByText('Spending increased significantly')).toBeInTheDocument();
-    expect(screen.getByText('Excellent savings rate!')).toBeInTheDocument();
-  });
-
-  it('renders daily spending trend section', () => {
-    mockedUseInsights.mockReturnValue({
-      insights: makeInsightsData(),
-      loading: false,
-      error: null,
-      refresh: vi.fn(),
-    });
-
-    render(
-      <MemoryRouter>
-        <InsightsPage />
-      </MemoryRouter>,
-    );
-
-    expect(screen.getByLabelText('Daily spending trend')).toBeInTheDocument();
-  });
-
-  it('renders month comparison section', () => {
-    mockedUseInsights.mockReturnValue({
-      insights: makeInsightsData(),
-      loading: false,
-      error: null,
-      refresh: vi.fn(),
-    });
-
-    render(
-      <MemoryRouter>
-        <InsightsPage />
-      </MemoryRouter>,
-    );
-
-    expect(screen.getByLabelText('Month comparison')).toBeInTheDocument();
-    expect(screen.getByText('Last Month Spending')).toBeInTheDocument();
-    expect(screen.getByText('This Month Spending')).toBeInTheDocument();
-  });
-
-  it('renders comparison direction indicators', () => {
-    mockedUseInsights.mockReturnValue({
-      insights: makeInsightsData(),
-      loading: false,
-      error: null,
-      refresh: vi.fn(),
-    });
-
-    render(
-      <MemoryRouter>
-        <InsightsPage />
-      </MemoryRouter>,
-    );
-
-    // Spending comparison is "up" by 25%
-    expect(screen.getByText('25% vs last month')).toBeInTheDocument();
+    expect(screen.getByText('Weekly digest')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Weekly' })).toBeTruthy();
+    expect(screen.getByText('Current net worth')).toBeTruthy();
+    expect(screen.getByText('Top spending categories')).toBeTruthy();
+    expect(screen.getByText('Goal progress updates')).toBeTruthy();
+    expect(screen.getByText('Did you know?')).toBeTruthy();
+    expect(screen.getByText('Your net worth moved in the right direction')).toBeTruthy();
   });
 });
