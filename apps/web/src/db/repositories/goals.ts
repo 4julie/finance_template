@@ -2,6 +2,7 @@
 
 import type { Currency, Goal, GoalStatus, SyncId } from '../../kmp/bridge';
 import { Currencies } from '../../kmp/bridge';
+import { notifyMilestoneDataChanged } from '../../lib/milestones';
 import { execute, query, queryOne, type Row, type SqliteDb } from '../sqlite-wasm';
 import {
   SQLITE_NOW_EXPRESSION,
@@ -157,6 +158,7 @@ export function createGoal(db: SqliteDb, input: CreateGoalInput): Goal {
     throw new Error('Failed to create goal.');
   }
 
+  notifyMilestoneDataChanged();
   return createdGoal;
 }
 
@@ -216,7 +218,12 @@ export function updateGoal(db: SqliteDb, goalId: SyncId, updates: UpdateGoalInpu
     ],
   );
 
-  return getGoalById(db, goalId);
+  const updatedGoal = getGoalById(db, goalId);
+  if (updatedGoal) {
+    notifyMilestoneDataChanged();
+  }
+
+  return updatedGoal;
 }
 
 /** Add a positive contribution amount to a goal's current progress. */
@@ -287,7 +294,12 @@ export function contributeToGoal(
     ],
   );
 
-  return getGoalById(db, goalId);
+  const updatedGoal = getGoalById(db, goalId);
+  if (updatedGoal) {
+    notifyMilestoneDataChanged();
+  }
+
+  return updatedGoal;
 }
 
 /** Soft-delete a goal row by marking its deleted timestamp. */
@@ -309,6 +321,7 @@ export function deleteGoal(db: SqliteDb, goalId: SyncId): boolean {
     [goalId],
   );
 
+  notifyMilestoneDataChanged();
   return true;
 }
 
