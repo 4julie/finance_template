@@ -54,6 +54,8 @@ export type {
   MonthComparison,
   Recommendation,
 } from './useInsights';
+export { useWealthInsights } from './useWealthInsights';
+export type { UseWealthInsightsResult } from './useWealthInsights';
 export { useSpendingWatchlists } from './useSpendingWatchlists';
 export type {
   UseSpendingWatchlistsResult,
