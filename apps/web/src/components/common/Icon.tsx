@@ -1,15 +1,228 @@
 // SPDX-License-Identifier: BUSL-1.1
 
+import type { ComponentType, CSSProperties } from 'react';
 import {
-  useEffect,
-  useMemo,
-  useState,
-  type ComponentType,
-  type CSSProperties,
-  type SVGProps,
-} from 'react';
-import * as lucideReact from 'lucide-react';
-import type { LucideProps } from 'lucide-react';
+  ArrowDownToLine,
+  ArrowLeftRight,
+  ArrowUpDown,
+  ArrowUpFromLine,
+  BadgeDollarSign,
+  Banknote,
+  Bell,
+  Calculator,
+  Car,
+  ChartBar,
+  ChartColumn,
+  ChartLine,
+  ChartPie,
+  Check,
+  ChefHat,
+  CircleAlert,
+  CircleCheck,
+  CircleUserRound,
+  CircleX,
+  Clock,
+  Copy,
+  CreditCard,
+  Download,
+  Dumbbell,
+  FileDown,
+  FileText,
+  FileUp,
+  Flag,
+  Fuel,
+  Funnel,
+  Gift,
+  GraduationCap,
+  HandCoins,
+  HeartPulse,
+  Home,
+  House,
+  HousePlus,
+  Info,
+  Landmark,
+  LayoutDashboard,
+  Lightbulb,
+  Lock,
+  LockOpen,
+  Palmtree,
+  Pencil,
+  PiggyBank,
+  Plane,
+  Plug,
+  Plus,
+  Popcorn,
+  Receipt,
+  ReceiptText,
+  RefreshCcw,
+  RefreshCw,
+  Repeat,
+  Save,
+  Scale,
+  ScanLine,
+  Search,
+  Settings,
+  Share2,
+  Shield,
+  ShieldCheck,
+  ShoppingBag,
+  ShoppingBasket,
+  Target,
+  Trash2,
+  TrendingUp,
+  TriangleAlert,
+  Upload,
+  Users,
+  Utensils,
+  Wallet,
+  Wifi,
+  WifiOff,
+  X,
+} from 'lucide-react';
+import {
+  Add24Filled,
+  Add24Regular,
+  Airplane24Filled,
+  Airplane24Regular,
+  Alert24Filled,
+  Alert24Regular,
+  ArrowClockwise24Filled,
+  ArrowClockwise24Regular,
+  ArrowDownload24Filled,
+  ArrowDownload24Regular,
+  ArrowRepeatAll24Filled,
+  ArrowRepeatAll24Regular,
+  ArrowSort24Filled,
+  ArrowSort24Regular,
+  ArrowSwap24Filled,
+  ArrowSwap24Regular,
+  ArrowSync24Filled,
+  ArrowSync24Regular,
+  ArrowTrending24Filled,
+  ArrowTrending24Regular,
+  ArrowUpload24Filled,
+  ArrowUpload24Regular,
+  Board24Filled,
+  Board24Regular,
+  BuildingBank24Filled,
+  BuildingBank24Regular,
+  Calculator24Filled,
+  Calculator24Regular,
+  Checkmark24Filled,
+  Checkmark24Regular,
+  CheckmarkCircle24Filled,
+  CheckmarkCircle24Regular,
+  Clock24Filled,
+  Clock24Regular,
+  Copy24Filled,
+  Copy24Regular,
+  DataBarVertical24Filled,
+  DataBarVertical24Regular,
+  DataLine24Filled,
+  DataLine24Regular,
+  DataPie24Filled,
+  DataPie24Regular,
+  Delete24Filled,
+  Delete24Regular,
+  Dismiss24Filled,
+  Dismiss24Regular,
+  DismissCircle24Filled,
+  DismissCircle24Regular,
+  DocumentArrowDown24Filled,
+  DocumentArrowDown24Regular,
+  DocumentData24Filled,
+  DocumentData24Regular,
+  DocumentText24Filled,
+  DocumentText24Regular,
+  Dumbbell24Filled,
+  Dumbbell24Regular,
+  Edit24Filled,
+  Edit24Regular,
+  ErrorCircle24Filled,
+  ErrorCircle24Regular,
+  Filter24Filled,
+  Filter24Regular,
+  Flag24Filled,
+  Flag24Regular,
+  Food24Filled,
+  Food24Regular,
+  FoodApple24Filled,
+  FoodApple24Regular,
+  FoodPizza24Filled,
+  FoodPizza24Regular,
+  Gas24Filled,
+  Gas24Regular,
+  Gift24Filled,
+  Gift24Regular,
+  HatGraduation24Filled,
+  HatGraduation24Regular,
+  HeartPulse24Filled,
+  HeartPulse24Regular,
+  Home24Filled,
+  Home24Regular,
+  HomePerson24Filled,
+  HomePerson24Regular,
+  Info24Filled,
+  Info24Regular,
+  Lightbulb24Filled,
+  Lightbulb24Regular,
+  LockClosed24Filled,
+  LockClosed24Regular,
+  LockOpen24Filled,
+  LockOpen24Regular,
+  Money24Filled,
+  Money24Regular,
+  MoneyHand24Filled,
+  MoneyHand24Regular,
+  MoviesAndTv24Filled,
+  MoviesAndTv24Regular,
+  Payment24Filled,
+  Payment24Regular,
+  People24Filled,
+  People24Regular,
+  PersonCircle24Filled,
+  PersonCircle24Regular,
+  PlugConnected24Filled,
+  PlugConnected24Regular,
+  Receipt24Filled,
+  Receipt24Regular,
+  ReceiptMoney24Filled,
+  ReceiptMoney24Regular,
+  Save24Filled,
+  Save24Regular,
+  Savings24Filled,
+  Savings24Regular,
+  ScaleFit24Filled,
+  ScaleFit24Regular,
+  Scan24Filled,
+  Scan24Regular,
+  Search24Filled,
+  Search24Regular,
+  Settings24Filled,
+  Settings24Regular,
+  Share24Filled,
+  Share24Regular,
+  Shield24Filled,
+  Shield24Regular,
+  ShieldCheckmark24Filled,
+  ShieldCheckmark24Regular,
+  ShoppingBag24Filled,
+  ShoppingBag24Regular,
+  TargetArrow24Filled,
+  TargetArrow24Regular,
+  Umbrella24Filled,
+  Umbrella24Regular,
+  VehicleCar24Filled,
+  VehicleCar24Regular,
+  Wallet24Filled,
+  Wallet24Regular,
+  Warning24Filled,
+  Warning24Regular,
+  Wifi124Filled,
+  Wifi124Regular,
+  WifiOff24Filled,
+  WifiOff24Regular,
+} from '@fluentui/react-icons';
 
 import { useIconPack, normalizeIconPackId, type WebIconPackId } from '../../hooks/useIconPack';
 import {
@@ -37,59 +250,232 @@ export interface IconProps {
   packId?: WebIconPackId;
 }
 
-type LucideIconComponent = ComponentType<LucideProps>;
-type FluentIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-type FluentIconModule = Record<string, FluentIconComponent | undefined>;
+type LucideIconComponent = ComponentType<Record<string, unknown>>;
+type FluentIconComponent = ComponentType<Record<string, unknown>>;
 
-const lucideLookupCache = new Map<string, LucideIconComponent | undefined>();
-let fluentModuleCache: FluentIconModule | null = null;
-let fluentModulePromise: Promise<FluentIconModule> | null = null;
+const LUCIDE_ICONS = {
+  'arrow-down-to-line': ArrowDownToLine,
+  'arrow-left-right': ArrowLeftRight,
+  'arrow-up-down': ArrowUpDown,
+  'arrow-up-from-line': ArrowUpFromLine,
+  'badge-dollar-sign': BadgeDollarSign,
+  banknote: Banknote,
+  bell: Bell,
+  calculator: Calculator,
+  car: Car,
+  'chart-bar': ChartBar,
+  'chart-column': ChartColumn,
+  'chart-line': ChartLine,
+  'chart-pie': ChartPie,
+  check: Check,
+  'chef-hat': ChefHat,
+  'circle-alert': CircleAlert,
+  'circle-check': CircleCheck,
+  'circle-user-round': CircleUserRound,
+  'circle-x': CircleX,
+  clock: Clock,
+  copy: Copy,
+  'credit-card': CreditCard,
+  download: Download,
+  dumbbell: Dumbbell,
+  'file-down': FileDown,
+  'file-text': FileText,
+  'file-up': FileUp,
+  flag: Flag,
+  fuel: Fuel,
+  funnel: Funnel,
+  gift: Gift,
+  'graduation-cap': GraduationCap,
+  'hand-coins': HandCoins,
+  'heart-pulse': HeartPulse,
+  home: Home,
+  house: House,
+  'house-plus': HousePlus,
+  info: Info,
+  landmark: Landmark,
+  'layout-dashboard': LayoutDashboard,
+  lightbulb: Lightbulb,
+  lock: Lock,
+  'lock-open': LockOpen,
+  'palm-tree': Palmtree,
+  pencil: Pencil,
+  'piggy-bank': PiggyBank,
+  plane: Plane,
+  plug: Plug,
+  plus: Plus,
+  popcorn: Popcorn,
+  receipt: Receipt,
+  'receipt-text': ReceiptText,
+  'refresh-ccw': RefreshCcw,
+  'refresh-cw': RefreshCw,
+  repeat: Repeat,
+  save: Save,
+  scale: Scale,
+  'scan-line': ScanLine,
+  search: Search,
+  settings: Settings,
+  'share-2': Share2,
+  shield: Shield,
+  'shield-check': ShieldCheck,
+  'shopping-bag': ShoppingBag,
+  'shopping-basket': ShoppingBasket,
+  target: Target,
+  'trash-2': Trash2,
+  'trending-up': TrendingUp,
+  'triangle-alert': TriangleAlert,
+  upload: Upload,
+  users: Users,
+  utensils: Utensils,
+  wallet: Wallet,
+  wifi: Wifi,
+  'wifi-off': WifiOff,
+  x: X,
+} satisfies Record<string, LucideIconComponent>;
 
-function toPascalCase(iconName: string): string {
-  return iconName
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('');
-}
-
-function resolveLucideIcon(iconName: string): LucideIconComponent | undefined {
-  if (!lucideLookupCache.has(iconName)) {
-    lucideLookupCache.set(
-      iconName,
-      lucideReact[toPascalCase(iconName) as keyof typeof lucideReact] as LucideIconComponent,
-    );
-  }
-  return lucideLookupCache.get(iconName);
-}
-
-function loadFluentIcons(): Promise<FluentIconModule> {
-  if (fluentModuleCache) return Promise.resolve(fluentModuleCache);
-  fluentModulePromise ??= import('@fluentui/react-icons')
-    .then((module) => module as unknown as FluentIconModule)
-    .catch(() => ({}) as FluentIconModule)
-    .then((module) => {
-      fluentModuleCache = module;
-      return fluentModuleCache;
-    });
-  return fluentModulePromise;
-}
-
-function useFluentModule(enabled: boolean): FluentIconModule | null {
-  const [module, setModule] = useState<FluentIconModule | null>(fluentModuleCache);
-
-  useEffect(() => {
-    if (!enabled || module) return;
-    let active = true;
-    void loadFluentIcons().then((loadedModule) => {
-      if (active) setModule(loadedModule);
-    });
-    return () => {
-      active = false;
-    };
-  }, [enabled, module]);
-
-  return module;
-}
+const FLUENT_ICONS = {
+  Add24Filled,
+  Add24Regular,
+  Airplane24Filled,
+  Airplane24Regular,
+  Alert24Filled,
+  Alert24Regular,
+  ArrowClockwise24Filled,
+  ArrowClockwise24Regular,
+  ArrowDownload24Filled,
+  ArrowDownload24Regular,
+  ArrowRepeatAll24Filled,
+  ArrowRepeatAll24Regular,
+  ArrowSort24Filled,
+  ArrowSort24Regular,
+  ArrowSwap24Filled,
+  ArrowSwap24Regular,
+  ArrowSync24Filled,
+  ArrowSync24Regular,
+  ArrowTrending24Filled,
+  ArrowTrending24Regular,
+  ArrowUpload24Filled,
+  ArrowUpload24Regular,
+  Board24Filled,
+  Board24Regular,
+  BuildingBank24Filled,
+  BuildingBank24Regular,
+  Calculator24Filled,
+  Calculator24Regular,
+  Checkmark24Filled,
+  Checkmark24Regular,
+  CheckmarkCircle24Filled,
+  CheckmarkCircle24Regular,
+  Clock24Filled,
+  Clock24Regular,
+  Copy24Filled,
+  Copy24Regular,
+  DataBarVertical24Filled,
+  DataBarVertical24Regular,
+  DataLine24Filled,
+  DataLine24Regular,
+  DataPie24Filled,
+  DataPie24Regular,
+  Delete24Filled,
+  Delete24Regular,
+  Dismiss24Filled,
+  Dismiss24Regular,
+  DismissCircle24Filled,
+  DismissCircle24Regular,
+  DocumentArrowDown24Filled,
+  DocumentArrowDown24Regular,
+  DocumentData24Filled,
+  DocumentData24Regular,
+  DocumentText24Filled,
+  DocumentText24Regular,
+  Dumbbell24Filled,
+  Dumbbell24Regular,
+  Edit24Filled,
+  Edit24Regular,
+  ErrorCircle24Filled,
+  ErrorCircle24Regular,
+  Filter24Filled,
+  Filter24Regular,
+  Flag24Filled,
+  Flag24Regular,
+  Food24Filled,
+  Food24Regular,
+  FoodApple24Filled,
+  FoodApple24Regular,
+  FoodPizza24Filled,
+  FoodPizza24Regular,
+  Gas24Filled,
+  Gas24Regular,
+  Gift24Filled,
+  Gift24Regular,
+  HatGraduation24Filled,
+  HatGraduation24Regular,
+  HeartPulse24Filled,
+  HeartPulse24Regular,
+  Home24Filled,
+  Home24Regular,
+  HomePerson24Filled,
+  HomePerson24Regular,
+  Info24Filled,
+  Info24Regular,
+  Lightbulb24Filled,
+  Lightbulb24Regular,
+  LockClosed24Filled,
+  LockClosed24Regular,
+  LockOpen24Filled,
+  LockOpen24Regular,
+  Money24Filled,
+  Money24Regular,
+  MoneyHand24Filled,
+  MoneyHand24Regular,
+  MoviesAndTv24Filled,
+  MoviesAndTv24Regular,
+  Payment24Filled,
+  Payment24Regular,
+  People24Filled,
+  People24Regular,
+  PersonCircle24Filled,
+  PersonCircle24Regular,
+  PlugConnected24Filled,
+  PlugConnected24Regular,
+  Receipt24Filled,
+  Receipt24Regular,
+  ReceiptMoney24Filled,
+  ReceiptMoney24Regular,
+  Save24Filled,
+  Save24Regular,
+  Savings24Filled,
+  Savings24Regular,
+  ScaleFit24Filled,
+  ScaleFit24Regular,
+  Scan24Filled,
+  Scan24Regular,
+  Search24Filled,
+  Search24Regular,
+  Settings24Filled,
+  Settings24Regular,
+  Share24Filled,
+  Share24Regular,
+  Shield24Filled,
+  Shield24Regular,
+  ShieldCheckmark24Filled,
+  ShieldCheckmark24Regular,
+  ShoppingBag24Filled,
+  ShoppingBag24Regular,
+  TargetArrow24Filled,
+  TargetArrow24Regular,
+  Umbrella24Filled,
+  Umbrella24Regular,
+  VehicleCar24Filled,
+  VehicleCar24Regular,
+  Wallet24Filled,
+  Wallet24Regular,
+  Warning24Filled,
+  Warning24Regular,
+  Wifi124Filled,
+  Wifi124Regular,
+  WifiOff24Filled,
+  WifiOff24Regular,
+} satisfies Record<string, FluentIconComponent>;
 
 function getMaterialFamily(packId: WebIconPackId): string {
   switch (packId) {
@@ -132,7 +518,7 @@ function LucideIcon({
     packId: WebIconPackId;
   }) {
   const iconName = LUCIDE_MAPPING[name];
-  const Component = resolveLucideIcon(iconName);
+  const Component = LUCIDE_ICONS[iconName as keyof typeof LUCIDE_ICONS];
 
   if (!Component) return null;
 
@@ -153,9 +539,7 @@ function LucideIcon({
 export function Icon({ name, size = 24, className, ariaLabel, packId }: IconProps) {
   const { iconPackId } = useIconPack();
   const resolvedPackId = normalizeIconPackId(packId ?? iconPackId);
-  const isFluentPack = resolvedPackId === FLUENT_REGULAR || resolvedPackId === FLUENT_FILLED;
-  const fluentModule = useFluentModule(isFluentPack);
-  const mapping = useMemo(() => getPackMapping(resolvedPackId), [resolvedPackId]);
+  const mapping = getPackMapping(resolvedPackId);
   const iconName = mapping[name];
 
   if (resolvedPackId.startsWith('material_symbols_')) {
@@ -185,8 +569,8 @@ export function Icon({ name, size = 24, className, ariaLabel, packId }: IconProp
     );
   }
 
-  if (isFluentPack && fluentModule) {
-    const Component = fluentModule[iconName];
+  if (resolvedPackId === FLUENT_REGULAR || resolvedPackId === FLUENT_FILLED) {
+    const Component = FLUENT_ICONS[iconName as keyof typeof FLUENT_ICONS];
     if (Component) {
       return (
         <Component
@@ -210,7 +594,11 @@ export function Icon({ name, size = 24, className, ariaLabel, packId }: IconProp
       size={size}
       className={className}
       ariaLabel={ariaLabel}
-      packId={isFluentPack ? STANDARD_LUCIDE : resolvedPackId}
+      packId={
+        resolvedPackId === FLUENT_REGULAR || resolvedPackId === FLUENT_FILLED
+          ? STANDARD_LUCIDE
+          : resolvedPackId
+      }
     />
   );
 }
