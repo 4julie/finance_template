@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: BUSL-1.1
 
 import type { SVGProps } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Icon } from './Icon';
-vi.mock('@fluentui/react-icons', () => ({
-  Home24Filled: (props: SVGProps<SVGSVGElement>) => <svg {...props} data-fluent-mock="filled" />,
-  Home24Regular: (props: SVGProps<SVGSVGElement>) => <svg {...props} data-fluent-mock="regular" />,
-}));
+vi.mock('@fluentui/react-icons', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@fluentui/react-icons')>();
+  return {
+    ...actual,
+    Home24Filled: (props: SVGProps<SVGSVGElement>) => <svg {...props} data-fluent-mock="filled" />,
+    Home24Regular: (props: SVGProps<SVGSVGElement>) => (
+      <svg {...props} data-fluent-mock="regular" />
+    ),
+  };
+});
 
 import {
   FLUENT_FILLED,
@@ -59,18 +65,13 @@ describe('Icon', () => {
     expect(icon).toHaveAttribute('data-icon-pack', packId);
   });
 
-  it.each([FLUENT_REGULAR, FLUENT_FILLED])(
-    'renders %s with Fluent icons after lazy import',
-    async (packId) => {
-      renderIconWithStoredPack(packId);
+  it.each([FLUENT_REGULAR, FLUENT_FILLED])('renders %s with Fluent icons', (packId) => {
+    renderIconWithStoredPack(packId);
 
-      await waitFor(() => {
-        const icon = screen.getByRole('img', { name: 'Home' });
-        expect(icon).toHaveAttribute('data-icon-pack', packId);
-        expect(icon.tagName.toLowerCase()).toBe('svg');
-      });
-    },
-  );
+    const icon = screen.getByRole('img', { name: 'Home' });
+    expect(icon).toHaveAttribute('data-icon-pack', packId);
+    expect(icon.tagName.toLowerCase()).toBe('svg');
+  });
 
   it('falls back to Standard Lucide when an unsupported web pack is stored', () => {
     renderIconWithStoredPack(IOS_SF_SYMBOLS);
