@@ -49,6 +49,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: ${{ inputs.environment || 'staging' }}
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
     outputs:
       version: ${{ steps.version.outputs.version }}
       deploy-url: ${{ steps.deploy.outputs.url }}
@@ -120,6 +125,14 @@ jobs:
           budgetPath: apps/web/budget.json
           uploadArtifacts: true
           runs: 3
+
+      - name: Attest build provenance
+        if: inputs.dry-run != true
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: |
+            apps/web/dist/**
+            packages/design-tokens/build/**
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

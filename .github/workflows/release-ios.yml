@@ -52,6 +52,11 @@ jobs:
     needs: approve
     runs-on: macos-15
     timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
     outputs:
       version: ${{ steps.version.outputs.version }}
       build-number: ${{ steps.version.outputs.build-number }}
@@ -199,6 +204,12 @@ jobs:
             -exportOptionsPlist ExportOptions.plist \
             -exportPath .build/Export \
             2>&1 | tail -10
+
+      - name: Attest build provenance
+        if: inputs.dry-run != true
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: apps/ios/.build/Export/*.ipa
 
       - name: Upload to App Store Connect (TestFlight)
         if: inputs.dry-run != true

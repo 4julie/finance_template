@@ -55,6 +55,11 @@ jobs:
     needs: approve
     runs-on: windows-latest
     timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
     outputs:
       version: ${{ steps.version.outputs.version }}
 
@@ -154,6 +159,14 @@ jobs:
         if: env.HAS_SIGNING_SECRETS != 'true'
         run: |
           echo "::warning::WINDOWS_SIGNING_CERT_BASE64 or WINDOWS_CERT_PASSWORD secret is empty — release MSI published unsigned."
+
+      - name: Attest build provenance
+        if: inputs.dry-run != true
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: |
+            apps/windows/build/compose/binaries/main/msi/*.msi
+            apps/windows/build/compose/binaries/main/app/**
 
       - name: Upload MSI artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
