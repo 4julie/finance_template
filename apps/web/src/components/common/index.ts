@@ -64,6 +64,20 @@ export type { BrowserWarningProps } from './BrowserWarning';
 
 export { UndoBar } from './UndoBar';
 export type { UndoBarProps } from './UndoBar';
+export {
+  CategoryDropZone,
+  DragDropProvider,
+  DraggableTransaction,
+  readTransactionDragPayload,
+  useDragDropContext,
+  writeTransactionDragPayload,
+} from './DragDropContext';
+export type {
+  CategoryDropZoneProps,
+  DragDropProviderProps,
+  DraggableTransactionProps,
+  TransactionDragPayload,
+} from './DragDropContext';
 
 // Animations
 export {
