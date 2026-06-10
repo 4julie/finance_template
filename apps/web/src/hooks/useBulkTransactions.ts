@@ -15,7 +15,7 @@
  * References: issue #318
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDatabase } from '../db/DatabaseProvider';
 import {
   updateTransaction as repoUpdateTransaction,
@@ -77,6 +77,16 @@ export function useBulkTransactions(
 ): UseBulkTransactionsResult {
   const db = useDatabase();
   const [selectedIds, setSelectedIds] = useState<Set<SyncId>>(new Set());
+
+  useEffect(() => {
+    const visibleTransactionIds = new Set(transactions.map((transaction) => transaction.id));
+    setSelectedIds((prev) => {
+      const next = new Set(
+        Array.from(prev).filter((transactionId) => visibleTransactionIds.has(transactionId)),
+      );
+      return next.size === prev.size ? prev : next;
+    });
+  }, [transactions]);
 
   const selectionCount = selectedIds.size;
   const isBulkMode = selectionCount > 0;

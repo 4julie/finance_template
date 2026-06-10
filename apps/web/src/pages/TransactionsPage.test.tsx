@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 
 import { useAccounts } from '../hooks/useAccounts';
+import { useBulkTransactions } from '../hooks/useBulkTransactions';
 import { useCategories } from '../hooks/useCategories';
 import { useTransactions } from '../hooks/useTransactions';
 
@@ -15,6 +16,7 @@ import { TransactionsPage } from './TransactionsPage';
 vi.mock('../hooks/useTransactions', () => ({ useTransactions: vi.fn() }));
 vi.mock('../hooks/useCategories', () => ({ useCategories: vi.fn() }));
 vi.mock('../hooks/useAccounts', () => ({ useAccounts: vi.fn() }));
+vi.mock('../hooks/useBulkTransactions', () => ({ useBulkTransactions: vi.fn() }));
 
 // TransactionForm renders unconditionally and calls useDatabase internally.
 // Stub it out so the test has no provider dependency while still allowing
@@ -25,6 +27,10 @@ vi.mock('../components/forms', () => ({
       <div role="dialog" aria-label="Transaction form">
         Transaction form
       </div>
+    ) : null,
+  BulkEditToolbar: ({ selectionCount }: { selectionCount: number }) =>
+    selectionCount > 0 ? (
+      <div data-testid="bulk-edit-toolbar">{selectionCount} selected</div>
     ) : null,
 }));
 
@@ -54,10 +60,16 @@ vi.mock('../components/transactions', () => ({
 const mockedUseTransactions = vi.mocked(useTransactions);
 const mockedUseCategories = vi.mocked(useCategories);
 const mockedUseAccounts = vi.mocked(useAccounts);
+const mockedUseBulkTransactions = vi.mocked(useBulkTransactions);
 const refreshTransactionsMock = vi.fn();
 const createTransactionMock = vi.fn();
 const updateTransactionMock = vi.fn();
 const deleteTransactionMock = vi.fn();
+const bulkUpdateMock = vi.fn();
+const bulkDeleteMock = vi.fn();
+const toggleSelectionMock = vi.fn();
+const selectAllMock = vi.fn();
+const clearSelectionMock = vi.fn();
 const syncMetadata = {
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
@@ -66,13 +78,34 @@ const syncMetadata = {
   isSynced: true,
 };
 
+function createMockDataTransfer() {
+  const data = new Map<string, string>();
+  return {
+    effectAllowed: 'all',
+    dropEffect: 'none',
+    setData: vi.fn((type: string, value: string) => {
+      data.set(type, value);
+    }),
+    getData: vi.fn((type: string) => data.get(type) ?? ''),
+    setDragImage: vi.fn(),
+  } as unknown as DataTransfer;
+}
+
 describe('TransactionsPage', () => {
   beforeEach(() => {
     refreshTransactionsMock.mockReset();
     createTransactionMock.mockReset();
     updateTransactionMock.mockReset();
     deleteTransactionMock.mockReset();
+    bulkUpdateMock.mockReset();
+    bulkDeleteMock.mockReset();
+    toggleSelectionMock.mockReset();
+    selectAllMock.mockReset();
+    clearSelectionMock.mockReset();
+
     deleteTransactionMock.mockReturnValue(true);
+    bulkUpdateMock.mockReturnValue({ successCount: 2, failureCount: 0, errors: [] });
+    bulkDeleteMock.mockReturnValue({ successCount: 1, failureCount: 0, errors: [] });
 
     mockedUseTransactions.mockReturnValue({
       transactions: [
@@ -243,6 +276,17 @@ describe('TransactionsPage', () => {
       updateAccount: vi.fn(),
       deleteAccount: vi.fn(),
     });
+    mockedUseBulkTransactions.mockReturnValue({
+      selectedIds: new Set(),
+      selectionCount: 0,
+      isBulkMode: false,
+      toggleSelection: toggleSelectionMock,
+      selectAll: selectAllMock,
+      clearSelection: clearSelectionMock,
+      isSelected: () => false,
+      bulkUpdate: bulkUpdateMock,
+      bulkDelete: bulkDeleteMock,
+    });
   });
 
   it('renders without crashing', () => {
@@ -377,5 +421,100 @@ describe('TransactionsPage', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Delete' }));
 
     expect(deleteTransactionMock).toHaveBeenCalledWith('transaction-1');
+  });
+
+  it('shows the bulk edit toolbar when transactions are selected', () => {
+    mockedUseBulkTransactions.mockReturnValue({
+      selectedIds: new Set(['transaction-1']),
+      selectionCount: 1,
+      isBulkMode: true,
+      toggleSelection: toggleSelectionMock,
+      selectAll: selectAllMock,
+      clearSelection: clearSelectionMock,
+      isSelected: (transactionId: string) => transactionId === 'transaction-1',
+      bulkUpdate: bulkUpdateMock,
+      bulkDelete: bulkDeleteMock,
+    });
+
+    render(
+      <MemoryRouter>
+        <TransactionsPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByTestId('bulk-edit-toolbar')).toHaveTextContent('1 selected');
+  });
+
+  it('drops a single transaction onto a category and updates that transaction', () => {
+    const dataTransfer = createMockDataTransfer();
+    updateTransactionMock.mockImplementation(
+      (transactionId: string, updates: { categoryId: string }) => ({
+        id: transactionId,
+        categoryId: updates.categoryId,
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <TransactionsPage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.dragStart(screen.getByRole('group', { name: /actions for grocery store/i }), {
+      dataTransfer,
+    });
+    fireEvent.dragOver(
+      screen.getByText('Utilities').closest('[data-drop-target-id="category-utilities"]')!,
+      {
+        dataTransfer,
+      },
+    );
+    fireEvent.drop(
+      screen.getByText('Utilities').closest('[data-drop-target-id="category-utilities"]')!,
+      {
+        dataTransfer,
+      },
+    );
+
+    expect(updateTransactionMock).toHaveBeenCalledWith('transaction-1', {
+      categoryId: 'category-utilities',
+    });
+  });
+
+  it('drops selected transactions as a batch and uses bulk recategorization', () => {
+    const dataTransfer = createMockDataTransfer();
+    mockedUseBulkTransactions.mockReturnValue({
+      selectedIds: new Set(['transaction-1', 'transaction-2']),
+      selectionCount: 2,
+      isBulkMode: true,
+      toggleSelection: toggleSelectionMock,
+      selectAll: selectAllMock,
+      clearSelection: clearSelectionMock,
+      isSelected: (transactionId: string) =>
+        transactionId === 'transaction-1' || transactionId === 'transaction-2',
+      bulkUpdate: bulkUpdateMock,
+      bulkDelete: bulkDeleteMock,
+    });
+
+    render(
+      <MemoryRouter>
+        <TransactionsPage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.dragStart(screen.getByRole('group', { name: /actions for grocery store/i }), {
+      dataTransfer,
+    });
+    fireEvent.drop(
+      screen.getByText('Utilities').closest('[data-drop-target-id="category-utilities"]')!,
+      {
+        dataTransfer,
+      },
+    );
+
+    expect(bulkUpdateMock).toHaveBeenCalledWith({ categoryId: 'category-utilities' });
+    expect(updateTransactionMock).not.toHaveBeenCalledWith('transaction-1', {
+      categoryId: 'category-utilities',
+    });
   });
 });
