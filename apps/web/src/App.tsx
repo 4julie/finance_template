@@ -2,9 +2,11 @@
 
 import type { FC } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { MilestoneToast } from './components/celebrations';
 import { AppLayout } from './components/layout';
 import { ConsentDialog } from './components/gdpr';
 import { PrivacyModeProvider } from './contexts/PrivacyModeContext';
+import { useMilestoneCheck } from './hooks/useMilestoneCheck';
 import { useRouteAnnouncer } from './hooks/useRouteAnnouncer';
 import { AppRoutes } from './routes';
 
@@ -85,6 +87,16 @@ function derivePageTitle(pathname: string): string {
   return PAGE_TITLES[firstSegment] ?? 'Finance';
 }
 
+const MilestoneNotifier: FC = () => {
+  const { activeMilestone, dismissMilestone } = useMilestoneCheck();
+
+  if (!activeMilestone) {
+    return null;
+  }
+
+  return <MilestoneToast milestone={activeMilestone} onDismiss={dismissMilestone} />;
+};
+
 /**
  * Root application component.
  *
@@ -119,6 +131,7 @@ export const App: FC = () => {
       >
         <AppRoutes />
       </AppLayout>
+      <MilestoneNotifier />
     </PrivacyModeProvider>
   );
 };

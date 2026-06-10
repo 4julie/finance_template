@@ -199,3 +199,5 @@ export type {
   PermissionLevel,
   TokenStatus,
 } from './useConnectorPermissions';
+export { useMilestoneCheck } from './useMilestoneCheck';
+export type { UseMilestoneCheckResult } from './useMilestoneCheck';
