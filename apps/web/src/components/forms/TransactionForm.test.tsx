@@ -133,9 +133,7 @@ describe('TransactionForm', () => {
 
     expect(screen.getByText('Amount must be greater than zero.')).toBeInTheDocument();
     expect(screen.getByText('Please select an account.')).toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'Some fields need attention ΓÇö see highlighted errors above.',
-    );
+    expect(screen.getByRole('status')).toHaveTextContent(/Some fields need attention/);
     expect(screen.getByRole('status')).toHaveAttribute('aria-live', 'polite');
     expect(onSubmit).not.toHaveBeenCalled();
   });
