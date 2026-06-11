@@ -90,8 +90,9 @@ export const SETTING_DESCRIPTIONS: Record<string, SettingDescription> = {
     recommendation: 'Keep disabled if you only want mood tags on this device.',
   },
   eraseMoodData: {
-    summary: 'Removes all saved mood tags and disables mood-tag preferences.',
-    impact: 'This destructive action cannot restore erased mood tags later.',
-    recommendation: 'Use only when you are sure you no longer need mood history.',
+    summary: 'Removes saved mood tags, local journal entries, and mood preferences.',
+    impact:
+      'This destructive action cannot restore erased mood tags or mood journal history later.',
+    recommendation: 'Use only when you are sure you no longer need mood history on this device.',
   },
 };
