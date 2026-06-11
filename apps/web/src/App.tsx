@@ -45,6 +45,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/settings/account': 'Settings · Account',
   '/settings/preferences': 'Settings · Preferences',
   '/settings/privacy': 'Settings · Privacy & Data',
+  '/settings/security': 'Settings · Security & Encryption',
   '/settings/sync': 'Settings · Sync & Devices',
   '/settings/advanced': 'Settings · Advanced',
   '/import': 'Import',
