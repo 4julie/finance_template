@@ -18,6 +18,7 @@ import {
   useToast,
 } from '../components/common';
 import { SwipeableRow } from '../components/common/SwipeableRow';
+import { CategoryConfirmation } from '../components/categorization';
 import { BulkEditToolbar, TransactionForm } from '../components/forms';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { VoiceEntrySheet } from '../components/voice';
@@ -39,7 +40,7 @@ import type { AdvancedFilters } from '../components/transactions';
 import type { SortConfig, SortField } from '../components/transactions';
 import type { CreateTransactionInput } from '../db/repositories/transactions';
 import { useAccounts } from '../hooks/useAccounts';
-import { useAutoCategory } from '../hooks/useAutoCategory';
+import { useAutoCategorize } from '../hooks/useAutoCategorize';
 import { useCategories } from '../hooks/useCategories';
 import { useBulkTransactions } from '../hooks/useBulkTransactions';
 import { useAccessibility } from '../hooks/useAccessibility';
@@ -314,6 +315,7 @@ export const TransactionsPage: React.FC = () => {
   const [reportEndDate, setReportEndDate] = useState(() => getTodayIsoDate());
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [dismissedAutoCategoryIds, setDismissedAutoCategoryIds] = useState<string[]>([]);
   const [isVoiceEntryOpen, setIsVoiceEntryOpen] = useState(false);
   const addMenuRef = useRef<HTMLDivElement>(null);
 
@@ -383,8 +385,42 @@ export const TransactionsPage: React.FC = () => {
     () => new Map(accounts.map((account) => [account.id, account.name])),
     [accounts],
   );
-  const { suggestCategory } = useAutoCategory(categories);
+  const { suggestForTransaction, autoCategorizeInput, learnFromFeedback } =
+    useAutoCategorize(categories);
   const toast = useOptionalToast();
+
+  const learnCategoryChoice = useCallback(
+    (
+      transactionLike: {
+        payee?: string | null;
+        note?: string | null;
+        counterpartyName?: string | null;
+        amount?: { amount: number } | null;
+      },
+      categoryId: string | null,
+    ) => {
+      if (!categoryId) {
+        return;
+      }
+
+      const description =
+        transactionLike.payee?.trim() ||
+        transactionLike.note?.trim() ||
+        transactionLike.counterpartyName?.trim() ||
+        '';
+      if (!description) {
+        return;
+      }
+
+      learnFromFeedback({
+        description,
+        amountCents: transactionLike.amount ? Math.abs(transactionLike.amount.amount) : undefined,
+        categoryId,
+        categoryName: categoryNames.get(categoryId) ?? null,
+      });
+    },
+    [categoryNames, learnFromFeedback],
+  );
 
   // Apply advanced local filters, then sort
   const transactions = useMemo(() => {
@@ -562,7 +598,10 @@ export const TransactionsPage: React.FC = () => {
           throw new Error('Failed to update transaction. Please try again.');
         }
       } else {
-        const result = createTransaction(data);
+        const result = createTransaction({
+          ...data,
+          categoryId: autoCategorizeInput(data),
+        });
         if (result === null) {
           throw new Error('Failed to create transaction. Please try again.');
         }
@@ -572,6 +611,7 @@ export const TransactionsPage: React.FC = () => {
       refreshTransactions();
     },
     [
+      autoCategorizeInput,
       createTransaction,
       editingTransaction,
       handleFormCancel,
@@ -586,10 +626,13 @@ export const TransactionsPage: React.FC = () => {
       if (result === null) {
         throw new Error('Failed to update transaction. Please try again.');
       }
+      if (editPanelTransaction?.categoryId !== result.categoryId) {
+        learnCategoryChoice(result, result.categoryId);
+      }
       setEditPanelTransaction(null);
       refreshTransactions();
     },
-    [updateTransaction, refreshTransactions],
+    [editPanelTransaction, learnCategoryChoice, refreshTransactions, updateTransaction],
   );
 
   const handleVoiceTransactionSubmit = useCallback(
@@ -711,13 +754,15 @@ export const TransactionsPage: React.FC = () => {
         return;
       }
 
+      learnCategoryChoice(result, result.categoryId);
+      setDismissedAutoCategoryIds((currentIds) => currentIds.filter((id) => id !== transaction.id));
       refreshTransactions();
       toast?.showToast({
         type: 'success',
         message: `Categorized ${getTransactionLabel(transaction)} as ${categoryName}.`,
       });
     },
-    [refreshTransactions, toast, updateTransaction],
+    [learnCategoryChoice, refreshTransactions, toast, updateTransaction],
   );
 
   const handleMarkReviewed = useCallback(
@@ -784,6 +829,9 @@ export const TransactionsPage: React.FC = () => {
           return false;
         }
 
+        transactionsNeedingChange.forEach((transaction) => {
+          learnCategoryChoice(transaction, categoryId);
+        });
         toast?.showToast({
           type: result.failureCount > 0 ? 'warning' : 'success',
           message:
@@ -808,6 +856,7 @@ export const TransactionsPage: React.FC = () => {
         return false;
       }
 
+      learnCategoryChoice(result, result.categoryId);
       if (selectedIds.has(transaction.id)) {
         clearSelection();
       }
@@ -818,7 +867,15 @@ export const TransactionsPage: React.FC = () => {
       });
       return true;
     },
-    [bulkUpdate, clearSelection, selectedIds, toast, transactionLookup, updateTransaction],
+    [
+      bulkUpdate,
+      clearSelection,
+      learnCategoryChoice,
+      selectedIds,
+      toast,
+      transactionLookup,
+      updateTransaction,
+    ],
   );
 
   const hasActiveFilters =
@@ -1053,16 +1110,12 @@ export const TransactionsPage: React.FC = () => {
                     <ul className="list-group" role="list">
                       {group.transactions.map((transaction) => {
                         const transactionLabel = getTransactionLabel(transaction);
-                        const autoCategory = suggestCategory(
-                          transaction.payee?.trim() ||
-                            transaction.note?.trim() ||
-                            transaction.counterpartyName?.trim() ||
-                            '',
-                          Math.abs(transaction.amount.amount),
-                        );
+                        const autoCategory = suggestForTransaction(transaction);
                         const canQuickCategorize =
                           autoCategory !== null &&
                           autoCategory.categoryId !== transaction.categoryId;
+                        const showCategoryConfirmation =
+                          canQuickCategorize && !dismissedAutoCategoryIds.includes(transaction.id);
                         const leftSwipeActions = [
                           ...(canQuickCategorize && autoCategory !== null
                             ? [
@@ -1183,6 +1236,25 @@ export const TransactionsPage: React.FC = () => {
                                 }
                                 onSave={(update) => handleSaveBusinessExpense(transaction, update)}
                               />
+                              {showCategoryConfirmation && autoCategory !== null ? (
+                                <CategoryConfirmation
+                                  suggestion={autoCategory}
+                                  onAccept={() =>
+                                    handleQuickCategorize(
+                                      transaction,
+                                      autoCategory.categoryId,
+                                      autoCategory.categoryName,
+                                    )
+                                  }
+                                  onReject={() =>
+                                    setDismissedAutoCategoryIds((currentIds) =>
+                                      currentIds.includes(transaction.id)
+                                        ? currentIds
+                                        : [...currentIds, transaction.id],
+                                    )
+                                  }
+                                />
+                              ) : null}
                             </div>
                             <div className="list-item__trailing transaction-list-item__trailing">
                               <div className="transaction-list-item__amount">

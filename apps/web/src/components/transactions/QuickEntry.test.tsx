@@ -77,6 +77,8 @@ function setupMock(overrides: Partial<ReturnType<typeof useQuickEntry>> = {}) {
       },
     ],
     suggestCategory: vi.fn(),
+    shouldAutoApplySuggestion: vi.fn().mockReturnValue(true),
+    learnFromFeedback: vi.fn(),
     ...overrides,
   });
 }

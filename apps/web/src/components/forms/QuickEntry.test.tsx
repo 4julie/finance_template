@@ -284,6 +284,12 @@ describe('QuickEntry', () => {
       categoryId: 'cat-1',
       categoryName: 'Food',
       confidence: 0.92,
+      confidenceLevel: 'high',
+      source: 'builtin',
+      matchKind: 'exact',
+      merchant: 'grocery store',
+      ruleId: 'builtin-groceries',
+      reason: 'Matched a known merchant exactly.',
     });
 
     renderQuickEntry({ suggestCategory });
@@ -292,7 +298,8 @@ describe('QuickEntry', () => {
       target: { value: 'Grocery Store' },
     });
 
-    expect(screen.getByText('Food (92%)')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Food');
+    expect(screen.getByRole('status')).toHaveTextContent('92%');
   });
 
   it('does not show suggestion when suggestCategory returns null', () => {

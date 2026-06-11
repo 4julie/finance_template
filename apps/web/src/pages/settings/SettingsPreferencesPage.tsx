@@ -3,10 +3,12 @@
 import React, { useCallback, useState } from 'react';
 
 import { CurrencyDisplay } from '../../components/common/CurrencyDisplay';
+import { CategorizationSettings } from '../../components/categorization';
 import { HapticSettings, SettingInfoWidget } from '../../components/settings';
 import { CurrencyRatesSettings } from '../../components/settings/CurrencyRatesSettings';
 import '../../components/settings/currency-rates-settings.css';
 import { useAccessibility } from '../../hooks/useAccessibility';
+import { useCategories } from '../../hooks/useCategories';
 import { useTheme } from '../../hooks/useTheme';
 import { AppearanceSettings } from './AppearanceSettings';
 import type { AccessibilityFontSize } from '../../contexts/AccessibilityContext';
@@ -79,6 +81,7 @@ const ACCESSIBILITY_FONT_SIZE_LABELS: Record<AccessibilityFontSize, string> = {
  */
 export const SettingsPreferencesPage: React.FC = () => {
   const { theme, setTheme, themes } = useTheme();
+  const { categories } = useCategories();
   const {
     accessibilityMode,
     fontSize,
@@ -245,6 +248,10 @@ export const SettingsPreferencesPage: React.FC = () => {
           </SettingInfoWidget>
           <HapticSettings />
         </div>
+      </section>
+
+      <section aria-label="Auto-categorization" className="page-section">
+        <CategorizationSettings categories={categories} />
       </section>
 
       <section aria-label="Accessibility" className="page-section">

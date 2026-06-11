@@ -34,6 +34,7 @@ import type { CreateTransactionInput } from '../../db/repositories/transactions'
 import { useAmountInput } from '../../hooks/useAmountInput';
 import type { Account, Category, TransactionType } from '../../kmp/bridge';
 import type { CategorySuggestion } from '../../lib/categorization';
+import { AutoCategoryBadge } from '../categorization';
 import { AmountInput } from './AmountInput';
 
 import './forms.css';
@@ -66,6 +67,15 @@ export interface QuickEntryProps {
   onClose: () => void;
   /** Optional auto-categorization function. */
   suggestCategory?: (description: string, amountCents?: number) => CategorySuggestion | null;
+  /** Optional predicate for whether a suggestion should be applied automatically. */
+  shouldAutoApplySuggestion?: (suggestion: CategorySuggestion | null) => boolean;
+  /** Optional callback to learn from accepted categories. */
+  learnFromFeedback?: (entry: {
+    description: string;
+    amountCents?: number;
+    categoryId: string;
+    categoryName?: string | null;
+  }) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -136,6 +146,8 @@ export const QuickEntry: FC<QuickEntryProps> = ({
   onSubmit,
   onClose,
   suggestCategory,
+  shouldAutoApplySuggestion,
+  learnFromFeedback,
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const amountInputRef = useRef<HTMLInputElement>(null);
@@ -243,7 +255,19 @@ export const QuickEntry: FC<QuickEntryProps> = ({
       }
 
       const amountCents = normalizedAmountCents;
-      const categoryId = suggestion?.categoryId ?? null;
+      const categoryId =
+        suggestion && (shouldAutoApplySuggestion ? shouldAutoApplySuggestion(suggestion) : true)
+          ? suggestion.categoryId
+          : null;
+
+      if (categoryId && learnFromFeedback) {
+        learnFromFeedback({
+          description: trimmedDescription,
+          amountCents: Math.abs(amountCents),
+          categoryId,
+          categoryName: suggestion?.categoryName ?? null,
+        });
+      }
 
       const input: CreateTransactionInput = {
         householdId: selectedAccount.householdId,
@@ -271,6 +295,8 @@ export const QuickEntry: FC<QuickEntryProps> = ({
       description,
       transactionType,
       suggestion,
+      shouldAutoApplySuggestion,
+      learnFromFeedback,
       onSubmit,
       resetForm,
     ],
@@ -371,9 +397,7 @@ export const QuickEntry: FC<QuickEntryProps> = ({
           {/* Category suggestion badge */}
           {suggestion && (
             <div className="quick-entry__suggestion" role="status">
-              <span className="quick-entry__suggestion-text">
-                {suggestion.categoryName} ({Math.round(suggestion.confidence * 100)}%)
-              </span>
+              <AutoCategoryBadge suggestion={suggestion} />
             </div>
           )}
 
