@@ -33,7 +33,7 @@ import {
 
 import { useFocusTrap } from '../../accessibility/aria';
 import type { CreateTransactionInput } from '../../db/repositories/transactions';
-import { useAutoCategory } from '../../hooks/useAutoCategory';
+import { useAutoCategorize } from '../../hooks/useAutoCategorize';
 import { useAmountInput } from '../../hooks/useAmountInput';
 import { useMerchants } from '../../hooks/useMerchants';
 import { useNavigationGuard } from '../../hooks/useNavigationGuard';
@@ -55,6 +55,7 @@ import {
 } from '../../lib/mood-tags';
 import { transactionSchema } from '../../lib/validation';
 import { AmountInput } from './AmountInput';
+import { CategoryConfirmation } from '../categorization';
 import { CounterpartyInput } from '../transactions/CounterpartyInput';
 
 import './forms.css';
@@ -331,7 +332,7 @@ export function TransactionForm({
   });
 
   // -- auto-categorisation --------------------------------------------------
-  const { suggestCategory: autoSuggest, learnCorrection } = useAutoCategory(categories);
+  const { suggestCategory: autoSuggest, learnFromFeedback } = useAutoCategorize(categories);
 
   // -- merchant matching ----------------------------------------------------
   const { merchants, matchDescription, recordMatch } = useMerchants();
@@ -572,11 +573,6 @@ export function TransactionForm({
         counterpartyName: counterpartyName.trim() || null,
       };
 
-      // Learn from user's category choice if it differs from the suggestion.
-      if (categoryId && description.trim() && suggestion && categoryId !== suggestion.categoryId) {
-        learnCorrection(description, categoryId);
-      }
-
       // Record merchant match for ranking
       if (merchantMatch) {
         recordMatch(merchantMatch.merchant.id);
@@ -587,6 +583,16 @@ export function TransactionForm({
 
       try {
         await onSubmit(input);
+
+        if (categoryId && description.trim()) {
+          learnFromFeedback({
+            description,
+            amountCents: Math.abs(normalizedAmountCents),
+            categoryId,
+            categoryName: categories.find((category) => category.id === categoryId)?.name ?? null,
+          });
+        }
+
         // Reset form on success
         amountInput.reset(0);
         amountInput.setSign('negative');
@@ -648,7 +654,8 @@ export function TransactionForm({
       onSubmit,
       submitFailureMessage,
       suggestion,
-      learnCorrection,
+      learnFromFeedback,
+      categories,
       recordMatch,
     ],
   );
@@ -849,20 +856,11 @@ export function TransactionForm({
                 ))}
               </select>
               {suggestion && !categoryId && (
-                <div className="form-category-suggestion" role="status">
-                  <span className="form-category-suggestion__text">
-                    Suggested: {suggestion.categoryName} ({Math.round(suggestion.confidence * 100)}
-                    %)
-                  </span>
-                  <button
-                    type="button"
-                    className="form-category-suggestion__accept"
-                    onClick={handleAcceptSuggestion}
-                    aria-label={`Accept suggested category: ${suggestion.categoryName}`}
-                  >
-                    Accept
-                  </button>
-                </div>
+                <CategoryConfirmation
+                  suggestion={suggestion}
+                  onAccept={handleAcceptSuggestion}
+                  onReject={() => setSuggestion(null)}
+                />
               )}
             </div>
 

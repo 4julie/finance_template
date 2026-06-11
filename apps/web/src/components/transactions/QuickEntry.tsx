@@ -53,6 +53,7 @@ export const QuickEntry: React.FC<QuickEntryProps> = ({ className = '' }) => {
     accounts,
     categories,
     suggestCategory,
+    shouldAutoApplySuggestion,
   } = useQuickEntry();
 
   const reducedMotion = useReducedMotion();
@@ -97,11 +98,11 @@ export const QuickEntry: React.FC<QuickEntryProps> = ({ className = '' }) => {
   useEffect(() => {
     if (description.trim().length > 2) {
       const suggestion = suggestCategory(description, amountInput.cents || undefined);
-      if (suggestion) {
+      if (shouldAutoApplySuggestion(suggestion) && suggestion) {
         setCategoryId(suggestion.categoryId);
       }
     }
-  }, [amountInput.cents, description, suggestCategory]);
+  }, [amountInput.cents, description, shouldAutoApplySuggestion, suggestCategory]);
 
   const validate = useCallback((): FormErrors => {
     const errs: FormErrors = {};
