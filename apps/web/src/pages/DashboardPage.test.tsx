@@ -3,19 +3,61 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import { useCategories, useCoachAlerts, useDashboardData, useTransactions } from '../hooks';
+
+vi.mock('@fluentui/react-icons', () => ({}));
+import {
+  useCategories,
+  useCoachAlerts,
+  useDashboardData,
+  useRecommendations,
+  useTransactions,
+} from '../hooks';
 import { DashboardPage } from './DashboardPage';
 
 vi.mock('../hooks', () => ({
   useDashboardData: vi.fn(),
   useCategories: vi.fn(),
   useCoachAlerts: vi.fn(),
+  useRecommendations: vi.fn(),
   // DashboardPage now calls useTransactions to feed chart components.
   useTransactions: vi.fn(),
 }));
 
 vi.mock('../components/ai/QueryEngine', () => ({
   QueryEngine: () => <div data-testid="ai-query-engine">AI query engine</div>,
+}));
+
+vi.mock('../components/coaching', () => ({
+  CoachCard: () => <section aria-label="Financial coach">What needs attention now</section>,
+  CoachPanel: () => <section aria-label="Coach insights">Coach insights</section>,
+}));
+
+vi.mock('../components/common/CurrencyDisplay', () => ({
+  CurrencyDisplay: ({ amount }: { amount: number }) => <span>{amount}</span>,
+}));
+vi.mock('../components/common/EmptyState', () => ({
+  EmptyState: ({ title }: { title: string }) => <section>{title}</section>,
+}));
+vi.mock('../components/common/ErrorBanner', () => ({
+  ErrorBanner: ({ message }: { message: string }) => <section>{message}</section>,
+}));
+vi.mock('../components/common/LoadingSpinner', () => ({
+  LoadingSpinner: ({ label }: { label?: string }) => (
+    <div role="status" aria-label={label ?? 'Loading'}>
+      {label ?? 'Loading'}
+    </div>
+  ),
+}));
+vi.mock('../components/common/SyncIndicator', () => ({
+  SyncIndicator: () => <span>Synced</span>,
+}));
+vi.mock('../components/OfflineBanner', () => ({
+  OfflineBanner: () => null,
+}));
+vi.mock('../components/recommendations', () => ({
+  RecommendationsFeed: () => (
+    <section aria-label="Personalized recommendations">Recommended next moves</section>
+  ),
 }));
 
 // Chart components depend on Recharts canvas APIs unavailable in jsdom.
@@ -29,6 +71,7 @@ vi.mock('../components/charts', () => ({
 const mockedUseDashboardData = vi.mocked(useDashboardData);
 const mockedUseCategories = vi.mocked(useCategories);
 const mockedUseCoachAlerts = vi.mocked(useCoachAlerts);
+const mockedUseRecommendations = vi.mocked(useRecommendations);
 const mockedUseTransactions = vi.mocked(useTransactions);
 const syncMetadata = {
   createdAt: '2025-01-01T00:00:00Z',
@@ -217,6 +260,37 @@ describe('DashboardPage', () => {
       updateCategory: vi.fn(),
       deleteCategory: vi.fn(),
     });
+    mockedUseRecommendations.mockReturnValue({
+      recommendations: [
+        {
+          id: 'rec-1',
+          title: 'You spent 40% more on Food this month',
+          summary: "Returning to last month's pace could save about $200 this month.",
+          explanation: 'Food is currently your biggest variable expense.',
+          category: 'spending',
+          priority: 'high',
+          score: 88,
+          currencyCode: 'USD',
+          icon: 'chart-bar',
+          tags: ['Food'],
+          actionLabel: 'Review transactions',
+          actionHref: '/transactions',
+          actionSteps: [],
+          evidence: ['This month: $400'],
+          impact: { monthlySavingsCents: 20000, annualSavingsCents: 240000 },
+        },
+      ],
+      summary: {
+        totalCount: 1,
+        criticalCount: 0,
+        highCount: 1,
+        estimatedMonthlySavingsCents: 20000,
+        lastAnalyzedAt: '2025-03-06T00:00:00Z',
+      },
+      loading: false,
+      error: null,
+      refresh: vi.fn(),
+    });
     // useTransactions is called by DashboardPage to supply chart data.
     // Return an empty list — charts are stubbed, so no data is needed.
     mockedUseTransactions.mockReturnValue({
@@ -269,7 +343,20 @@ describe('DashboardPage', () => {
       </MemoryRouter>,
     );
     expect(screen.getByRole('region', { name: /financial summary/i })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /mood and spending journal/i })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: /recent transactions/i })).toBeInTheDocument();
+  });
+
+  it('renders the mood journal section', () => {
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('Emotional Spending Journal')).toBeInTheDocument();
+    expect(screen.getByText('Quick mood check-in')).toBeInTheDocument();
+    expect(screen.getByText('Journal feed')).toBeInTheDocument();
   });
 
   it('includes the AI query engine entry point', () => {

@@ -166,6 +166,7 @@ import { SettingsAboutPage } from './settings/SettingsAboutPage';
 import { SettingsAdvancedPage } from './settings/SettingsAdvancedPage';
 import { SettingsPreferencesPage } from './settings/SettingsPreferencesPage';
 import { SettingsPrivacyPage } from './settings/SettingsPrivacyPage';
+import { SettingsSecurityPage } from './settings/SettingsSecurityPage';
 import { SettingsSyncPage } from './settings/SettingsSyncPage';
 
 /**
@@ -181,6 +182,7 @@ function renderSettingsAt(path: string) {
           <Route path="account" element={<SettingsAccountPage />} />
           <Route path="preferences" element={<SettingsPreferencesPage />} />
           <Route path="privacy" element={<SettingsPrivacyPage />} />
+          <Route path="security" element={<SettingsSecurityPage />} />
           <Route path="sync" element={<SettingsSyncPage />} />
           <Route path="advanced" element={<SettingsAdvancedPage />} />
           <Route path="about" element={<SettingsAboutPage />} />
@@ -237,11 +239,17 @@ describe('SettingsPage', () => {
       const nav = screen.getByRole('navigation', { name: /settings sections/i });
       expect(nav).toBeInTheDocument();
       // Each section is a real <a> link inside <nav> for keyboard nav.
-      ['Account', 'Preferences', 'Privacy & Data', 'Sync & Devices', 'Advanced', 'About'].forEach(
-        (label) => {
-          expect(nav.querySelector(`a[href$='${label.toLowerCase().split(' ')[0]}']`)).toBeTruthy();
-        },
-      );
+      [
+        'Account',
+        'Preferences',
+        'Privacy & Data',
+        'Security',
+        'Sync & Devices',
+        'Advanced',
+        'About',
+      ].forEach((label) => {
+        expect(nav.querySelector(`a[href$='${label.toLowerCase().split(' ')[0]}']`)).toBeTruthy();
+      });
     });
 
     it('redirects /settings (bare) to /settings/account', () => {
@@ -492,6 +500,18 @@ describe('SettingsPage', () => {
     });
   });
 
+  describe('Security sub-page', () => {
+    it('renders the encryption details center', () => {
+      renderSettingsAt('/settings/security');
+
+      expect(
+        screen.getByRole('heading', { name: 'Security & Encryption', level: 2 }),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Security Checkup')).toBeInTheDocument();
+      expect(screen.getByText('At-Rest Encryption')).toBeInTheDocument();
+    });
+  });
+
   describe('Sync sub-page', () => {
     it('shows online sync status and passkey registration state', () => {
       renderSettingsAt('/settings/sync');
@@ -556,7 +576,7 @@ describe('SettingsPage', () => {
       );
       expect(
         screen.getByRole('button', {
-          name: /removes all saved mood tags and disables mood-tag preferences/i,
+          name: /removes saved mood tags, local journal entries, and mood preferences/i,
         }),
       ).toBeInTheDocument();
     });
