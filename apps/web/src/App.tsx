@@ -1,18 +1,24 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-import { useEffect, useRef, type FC } from 'react';
+import { useCallback, useEffect, useRef, type FC } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MilestoneToast } from './components/celebrations';
 import { ConsentDialog } from './components/gdpr';
 import { AppLayout } from './components/layout';
 import { PrivacyModeProvider } from './contexts/PrivacyModeContext';
-import { useBudgets } from './hooks';
+import { useBudgets, useNotifications } from './hooks';
 import { useHaptics } from './hooks/useHaptics';
 import { useMilestoneCheck } from './hooks/useMilestoneCheck';
 import { useRouteAnnouncer } from './hooks/useRouteAnnouncer';
 import { useSpendingPace } from './hooks/useSpendingPace';
 import type { HapticEventType } from './lib/haptics/types';
 import type { DetectedMilestone } from './lib/milestones';
+import type { AppNotification } from './lib/notifications';
+import {
+  buildWarrantyReminderNotifications,
+  buildWarrantyReminders,
+  useWarrantyEntries,
+} from './lib/warranty';
 import { AppRoutes } from './routes';
 
 /**
@@ -229,6 +235,70 @@ const MilestoneNotifier: FC = () => {
   return <MilestoneToast milestone={activeMilestone} onDismiss={dismissMilestone} />;
 };
 
+const AuthenticatedShell: FC<{
+  activePath: string;
+  pageTitle: string;
+}> = ({ activePath, pageTitle }) => {
+  const navigate = useNavigate();
+  const warrantyEntries = useWarrantyEntries();
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    markAsRead,
+    markAllAsRead,
+    dismiss,
+    addNotifications,
+  } = useNotifications();
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    const existingDeduplicationKeys = new Set(
+      notifications
+        .map((notification) => notification.deduplicationKey)
+        .filter((key): key is string => typeof key === 'string' && key.length > 0),
+    );
+    const reminderNotifications = buildWarrantyReminderNotifications(
+      buildWarrantyReminders(warrantyEntries, undefined, existingDeduplicationKeys),
+    );
+
+    if (reminderNotifications.length > 0) {
+      addNotifications(reminderNotifications);
+    }
+  }, [addNotifications, loading, notifications, warrantyEntries]);
+
+  const handleNotificationAction = useCallback(
+    (notification: AppNotification) => {
+      if (notification.entityType === 'transaction' && notification.entityId) {
+        navigate(`/transactions/${notification.entityId}`);
+      }
+    },
+    [navigate],
+  );
+
+  return (
+    <>
+      <AppLayout
+        activePath={activePath}
+        onNavigate={(path) => navigate(path)}
+        pageTitle={pageTitle}
+        notifications={notifications}
+        notificationUnreadCount={unreadCount}
+        onMarkNotificationAsRead={markAsRead}
+        onMarkAllNotificationsAsRead={markAllAsRead}
+        onDismissNotification={dismiss}
+        onNotificationAction={handleNotificationAction}
+      >
+        <AppRoutes />
+      </AppLayout>
+      <MilestoneNotifier />
+    </>
+  );
+};
+
 /**
  * Root application component.
  *
@@ -239,7 +309,6 @@ const MilestoneNotifier: FC = () => {
  * render standalone without layout — see `STANDALONE_ROUTES` above.
  */
 export const App: FC = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const activePath = location.pathname === '/' ? '/' : location.pathname;
   const pageTitle = derivePageTitle(activePath);
@@ -256,15 +325,8 @@ export const App: FC = () => {
   ) : (
     <PrivacyModeProvider>
       <ConsentDialog />
-      <AppLayout
-        activePath={activePath}
-        onNavigate={(path) => navigate(path)}
-        pageTitle={pageTitle}
-      >
-        <AppRoutes />
-      </AppLayout>
+      <AuthenticatedShell activePath={activePath} pageTitle={pageTitle} />
       <BudgetHapticNotifier />
-      <MilestoneNotifier />
     </PrivacyModeProvider>
   );
 };

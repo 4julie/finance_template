@@ -34,6 +34,7 @@ import {
   TransactionEditPanel,
   DEFAULT_SORT,
 } from '../components/transactions';
+import { ReturnWindowBadge } from '../components/warranty';
 import type { AdvancedFilters } from '../components/transactions';
 import type { SortConfig, SortField } from '../components/transactions';
 import type { CreateTransactionInput } from '../db/repositories/transactions';
@@ -1166,6 +1167,7 @@ export const TransactionsPage: React.FC = () => {
                                         : 'Uncategorized'
                                     } · ${accountNames.get(transaction.accountId) ?? 'Unknown account'}`}
                               </p>
+                              <ReturnWindowBadge transaction={transaction} />
                               {isSimplified ? (
                                 <p className="transaction-list-item__support">
                                   Account:{' '}

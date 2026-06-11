@@ -21,6 +21,15 @@ vi.mock('../hooks', () => ({
   useRecommendations: vi.fn(),
   // DashboardPage now calls useTransactions to feed chart components.
   useTransactions: vi.fn(),
+  useSyncStatus: vi.fn(() => ({
+    isOffline: false,
+    isSyncing: false,
+    pendingMutations: 0,
+    lastSyncTime: null,
+    syncNow: vi.fn(),
+    authError: false,
+    conflictCount: 0,
+  })),
 }));
 
 vi.mock('../components/ai/QueryEngine', () => ({
@@ -83,6 +92,7 @@ const syncMetadata = {
 
 describe('DashboardPage', () => {
   beforeEach(() => {
+    localStorage.clear();
     mockedUseDashboardData.mockReturnValue({
       data: {
         netWorth: 2475000,

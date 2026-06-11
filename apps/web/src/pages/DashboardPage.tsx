@@ -12,17 +12,20 @@ import {
 } from '../components/charts';
 import { CoachCard, CoachPanel } from '../components/coaching';
 import {
+  CurrencyDisplay,
+  EmptyState,
+  ErrorBanner,
+  LoadingSpinner,
+  SyncIndicator,
+} from '../components/common';
+import {
   EmotionalPatterns,
   MoodCalendar,
   MoodEntry,
   MoodJournal,
   SpendingMoodChart,
 } from '../components/mood';
-import { CurrencyDisplay } from '../components/common/CurrencyDisplay';
-import { EmptyState } from '../components/common/EmptyState';
-import { ErrorBanner } from '../components/common/ErrorBanner';
-import { LoadingSpinner } from '../components/common/LoadingSpinner';
-import { SyncIndicator } from '../components/common/SyncIndicator';
+import { WarrantyDashboard } from '../components/warranty';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { useCategories, useCoachAlerts, useDashboardData, useTransactions } from '../hooks';
 import type { DashboardData } from '../hooks/useDashboardData';
@@ -507,6 +510,8 @@ export const DashboardPage: React.FC = () => {
               />
             </section>
           )}
+
+          <WarrantyDashboard />
 
           <section className="page-section mood-section" aria-label="Mood and spending journal">
             <div className="page-section__header">
