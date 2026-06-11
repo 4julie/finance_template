@@ -21,6 +21,13 @@ import { SwipeableRow } from '../components/common/SwipeableRow';
 import { BulkEditToolbar, TransactionForm } from '../components/forms';
 import { OfflineBanner } from '../components/OfflineBanner';
 import {
+  BusinessExpenseTag,
+  DeductionSummary,
+  ExpenseReport,
+  MileageDashboard,
+  TripEntry,
+} from '../components/mileage';
+import {
   TransactionFilters,
   TransactionSort,
   TransactionEditPanel,
@@ -35,6 +42,17 @@ import { useCategories } from '../hooks/useCategories';
 import { useBulkTransactions } from '../hooks/useBulkTransactions';
 import { useAccessibility } from '../hooks/useAccessibility';
 import { useTransactions } from '../hooks/useTransactions';
+import {
+  generateTaxReadyExpenseReport,
+  loadMileageTrips,
+  MILEAGE_TRIPS_CHANGED_EVENT,
+} from '../lib/mileage';
+import { createMileageTrip, deleteMileageTrip, updateMileageTrip } from '../lib/mileage';
+import type {
+  ExpenseTransactionInput,
+  TripEntry as MileageTripRecord,
+  TripEntryDraft as MileageTripDraft,
+} from '../lib/mileage';
 import type { Transaction } from '../kmp/bridge';
 
 // ---------------------------------------------------------------------------
@@ -182,6 +200,15 @@ function ChevronDownIcon() {
   );
 }
 
+function getTodayIsoDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getCurrentYearStartIsoDate(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-01-01`;
+}
+
 // ---------------------------------------------------------------------------
 // Sort logic
 // ---------------------------------------------------------------------------
@@ -279,6 +306,10 @@ export const TransactionsPage: React.FC = () => {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [editPanelTransaction, setEditPanelTransaction] = useState<Transaction | null>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+  const [editingMileageTrip, setEditingMileageTrip] = useState<MileageTripRecord | null>(null);
+  const [tripEntries, setTripEntries] = useState<MileageTripRecord[]>(() => loadMileageTrips());
+  const [reportStartDate, setReportStartDate] = useState(() => getCurrentYearStartIsoDate());
+  const [reportEndDate, setReportEndDate] = useState(() => getTodayIsoDate());
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const addMenuRef = useRef<HTMLDivElement>(null);
@@ -306,6 +337,20 @@ export const TransactionsPage: React.FC = () => {
     updateTransaction,
     deleteTransaction,
   } = useTransactions(hookFilters);
+  const reportFilters = useMemo(
+    () => ({
+      type: 'EXPENSE' as const,
+      startDate: reportStartDate || undefined,
+      endDate: reportEndDate || undefined,
+    }),
+    [reportEndDate, reportStartDate],
+  );
+  const {
+    transactions: reportTransactions,
+    loading: reportLoading,
+    error: reportError,
+    refresh: refreshReportTransactions,
+  } = useTransactions(reportFilters);
   const {
     categories,
     loading: categoriesLoading,
@@ -357,6 +402,48 @@ export const TransactionsPage: React.FC = () => {
     () => new Map(transactions.map((transaction) => [transaction.id, transaction])),
     [transactions],
   );
+  const reportExpenseTransactions = useMemo<ExpenseTransactionInput[]>(
+    () =>
+      reportTransactions.map((transaction) => ({
+        id: transaction.id,
+        date: transaction.date,
+        payee: transaction.payee,
+        note: transaction.note,
+        amountCents: transaction.amount.amount,
+        type: transaction.type,
+        tags: transaction.tags,
+        customFields: transaction.customFields,
+        categoryName:
+          transaction.categoryId !== null
+            ? (categoryNames.get(transaction.categoryId) ?? null)
+            : null,
+      })),
+    [categoryNames, reportTransactions],
+  );
+  const taxReport = useMemo(
+    () =>
+      generateTaxReadyExpenseReport({
+        trips: tripEntries,
+        transactions: reportExpenseTransactions,
+        startDate: reportStartDate || null,
+        endDate: reportEndDate || null,
+      }),
+    [reportEndDate, reportExpenseTransactions, reportStartDate, tripEntries],
+  );
+
+  useEffect(() => {
+    const syncTrips = () => {
+      setTripEntries(loadMileageTrips());
+    };
+
+    syncTrips();
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.addEventListener(MILEAGE_TRIPS_CHANGED_EVENT, syncTrips);
+    return () => window.removeEventListener(MILEAGE_TRIPS_CHANGED_EVENT, syncTrips);
+  }, []);
 
   useEffect(() => {
     if (transactions.length === 0 || toast === null || typeof window === 'undefined') {
@@ -508,6 +595,81 @@ export const TransactionsPage: React.FC = () => {
       refreshTransactions();
     }
   }, [deleteTransaction, deletingTransaction, refreshTransactions]);
+
+  const handleMileageTripSubmit = useCallback(
+    async (trip: MileageTripDraft): Promise<void> => {
+      if (editingMileageTrip !== null) {
+        const updatedTrip = updateMileageTrip(editingMileageTrip.id, trip);
+        if (updatedTrip === null) {
+          throw new Error('Could not update the mileage trip.');
+        }
+
+        setEditingMileageTrip(null);
+        toast?.showToast({
+          type: 'success',
+          message: 'Updated mileage trip.',
+        });
+        return;
+      }
+
+      createMileageTrip(trip);
+      toast?.showToast({
+        type: 'success',
+        message: 'Logged mileage trip.',
+      });
+    },
+    [editingMileageTrip, toast],
+  );
+
+  const handleDeleteMileageTrip = useCallback(
+    (tripId: string) => {
+      const deleted = deleteMileageTrip(tripId);
+      if (!deleted) {
+        toast?.showToast({
+          type: 'error',
+          message: 'Could not delete the mileage trip.',
+        });
+        return;
+      }
+
+      if (editingMileageTrip?.id === tripId) {
+        setEditingMileageTrip(null);
+      }
+
+      toast?.showToast({
+        type: 'success',
+        message: 'Deleted mileage trip.',
+      });
+    },
+    [editingMileageTrip?.id, toast],
+  );
+
+  const handleSaveBusinessExpense = useCallback(
+    (
+      transaction: Transaction,
+      update: { tags: string[]; customFields: Record<string, string> | null },
+    ) => {
+      const result = updateTransaction(transaction.id, {
+        tags: update.tags,
+        customFields: update.customFields,
+      });
+      if (result === null) {
+        toast?.showToast({
+          type: 'error',
+          message: `Could not update business deduction metadata for ${getTransactionLabel(transaction)}.`,
+        });
+        return;
+      }
+
+      refreshTransactions();
+      refreshReportTransactions();
+      toast?.showToast({
+        type: 'success',
+        message: `Updated tax tagging for ${getTransactionLabel(transaction)}.`,
+      });
+    },
+    [refreshReportTransactions, refreshTransactions, toast, updateTransaction],
+  );
 
   const handleQuickCategorize = useCallback(
     (transaction: Transaction, categoryId: string, categoryName: string) => {
@@ -780,6 +942,48 @@ export const TransactionsPage: React.FC = () => {
             </>
           ) : null}
 
+          <section className="page-section" aria-labelledby="tax-deductions-heading">
+            <div className="page-header">
+              <div>
+                <h3 id="tax-deductions-heading" className="page-heading">
+                  Mileage & business deductions
+                </h3>
+                <p className="page-summary">
+                  Track manual mileage, apply 2024 IRS rates, and tag deductible transactions
+                  locally on this device.
+                </p>
+              </div>
+            </div>
+            <div className="mileage-grid mileage-grid--columns">
+              <MileageDashboard report={taxReport} />
+              <DeductionSummary report={taxReport} />
+            </div>
+            <div
+              className="mileage-grid mileage-grid--columns"
+              style={{ marginTop: 'var(--spacing-4)' }}
+            >
+              <TripEntry
+                trip={editingMileageTrip}
+                onSubmit={handleMileageTripSubmit}
+                onCancel={() => setEditingMileageTrip(null)}
+              />
+              {reportError ? (
+                <ErrorBanner message={reportError} onRetry={refreshReportTransactions} />
+              ) : (
+                <ExpenseReport
+                  report={taxReport}
+                  startDate={reportStartDate}
+                  endDate={reportEndDate}
+                  onStartDateChange={setReportStartDate}
+                  onEndDateChange={setReportEndDate}
+                  onEditTrip={setEditingMileageTrip}
+                  onDeleteTrip={handleDeleteMileageTrip}
+                  isLoading={reportLoading}
+                />
+              )}
+            </div>
+          </section>
+
           {isLoading ? (
             <div
               style={{ display: 'flex', justifyContent: 'center', padding: 'var(--spacing-8) 0' }}
@@ -926,6 +1130,15 @@ export const TransactionsPage: React.FC = () => {
                                   {accountNames.get(transaction.accountId) ?? 'Unknown account'}
                                 </p>
                               ) : null}
+                              <BusinessExpenseTag
+                                transaction={transaction}
+                                categoryName={
+                                  transaction.categoryId !== null
+                                    ? (categoryNames.get(transaction.categoryId) ?? null)
+                                    : null
+                                }
+                                onSave={(update) => handleSaveBusinessExpense(transaction, update)}
+                              />
                             </div>
                             <div className="list-item__trailing transaction-list-item__trailing">
                               <div className="transaction-list-item__amount">
