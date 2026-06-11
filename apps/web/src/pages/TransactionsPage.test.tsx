@@ -192,6 +192,7 @@ function createMockDataTransfer() {
 
 describe('TransactionsPage', () => {
   beforeEach(() => {
+    localStorage.clear();
     refreshTransactionsMock.mockReset();
     createTransactionMock.mockReset();
     updateTransactionMock.mockReset();

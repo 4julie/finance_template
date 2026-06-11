@@ -32,7 +32,9 @@ export type AlertType =
   | 'spending_pace'
   | 'predictive_overspend'
   | 'transaction_confirmation'
-  | 'batch_confirmation';
+  | 'batch_confirmation'
+  | 'warranty_deadline'
+  | 'return_window_deadline';
 
 /** Delivery channels for notifications. */
 export type NotificationChannel = 'in_app' | 'browser_push' | 'email';

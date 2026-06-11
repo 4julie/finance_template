@@ -2,9 +2,11 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type { AppNotification } from '../../lib/notifications';
 import FeedbackDialog from '../FeedbackDialog';
 import { SyncStatusBar } from '../common';
 import { ConflictResolutionDialog } from '../common/ConflictResolutionDialog';
+import { NotificationCenter } from '../notifications';
 import { useKeyboardShortcuts } from '../../hooks';
 import { useAccessibility } from '../../hooks/useAccessibility';
 import { usePrivacyMode } from '../../contexts/PrivacyModeContext';
@@ -22,6 +24,12 @@ export interface AppLayoutProps {
   onNavigate: (path: string) => void;
   pageTitle: string;
   children: React.ReactNode;
+  notifications?: readonly AppNotification[];
+  notificationUnreadCount?: number;
+  onMarkNotificationAsRead?: (id: string) => void;
+  onMarkAllNotificationsAsRead?: () => void;
+  onDismissNotification?: (id: string) => void;
+  onNotificationAction?: (notification: AppNotification) => void;
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({
@@ -29,6 +37,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   onNavigate,
   pageTitle,
   children,
+  notifications = [],
+  notificationUnreadCount = 0,
+  onMarkNotificationAsRead = () => undefined,
+  onMarkAllNotificationsAsRead = () => undefined,
+  onDismissNotification = () => undefined,
+  onNotificationAction,
 }) => {
   const { isPrivacyMode, togglePrivacyMode } = usePrivacyMode();
   const { isSimplified } = useAccessibility();
@@ -137,6 +151,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 </span>
               ) : null}
             </button>
+            <NotificationCenter
+              notifications={notifications}
+              unreadCount={notificationUnreadCount}
+              onMarkAsRead={onMarkNotificationAsRead}
+              onMarkAllAsRead={onMarkAllNotificationsAsRead}
+              onDismiss={onDismissNotification}
+              onAction={onNotificationAction}
+            />
             {!isSimplified ? (
               <button
                 type="button"
