@@ -24,6 +24,11 @@ const SETTINGS_SECTIONS: ReadonlyArray<{ to: string; label: string; description:
     label: 'Privacy & Data',
     description: 'Privacy mode, consent, export, deletion',
   },
+  {
+    to: 'security',
+    label: 'Security',
+    description: 'Encryption, transport protection, audit log',
+  },
   { to: 'sync', label: 'Sync & Devices', description: 'Sync status, passkeys, biometric lock' },
   { to: 'advanced', label: 'Advanced', description: 'Experimental features' },
   { to: 'about', label: 'About', description: 'Version, build, license, credits' },
@@ -37,7 +42,13 @@ const SETTINGS_SECTIONS: ReadonlyArray<{ to: string; label: string; description:
  * dedicated sub-pages under `apps/web/src/pages/settings/*`. This file
  * only handles layout, in-section navigation, and the page heading.
  */
-const SIMPLIFIED_SETTINGS_SECTIONS = new Set(['account', 'preferences', 'privacy', 'about']);
+const SIMPLIFIED_SETTINGS_SECTIONS = new Set([
+  'account',
+  'preferences',
+  'privacy',
+  'security',
+  'about',
+]);
 
 export const SettingsPage: React.FC = () => {
   const { isSimplified } = useAccessibility();
