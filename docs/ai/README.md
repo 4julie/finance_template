@@ -1,10 +1,10 @@
-# AI Development Workflow — Finance
+# AI Development Workflow
 
-This directory contains comprehensive documentation for the AI-first development workflow used in the Finance monorepo. Every aspect of AI agent configuration, tooling, and usage is documented here for full transparency.
+This directory contains comprehensive documentation for the AI-first development workflow used in this monorepo. Every aspect of AI agent configuration, tooling, and usage is documented here for full transparency.
 
 ## Why AI-First?
 
-Finance is developed with AI agents as first-class contributors. This means:
+This repo is developed with AI agents as first-class contributors. This means:
 
 - **Every code change** can be initiated, reviewed, or refined by AI agents
 - **Every decision** is documented with rationale (human or AI-generated)
