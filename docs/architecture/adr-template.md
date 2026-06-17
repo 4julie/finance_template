@@ -1,6 +1,6 @@
 # Architecture Decision Record Template
 
-This is the standard template for Architecture Decision Records (ADRs) in the Finance project. ADRs document significant architectural decisions with their context and consequences.
+This is the standard template for Architecture Decision Records (ADRs) in the this project. ADRs document significant architectural decisions with their context and consequences.
 
 ## How to Use
 
