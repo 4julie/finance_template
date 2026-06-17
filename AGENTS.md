@@ -1,12 +1,9 @@
-# AGENTS.md — Finance Monorepo
+# AGENTS.md — Take2 Monorepo
 
 This file provides guidance for all AI agents (GitHub Copilot, Codex, Claude, and others) working in this repository.
 
-## Project Overview
 
-Finance is a multi-platform, native-first financial tracking application for personal, family, and partnered finances. It uses a monorepo architecture with an edge-first design — most computation happens on client devices, with a consolidated backend for data synchronization.
-
-**All four platforms (iOS, Android, Web, Windows) are first-class beta targets.** Windows mirrors Android's architecture: Koin DI, ViewModel pattern, Repository pattern, and KMP shared packages.
+**All three platforms (iOS, Android, Web) are first-class beta targets.**
 
 ## Repository Layout
 
